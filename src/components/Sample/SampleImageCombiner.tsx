@@ -42,11 +42,15 @@ const SampleImageCombiner = () => {
       const profileImg = new Image();
       const backgroundImg = new Image();
 
-      backgroundImg.src = URL.createObjectURL(backgroundImage);
+      backgroundImg.crossOrigin = "anonymous";
+      backgroundImg.src = `http://localhost:4001/proxy?url=${encodeURIComponent(
+        "https://s3.ap-south-1.amazonaws.com/submissions.growthschool.io/68-c96c38c2-5d38-45e0-9b19-5d4f2967a862.jpg"
+      )}`;
+      // backgroundImg.src = URL.createObjectURL(backgroundImage);
       backgroundImg.onload = () => {
         canvas.width = backgroundImg.width;
         canvas.height = backgroundImg.height;
-        const multiplier = 3;
+        const multiplier = 4;
         const halfMultiplier = multiplier / 2;
         // Draw background image
         ctx.drawImage(

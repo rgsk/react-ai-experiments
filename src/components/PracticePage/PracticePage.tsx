@@ -1,10 +1,10 @@
-import SampleRealtimeWebRTC from "../Sample/SampleRealtimeWebRTC";
+import SampleImageCombiner from "../Sample/SampleImageCombiner";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleRealtimeWebRTC />
+      <SampleImageCombiner />
     </div>
   );
 };
