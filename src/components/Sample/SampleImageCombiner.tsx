@@ -46,7 +46,8 @@ const SampleImageCombiner = () => {
       backgroundImg.onload = () => {
         canvas.width = backgroundImg.width;
         canvas.height = backgroundImg.height;
-        const multiplier = 1;
+        const multiplier = 3;
+        const halfMultiplier = multiplier / 2;
         // Draw background image
         ctx.drawImage(
           backgroundImg,
@@ -61,8 +62,8 @@ const SampleImageCombiner = () => {
 
         profileImg.onload = () => {
           // Draw profile image inside the designated box
-          const profileBox = { top: 125, left: 117, width: 400, height: 400 };
-          // const profileBox = { top: 75, left: 70, width: 238, height: 238 };
+          // const profileBox = { top: 125, left: 117, width: 400, height: 400 };
+          const profileBox = { top: 75, left: 70, width: 238, height: 238 };
           profileBox.top *= multiplier;
           profileBox.left *= multiplier;
           profileBox.height *= multiplier;
@@ -76,27 +77,27 @@ const SampleImageCombiner = () => {
           );
 
           // Add text inside the second box
-          const primaryFontSize = 30;
-          const secondaryFontSize = 20;
-          const primaryTextMargin = 10;
-          const secondaryTextMargin = 10;
+          const primaryFontSize = 30 * halfMultiplier;
+          const secondaryFontSize = 20 * halfMultiplier;
+          const primaryTextMargin = 10 * halfMultiplier;
+          const secondaryTextMargin = 10 * halfMultiplier;
           ctx.font = `bold ${primaryFontSize}px sans-serif`;
           ctx.fillStyle = "white";
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
 
-          const textBox = {
-            top: 553,
-            left: 104,
-            width: 426,
-            height: 193,
-          };
           // const textBox = {
-          //   top: 330,
-          //   left: 62,
-          //   width: 254,
-          //   height: 115,
+          //   top: 553,
+          //   left: 104,
+          //   width: 426,
+          //   height: 193,
           // };
+          const textBox = {
+            top: 330,
+            left: 62,
+            width: 254,
+            height: 115,
+          };
           textBox.top *= multiplier;
           textBox.left *= multiplier;
           textBox.height *= multiplier;
