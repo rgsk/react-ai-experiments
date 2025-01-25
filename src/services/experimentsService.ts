@@ -12,6 +12,10 @@ export type Message = {
   role: "system" | "user" | "assistant";
   content: string;
 };
+export type CompletionMessage = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
 const experimentsService = {
   getTextStreamReader: async ({
     messages,
@@ -41,7 +45,25 @@ const experimentsService = {
       return response.body.getReader();
     }
   },
-
+  getJsonCompletion: async <T>({
+    messages,
+  }: {
+    messages: CompletionMessage[];
+  }) => {
+    const result = await axiosInstance.post<T>("/json-completion", {
+      messages,
+    });
+    return result.data;
+  },
+  getCompletion: async ({ messages }: { messages: CompletionMessage[] }) => {
+    const result = await axiosInstance.post<{ content: string }>(
+      "/completion",
+      {
+        messages,
+      }
+    );
+    return result.data;
+  },
   getSession: async () => {
     const result = await axiosInstance.get<SampleResponseType["getSession"]>(
       "/session"

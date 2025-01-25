@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { v4 } from "uuid";
 import { Button } from "~/components/ui/button";
 import { ModeToggle } from "../Shared/ModeToggle";
 
@@ -11,6 +12,9 @@ const HomePage: React.FC<HomePageProps> = ({}) => {
       <div>
         <p className="text-red-500 text-lg">Home Page</p>
         <Link to="/practice">Go To Practice Page</Link>
+        <p>
+          <Link to={`/chat/${v4()}`}>Chat</Link>
+        </p>
       </div>
       <Button
         onClick={() => {

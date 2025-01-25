@@ -21,7 +21,9 @@ const router = createBrowserRouter(
     >
       <Route index element={<HomePage />} />
       <Route path="practice" element={<PracticePage />} />
-      <Route path="chat" element={<ChatPage />} />
+      <Route path="chat">
+        <Route path=":id" element={<ChatPage />} />
+      </Route>{" "}
     </Route>
   )
 );
