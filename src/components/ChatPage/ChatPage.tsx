@@ -1,17 +1,15 @@
+import { produce } from "immer";
 import { useEffect } from "react";
+import { v4 } from "uuid";
 import useJsonData from "~/hooks/useJsonData";
 import useTextStream from "~/hooks/useTextStream";
-import { CompletionMessage } from "~/services/experimentsService";
+import { Message } from "~/services/experimentsService";
 import MessageInput from "./Children/MessageInput";
-
 export type HandleSend = ({ text }: { text: string }) => void;
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { handleGenerate, loading, text } = useTextStream();
-  const [messages, setMessages] = useJsonData<CompletionMessage[]>(
-    "messages",
-    []
-  );
+  const [messages, setMessages] = useJsonData<Message[]>("messages", []);
   useEffect(() => {
     if (messages) {
       if (
@@ -24,28 +22,29 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   }, [handleGenerate, messages]);
   useEffect(() => {
     if (text) {
-      setMessages((prev) => {
-        if (prev) {
-          if (prev[prev.length - 1].role === "user") {
-            return [...prev, { role: "assistant", content: text }];
-          } else {
-            return [
-              ...prev.slice(0, prev.length - 1),
-              { role: "assistant", content: text },
-            ];
+      setMessages(
+        produce((draft) => {
+          if (draft) {
+            if (draft[draft.length - 1].role === "user") {
+              draft.push({ id: v4(), role: "assistant", content: text });
+            } else {
+              draft[draft.length - 1].content = text;
+            }
           }
-        }
-        return prev;
-      });
+        })
+      );
     }
   }, [setMessages, text]);
   const handleSend: HandleSend = ({ text }) => {
-    setMessages((prev) => [...(prev ?? []), { role: "user", content: text }]);
+    setMessages((prev) => [
+      ...(prev ?? []),
+      { id: v4(), role: "user", content: text },
+    ]);
   };
   return (
     <div>
-      {messages?.map((message, index) => (
-        <div key={index}>
+      {messages?.map((message) => (
+        <div key={message.id}>
           {message.role}: {message.content}
         </div>
       ))}

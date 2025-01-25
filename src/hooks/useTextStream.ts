@@ -1,7 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import experimentsService, {
-  CompletionMessage,
-} from "~/services/experimentsService";
+import experimentsService, { Message } from "~/services/experimentsService";
 export function uint8ArrayToString(uint8Array: Uint8Array) {
   return new TextDecoder().decode(uint8Array);
 }
@@ -14,7 +12,7 @@ const useTextStream = () => {
       messages,
       onComplete,
     }: {
-      messages: CompletionMessage[];
+      messages: Message[];
       onComplete?: () => void;
     }) => {
       if (readerRef.current) {

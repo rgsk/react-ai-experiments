@@ -6,7 +6,9 @@ const axiosInstance = axios.create({
   baseURL: baseUrl,
 });
 type SampleResponseType = typeof experimentsServiceSampleResponses;
-export type CompletionMessage = {
+
+export type Message = {
+  id: string;
   role: "system" | "user" | "assistant";
   content: string;
 };
