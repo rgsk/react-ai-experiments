@@ -18,21 +18,40 @@ export function MarkdownRenderer({
     <Markdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw]}
+      className="messageContent"
       components={{
-        code({ node, inline, className, children, ...props }: any) {
+        code({ node, className, children, ...props }: any) {
           const match = /language-(\w+)/.exec(className || "");
-
-          return !inline && match ? (
+          const language = match?.[1] ?? "default";
+          const inline = node.position.start.line === node.position.end.line;
+          if (inline) {
+            return (
+              <code
+                className={cn(
+                  "bg-gray-200 px-[5px] py-[2px] text-red-500 rounded-sm text-sm",
+                  className
+                )}
+                {...props}
+              >
+                {children}
+              </code>
+            );
+          }
+          return (
             <div className="relative">
               <div
                 className={cn(
-                  "absolute top-0 right-0 bg-[#50505a] h-[36px] w-full",
+                  "absolute top-0 right-0 bg-[#50505a] w-full",
                   "flex justify-between items-center",
                   "rounded-tl-[16px] rounded-tr-[16px]",
-                  "px-[16px]"
+                  "px-[16px] py-[8px]"
                 )}
               >
-                <span className="text-white text-xs">{match[1]}</span>
+                {language === "default" ? (
+                  <span></span>
+                ) : (
+                  <span className="text-white text-xs">{language}</span>
+                )}
                 <button
                   className="text-white text-xs"
                   onClick={() => {
@@ -46,20 +65,17 @@ export function MarkdownRenderer({
               <SyntaxHighlighter
                 style={vscDarkPlus}
                 PreTag="div"
-                language={match[1]}
+                language={language}
                 {...props}
                 customStyle={{
                   borderRadius: "16px",
+                  padding: "16px",
                   paddingTop: "50px",
                 }}
               >
                 {children}
               </SyntaxHighlighter>
             </div>
-          ) : (
-            <code className={className} {...props}>
-              {children}
-            </code>
           );
         },
       }}
