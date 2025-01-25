@@ -1,9 +1,20 @@
 import axios from "axios";
+import { localStorageWithExpiry } from "~/hooks/useLocalStorageState";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 const baseUrl = "http://localhost:4004";
-const axiosInstance = axios.create({
+export const axiosExperimentsInstance = axios.create({
   baseURL: baseUrl,
+});
+axiosExperimentsInstance.interceptors.request.use((config) => {
+  const token = localStorageWithExpiry.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    window.location.href = "/login";
+    throw new Error("Please login to continue");
+  }
+  return config;
 });
 type SampleResponseType = typeof experimentsServiceSampleResponses;
 
@@ -45,13 +56,13 @@ const experimentsService = {
   }: {
     messages: CompletionMessage[];
   }) => {
-    const result = await axiosInstance.post<T>("/json-completion", {
+    const result = await axiosExperimentsInstance.post<T>("/json-completion", {
       messages,
     });
     return result.data;
   },
   getCompletion: async ({ messages }: { messages: CompletionMessage[] }) => {
-    const result = await axiosInstance.post<{ content: string }>(
+    const result = await axiosExperimentsInstance.post<{ content: string }>(
       "/completion",
       {
         messages,
@@ -60,9 +71,9 @@ const experimentsService = {
     return result.data;
   },
   getSession: async () => {
-    const result = await axiosInstance.get<SampleResponseType["getSession"]>(
-      "/session"
-    );
+    const result = await axiosExperimentsInstance.get<
+      SampleResponseType["getSession"]
+    >("/session");
     return result.data;
   },
   getAWSUploadUrl: ({ key }: { key: string }) => {
@@ -70,7 +81,7 @@ const experimentsService = {
     return {
       key: ["aws", "upload-url", query],
       fn: async () => {
-        const response = await axiosInstance.get<
+        const response = await axiosExperimentsInstance.get<
           SampleResponseType["getAWSUploadUrl"][number]["response"]
         >(`/aws/upload-url?${query}`);
         return response.data;
@@ -82,7 +93,7 @@ const experimentsService = {
     return {
       key: ["aws", "download-url", query],
       fn: async () => {
-        const response = await axiosInstance.get<
+        const response = await axiosExperimentsInstance.get<
           SampleResponseType["getAWSDownloadUrl"][number]["response"]
         >(`/aws/download-url?${query}`);
         return response.data;

@@ -1,10 +1,8 @@
-import axios from "axios";
 import { User } from "firebase/auth";
 import { localStorageWithExpiry } from "~/hooks/useLocalStorageState";
 import { encodeQueryParams } from "~/lib/utils";
-const axiosInstance = axios.create({
-  baseURL: "http://localhost:4004",
-});
+import { axiosExperimentsInstance } from "./experimentsService";
+
 export type ISODateString = string;
 export type JsonData = {
   id: string;
@@ -27,7 +25,7 @@ const addPrefixToKey = (key: string) => {
 
 const jsonDataService = {
   getKey: async <T>({ key }: { key: string }) => {
-    const result = await axiosInstance.get<
+    const result = await axiosExperimentsInstance.get<
       (Omit<JsonData, "value"> & { value: T }) | null
     >(`/json-data?${encodeQueryParams({ key: addPrefixToKey(key) })}`);
     return result.data;
@@ -39,7 +37,7 @@ const jsonDataService = {
     return {
       queryKey: [path],
       queryFn: async () => {
-        const result = await axiosInstance.get<
+        const result = await axiosExperimentsInstance.get<
           (Omit<JsonData, "value"> & { value: T })[]
         >(path);
         return result.data;
@@ -48,7 +46,7 @@ const jsonDataService = {
   },
 
   deleteKeysLike: async ({ key }: { key: string }) => {
-    const result = await axiosInstance.delete(
+    const result = await axiosExperimentsInstance.delete(
       `/json-data/key-like?${encodeQueryParams({
         key: addPrefixToKey(key),
       })}`
@@ -56,20 +54,20 @@ const jsonDataService = {
     return result.data;
   },
   deleteKey: async ({ key }: { key: string }) => {
-    const result = await axiosInstance.delete(
+    const result = await axiosExperimentsInstance.delete(
       `/json-data?${encodeQueryParams({ key: addPrefixToKey(key) })}`
     );
     return result.data;
   },
   setKey: async <T>({ key, value }: { key: string; value?: T }) => {
-    const result = await axiosInstance.post(`/json-data`, {
+    const result = await axiosExperimentsInstance.post(`/json-data`, {
       key: addPrefixToKey(key),
       value,
     });
     return result.data;
   },
   createMany: async <T>(data: { key: string; value?: T }[]) => {
-    const result = await axiosInstance.post(`/json-data/bulk`, {
+    const result = await axiosExperimentsInstance.post(`/json-data/bulk`, {
       data: data.map((d) => ({ key: addPrefixToKey(d.key), value: d.value })),
     });
     return result.data;
