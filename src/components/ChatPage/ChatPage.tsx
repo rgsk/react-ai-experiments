@@ -10,6 +10,7 @@ import { Chat, Message } from "~/lib/typesJsonData";
 import { uuidPlaceholder } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import { Button } from "../ui/button";
+import { MarkdownRenderer } from "./Children/MarkdownRenderer";
 import MessageInput from "./Children/MessageInput";
 export type HandleSend = ({ text }: { text: string }) => void;
 interface ChatPageProps {}
@@ -142,7 +143,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           <h1>{chat.title || "New Chat"}</h1>
           {messages.map((message) => (
             <div key={message.id}>
-              {message.role}: {message.content}
+              <MarkdownRenderer>{message.content}</MarkdownRenderer>
             </div>
           ))}
           <MessageInput
