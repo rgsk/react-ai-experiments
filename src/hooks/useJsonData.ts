@@ -27,7 +27,7 @@ function useJsonData<T>(
   const localValueRef = useRef(localValue);
   localValueRef.current = localValue;
   const [loading, setLoading] = useState(true);
-  const watchedDataId = useMemo(() => v4(), []);
+  const postMessageId = useMemo(() => v4(), []);
   const keyRef = useRef(key);
   keyRef.current = key;
 
@@ -55,7 +55,7 @@ function useJsonData<T>(
     setLocalValue(undefined);
     setLoading(true);
 
-    const result = await jsonDataService.getKey({
+    const result = await jsonDataService.getKey<T>({
       key,
     });
     const value = result?.value;
@@ -92,17 +92,18 @@ function useJsonData<T>(
       }
     };
   }, []);
-
+  const [updating, setUpdating] = useState(false);
   useEffect(() => {
     if (
       localValue !== undefined &&
       localValue !== lastFetchedValueRef.current // this check so that we don't keep pushing expirationTime
     ) {
-      const timer = setTimeout(() => {
-        void jsonDataService.setKey({
+      const timer = setTimeout(async () => {
+        await jsonDataService.setKey({
           key: keyRef.current,
           value: localValue,
         });
+        setUpdating(false);
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -112,7 +113,7 @@ function useJsonData<T>(
     const cb = (event: MessageEvent) => {
       if (event.data.type === "watchedDataSetKey") {
         const { key, value, id } = event.data.payload;
-        if (keyRef.current === key && id !== watchedDataId) {
+        if (keyRef.current === key && id !== postMessageId) {
           setLocalValue(value);
         }
       }
@@ -121,11 +122,12 @@ function useJsonData<T>(
     return () => {
       window.removeEventListener("message", cb);
     };
-  }, [watchedDataId]);
+  }, [postMessageId]);
 
   const augmentedSetLocalValue: Dispatch<SetStateAction<T | undefined>> =
     useCallback(
       (valueOrFunction) => {
+        setUpdating(true);
         setLocalValue(valueOrFunction);
         const valueToStore =
           valueOrFunction instanceof Function
@@ -137,19 +139,19 @@ function useJsonData<T>(
             payload: {
               key: keyRef.current,
               value: valueToStore,
-              id: watchedDataId,
+              id: postMessageId,
             },
           },
           "*"
         );
       },
-      [watchedDataId]
+      [postMessageId]
     );
 
   return [
     localValue,
     augmentedSetLocalValue,
-    { loading, refetch: populateState },
+    { loading, refetch: populateState, updating },
   ] as const;
 }
 export default useJsonData;

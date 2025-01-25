@@ -13,20 +13,29 @@ export type JsonData = {
   createdAt: ISODateString;
   updatedAt: ISODateString;
 };
-const keyPrefix = "reactAIExperiments.";
+
+const keyPrefix = "reactAIExperiments/";
 
 const jsonDataService = {
-  getKey: async ({ key }: { key: string }) => {
-    const result = await axiosInstance.get(
-      `/json-data?${encodeQueryParams({ key: keyPrefix + key })}`
-    );
+  getKey: async <T>({ key }: { key: string }) => {
+    const result = await axiosInstance.get<
+      (Omit<JsonData, "value"> & { value: T }) | null
+    >(`/json-data?${encodeQueryParams({ key: keyPrefix + key })}`);
     return result.data;
   },
-  getKeysLike: async ({ key }: { key: string }) => {
-    const result = await axiosInstance.get(
-      `/json-data/key-like?${encodeQueryParams({ key: keyPrefix + key })}`
-    );
-    return result.data;
+  getKeysLike: <T>({ key }: { key: string }) => {
+    const path = `/json-data/key-like?${encodeQueryParams({
+      key: keyPrefix + key,
+    })}`;
+    return {
+      queryKey: [path],
+      queryFn: async () => {
+        const result = await axiosInstance.get<
+          (Omit<JsonData, "value"> & { value: T })[]
+        >(path);
+        return result.data;
+      },
+    };
   },
 
   deleteKeysLike: async ({ key }: { key: string }) => {
@@ -43,14 +52,14 @@ const jsonDataService = {
     );
     return result.data;
   },
-  setKey: async ({ key, value }: { key: string; value?: any }) => {
+  setKey: async <T>({ key, value }: { key: string; value?: T }) => {
     const result = await axiosInstance.post(`/json-data`, {
       key: keyPrefix + key,
       value,
     });
     return result.data;
   },
-  createMany: async (data: { key: string; value?: any }[]) => {
+  createMany: async <T>(data: { key: string; value?: T }[]) => {
     const result = await axiosInstance.post(`/json-data/bulk`, {
       data: data.map((d) => ({ key: keyPrefix + d.key, value: d.value })),
     });

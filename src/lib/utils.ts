@@ -14,3 +14,5 @@ export const encodeQueryParams = (
     )
     .join("&");
 };
+
+export const uuidPlaceholder = "________-____-____-____-____________";

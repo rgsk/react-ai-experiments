@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 interface SampleJsonDataProps {}
 const SampleJsonData: React.FC<SampleJsonDataProps> = ({}) => {
   const [count, setCount] = useJsonData("count", 1);
+
   return (
     <div>
       <p>Count: {count}</p>

@@ -7,11 +7,6 @@ const axiosInstance = axios.create({
 });
 type SampleResponseType = typeof experimentsServiceSampleResponses;
 
-export type Message = {
-  id: string;
-  role: "system" | "user" | "assistant";
-  content: string;
-};
 export type CompletionMessage = {
   role: "system" | "user" | "assistant";
   content: string;

@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { v4 } from "uuid";
 import { Button } from "~/components/ui/button";
+import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
+import { Chat } from "~/lib/typesJsonData";
 import { ModeToggle } from "../Shared/ModeToggle";
 
 interface HomePageProps {}
 const HomePage: React.FC<HomePageProps> = ({}) => {
   const [count, setCount] = useState(1);
+  const { data: chats } = useJsonDataKeysLike<Chat>("chat.%");
   return (
     <div>
       <div>
@@ -15,6 +18,9 @@ const HomePage: React.FC<HomePageProps> = ({}) => {
         <p>
           <Link to={`/chat/${v4()}`}>Chat</Link>
         </p>
+        {chats?.map((chat) => {
+          return <div key={chat.id}>{chat.title}</div>;
+        })}
       </div>
       <Button
         onClick={() => {

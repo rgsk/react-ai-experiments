@@ -1,4 +1,6 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "./providers/ThemeProvider";
+const queryClient = new QueryClient();
 
 interface ProvidersProps {
   children: any;
@@ -6,9 +8,11 @@ interface ProvidersProps {
 const Providers: React.FC<ProvidersProps> = ({ children }) => {
   return (
     <div>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        {children}
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
     </div>
   );
 };
