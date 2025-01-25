@@ -1,5 +1,5 @@
 import axios from "axios";
-import { localStorageWithExpiry } from "~/hooks/useLocalStorageState";
+import { getToken } from "~/hooks/auth/useToken";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 const baseUrl = "http://localhost:4004";
@@ -7,13 +7,8 @@ export const axiosExperimentsInstance = axios.create({
   baseURL: baseUrl,
 });
 axiosExperimentsInstance.interceptors.request.use((config) => {
-  const token = localStorageWithExpiry.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    window.location.href = "/login";
-    throw new Error("Please login to continue");
-  }
+  const token = getToken();
+  config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 type SampleResponseType = typeof experimentsServiceSampleResponses;
@@ -35,11 +30,12 @@ const experimentsService = {
     const payload = {
       messages: messages,
     };
-
+    const token = getToken();
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });

@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { firebaseAuth } from "~/lib/firebaseApp";
-import useLocalStorageState from "../useLocalStorageState";
-
+import useLocalStorageState, {
+  localStorageWithExpiry,
+} from "../useLocalStorageState";
+export const getToken = () => {
+  const token = localStorageWithExpiry.getItem<string>("token");
+  if (!token) {
+    window.location.href = "/login";
+    throw new Error("Please login to continue");
+  }
+  return token;
+};
 export default function useToken() {
   const [token, setToken] = useLocalStorageState<string | null>("token", null);
   const [tokenLoading, setTokenLoading] = useState(true);

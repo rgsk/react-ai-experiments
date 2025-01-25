@@ -1,7 +1,17 @@
 import { User } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { firebaseAuth } from "~/lib/firebaseApp";
-import useLocalStorageState from "../useLocalStorageState";
+import useLocalStorageState, {
+  localStorageWithExpiry,
+} from "../useLocalStorageState";
+export const getFirebaseUser = () => {
+  const firebaseUser = localStorageWithExpiry.getItem<User>("firebaseUser");
+  if (!firebaseUser) {
+    window.location.href = "/login";
+    throw new Error("Please login to continue");
+  }
+  return firebaseUser;
+};
 const useFirebaseUser = () => {
   const [firebaseUser, setFirebaseUser] = useLocalStorageState<User | null>(
     "firebaseUser",
@@ -10,7 +20,7 @@ const useFirebaseUser = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     return firebaseAuth.onAuthStateChanged(async (user) => {
-      setFirebaseUser(user as User);
+      setFirebaseUser(user);
       setLoading(false);
     });
   }, [setFirebaseUser]);

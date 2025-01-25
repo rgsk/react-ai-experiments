@@ -1,5 +1,4 @@
-import { User } from "firebase/auth";
-import { localStorageWithExpiry } from "~/hooks/useLocalStorageState";
+import { getFirebaseUser } from "~/hooks/auth/useFirebaseUser";
 import { encodeQueryParams } from "~/lib/utils";
 import { axiosExperimentsInstance } from "./experimentsService";
 
@@ -15,11 +14,7 @@ export type JsonData = {
 };
 
 const addPrefixToKey = (key: string) => {
-  const firebaseUser = localStorageWithExpiry.getItem<User>("firebaseUser");
-  if (!firebaseUser) {
-    window.location.href = "/login";
-    throw new Error("Please login to continue");
-  }
+  const firebaseUser = getFirebaseUser();
   return `reactAIExperiments/users/${firebaseUser.email}/${key}`;
 };
 
