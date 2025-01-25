@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import App from "~/App";
 import Providers from "~/Providers";
+import ChatPage from "./components/ChatPage/ChatPage";
 import HomePage from "./components/HomePage/HomePage";
 import PracticePage from "./components/PracticePage/PracticePage";
 
@@ -20,6 +21,7 @@ const router = createBrowserRouter(
     >
       <Route index element={<HomePage />} />
       <Route path="practice" element={<PracticePage />} />
+      <Route path="chat" element={<ChatPage />} />
     </Route>
   )
 );

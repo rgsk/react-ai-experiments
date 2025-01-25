@@ -27,6 +27,20 @@ const experimentsServiceSampleResponses = {
     },
     tools: [],
   },
+  getAWSUploadUrl: [
+    {
+      response: {
+        url: "",
+      },
+    },
+  ],
+  getAWSDownloadUrl: [
+    {
+      response: {
+        url: "",
+      },
+    },
+  ],
 };
 
 export default experimentsServiceSampleResponses;
