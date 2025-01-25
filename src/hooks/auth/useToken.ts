@@ -12,7 +12,7 @@ export const getToken = () => {
   return token;
 };
 export default function useToken() {
-  const [token, setToken] = useLocalStorageState<string | null>("token", null);
+  const [token, setToken] = useLocalStorageState<string>("token");
   const [tokenLoading, setTokenLoading] = useState(true);
   useEffect(() => {
     return firebaseAuth.onAuthStateChanged(async (user) => {
@@ -20,7 +20,7 @@ export default function useToken() {
         const token = await user.getIdToken();
         setToken(token);
       } else {
-        setToken(null);
+        setToken(undefined);
       }
       setTokenLoading(false);
     });

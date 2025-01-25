@@ -7,7 +7,7 @@ export const localStorageWithExpiry = {
     if (typeof window !== "undefined") {
       const item = window.localStorage.getItem(key);
       if (item === null) {
-        return null;
+        return undefined;
       }
       const details = JSON.parse(item) as {
         value: T;
@@ -20,11 +20,11 @@ export const localStorageWithExpiry = {
         (!details.expireAt || new Date() < new Date(details.expireAt)) &&
         details.version === version
       ) {
-        return details.value ?? null;
+        return details.value ?? undefined;
       }
-      return null;
+      return undefined;
     }
-    return null;
+    return undefined;
   },
   setItem<T>(
     key: string,
@@ -49,7 +49,7 @@ export const localStorageWithExpiry = {
 // expirationTime in seconds
 const useLocalStorageState = <T>(
   key: string,
-  initialValue: T | (() => T),
+  initialValue?: T | (() => T),
   {
     expirationTime,
     version,

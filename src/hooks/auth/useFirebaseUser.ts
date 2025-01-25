@@ -13,14 +13,12 @@ export const getFirebaseUser = () => {
   return firebaseUser;
 };
 const useFirebaseUser = () => {
-  const [firebaseUser, setFirebaseUser] = useLocalStorageState<User | null>(
-    "firebaseUser",
-    null
-  );
+  const [firebaseUser, setFirebaseUser] =
+    useLocalStorageState<User>("firebaseUser");
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     return firebaseAuth.onAuthStateChanged(async (user) => {
-      setFirebaseUser(user);
+      setFirebaseUser(user ?? undefined);
       setLoading(false);
     });
   }, [setFirebaseUser]);
