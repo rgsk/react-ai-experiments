@@ -7,6 +7,7 @@ import App from "~/App";
 import Providers from "~/Providers";
 import ChatPage from "./components/ChatPage/ChatPage";
 import HomePage from "./components/HomePage/HomePage";
+import LoginPage from "./components/LoginPage/LoginPage";
 import PracticePage from "./components/PracticePage/PracticePage";
 
 const router = createBrowserRouter(
@@ -21,9 +22,10 @@ const router = createBrowserRouter(
     >
       <Route index element={<HomePage />} />
       <Route path="practice" element={<PracticePage />} />
+      <Route path="login" element={<LoginPage />} />
       <Route path="chat">
         <Route path=":id" element={<ChatPage />} />
-      </Route>{" "}
+      </Route>
     </Route>
   )
 );

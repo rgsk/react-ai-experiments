@@ -2,6 +2,7 @@ import { produce } from "immer";
 import { useEffect, useRef } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
+import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useTextStream from "~/hooks/useTextStream";
@@ -18,6 +19,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { data: chatHistory, refetch: refetchChatHistory } =
     useJsonDataKeysLike<Chat>(`chats/${uuidPlaceholder}`);
   const navigate = useNavigate();
+  useAuthRequired();
   const [chat, setChat, { updating: chatUpdating }] = useJsonData<Chat>(
     `chats/${chatId}`,
     {
@@ -124,14 +126,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       <div className="flex gap-8">
         <div className="min-w-[500px]">
           <div className="flex flex-col">
-            {chatHistory.map((chat) => {
-              return (
-                <div key={chat.id}>
-                  <p>{chat.id}</p>
-                  <NavLink to={`/chat/${chat.id}`}>{chat.title}</NavLink>
-                </div>
-              );
-            })}
+            {chatHistory
+              .filter((c) => !!c.title)
+              .map((chat) => {
+                return (
+                  <div key={chat.id}>
+                    <p>{chat.id}</p>
+                    <NavLink to={`/chat/${chat.id}`}>{chat.title}</NavLink>
+                  </div>
+                );
+              })}
           </div>
         </div>
         <div>

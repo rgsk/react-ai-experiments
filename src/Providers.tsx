@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { GlobalContextProvider } from "./hooks/GlobalContext";
 import { ThemeProvider } from "./providers/ThemeProvider";
 const queryClient = new QueryClient();
 
@@ -10,7 +11,7 @@ const Providers: React.FC<ProvidersProps> = ({ children }) => {
     <div>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          {children}
+          <GlobalContextProvider>{children}</GlobalContextProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </div>
