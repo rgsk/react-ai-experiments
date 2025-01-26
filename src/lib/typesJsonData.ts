@@ -1,5 +1,4 @@
-import { ISODateString } from "~/services/jsonDataService";
-
+export type ISODateString = string;
 export type Message = {
   id: string;
   role: "system" | "user" | "assistant";
@@ -8,5 +7,11 @@ export type Message = {
 export type Chat = {
   id: string | undefined;
   title: string;
+  createdAt: ISODateString;
+};
+export type UserData = {
+  id: string;
+  name: string;
+  email: string;
   createdAt: ISODateString;
 };

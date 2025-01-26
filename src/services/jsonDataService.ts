@@ -1,8 +1,7 @@
-import { getFirebaseUser } from "~/hooks/auth/useFirebaseUser";
+import { ISODateString } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import { axiosExperimentsInstance } from "./experimentsService";
 
-export type ISODateString = string;
 export type JsonData = {
   id: string;
   key: string;
@@ -14,8 +13,7 @@ export type JsonData = {
 };
 
 const addPrefixToKey = (key: string) => {
-  const firebaseUser = getFirebaseUser();
-  return `reactAIExperiments/users/${firebaseUser.email}/${key}`;
+  return `reactAIExperiments/users/$userEmail/${key}`;
 };
 
 const jsonDataService = {
