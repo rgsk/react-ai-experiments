@@ -1,10 +1,8 @@
 import Markdown from "react-markdown";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
-import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { cn } from "~/lib/utils";
+import SyntaxHighlighter from "./SyntaxHighlighter";
 
 type MarkdownRendererProps = {
   children: string;
@@ -13,7 +11,6 @@ type MarkdownRendererProps = {
 export function MarkdownRenderer({
   children: markdown,
 }: MarkdownRendererProps) {
-  const { copied, copy } = useCopyToClipboard();
   return (
     <Markdown
       remarkPlugins={[remarkGfm]}
@@ -38,44 +35,12 @@ export function MarkdownRenderer({
             );
           }
           return (
-            <div className="relative">
-              <div
-                className={cn(
-                  "absolute top-0 right-0 bg-[#50505a] w-full",
-                  "flex justify-between items-center",
-                  "rounded-tl-[16px] rounded-tr-[16px]",
-                  "px-[16px] py-[8px]"
-                )}
-              >
-                {language === "default" ? (
-                  <span></span>
-                ) : (
-                  <span className="text-white text-xs">{language}</span>
-                )}
-                <button
-                  className="text-white text-xs"
-                  onClick={() => {
-                    copy(children);
-                  }}
-                >
-                  {copied ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              {/* @ts-ignore */}
-              <SyntaxHighlighter
-                style={vscDarkPlus}
-                PreTag="div"
-                language={language}
-                {...props}
-                customStyle={{
-                  borderRadius: "16px",
-                  padding: "16px",
-                  paddingTop: "50px",
-                }}
-              >
-                {children}
-              </SyntaxHighlighter>
-            </div>
+            <SyntaxHighlighter
+              code={children}
+              language={language}
+              codeProps={props}
+              isCodeOutput={false}
+            />
           );
         },
       }}

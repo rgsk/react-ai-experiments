@@ -96,5 +96,21 @@ const experimentsService = {
       },
     };
   },
+  executeCode: async ({
+    code,
+    language,
+  }: {
+    code: string;
+    language: string;
+  }) => {
+    const result = await axiosExperimentsInstance.post<{ output: string }>(
+      "/experiments/execute-code",
+      {
+        code,
+        language,
+      }
+    );
+    return result.data;
+  },
 };
 export default experimentsService;

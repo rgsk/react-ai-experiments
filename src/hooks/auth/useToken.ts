@@ -6,7 +6,7 @@ import useLocalStorageState, {
 export const getToken = () => {
   const token = localStorageWithExpiry.getItem<string>("token");
   if (!token) {
-    window.location.href = "/login";
+    // window.location.href = "/login";
     throw new Error("Please login to continue");
   }
   return token;
