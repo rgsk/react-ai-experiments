@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useRef } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
@@ -18,9 +19,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   isCodeOutput,
   codeProps,
 }) => {
+  const editableContentRef = useRef<HTMLDivElement>(null);
   const { copied, copy } = useCopyToClipboard();
   const executeCodeMutationResult = useMutation({
-    mutationFn: () => {
+    mutationFn: ({ code, language }: { code: string; language: string }) => {
       return experimentsService.executeCode({
         language,
         code: code,
@@ -55,7 +57,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             <button
               className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
               onClick={async () => {
-                executeCodeMutationResult.mutate();
+                const editedCode = editableContentRef.current?.textContent;
+                if (editedCode) {
+                  executeCodeMutationResult.mutate({
+                    code: editedCode,
+                    language,
+                  });
+                }
               }}
             >
               Run Code
@@ -63,20 +71,26 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           )}
         </div>
       </div>
-      {/* @ts-ignore */}
-      <Prism
-        style={vscDarkPlus}
-        PreTag="div"
-        language={language}
-        {...codeProps}
-        customStyle={{
-          borderRadius: "16px",
-          padding: "16px",
-          paddingTop: "50px",
-        }}
+      <div
+        contentEditable
+        ref={editableContentRef}
+        className="rounded-[16px] outline-none"
       >
-        {code}
-      </Prism>
+        {/* @ts-ignore */}
+        <Prism
+          style={vscDarkPlus}
+          PreTag="div"
+          language={language}
+          {...codeProps}
+          customStyle={{
+            borderRadius: "16px",
+            padding: "16px",
+            paddingTop: "50px",
+          }}
+        >
+          {code}
+        </Prism>
+      </div>
       {executeCodeMutationResult.isPending && (
         <div>
           <LoadingSpinner />
