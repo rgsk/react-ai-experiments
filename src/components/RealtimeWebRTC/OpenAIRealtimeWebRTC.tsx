@@ -60,7 +60,7 @@ const OpenAIRealtimeWebRTC = ({
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
       dc.addEventListener("open", () => {
-        console.log("Data channel is open");
+        // console.log("Data channel is open");
         for (const message of initialMessages) {
           const responseCreate = {
             type: "conversation.item.create",
@@ -82,7 +82,7 @@ const OpenAIRealtimeWebRTC = ({
       });
 
       dc.addEventListener("message", (e) => {
-        console.log("Realtime event : ", e.data);
+        // console.log("Realtime event : ", e.data);
         const realtimeEvent = JSON.parse(e.data);
         if (realtimeEvent.type === sampleAudioTranscriptDoneEvent.type) {
           const event = realtimeEvent as typeof sampleAudioTranscriptDoneEvent;

@@ -51,31 +51,34 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       return [...(prev ?? []), newMessage];
     });
   };
+  const markLastMessageAsComplete = (role: "user" | "assistant") => {
+    // get the last user message and mark it as complete
+    setMessages((prev) => {
+      if (!prev) return prev;
+      // Find the last user message index
+      let lastUserIndex = -1;
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i].role === role) {
+          lastUserIndex = i;
+          break;
+        }
+      }
+      // If found, update it with final transcript
+      if (lastUserIndex !== -1) {
+        const updatedMessages = [...prev];
+        updatedMessages[lastUserIndex] = {
+          ...updatedMessages[lastUserIndex],
+          status: "completed",
+        };
+        return updatedMessages;
+      }
+
+      return prev;
+    });
+  };
   const { startRecognition, stopRecognition } = useWebSTT({
     onFinalTranscript: () => {
-      // get the last user message and mark it as complete
-      setMessages((prev) => {
-        if (!prev) return prev;
-        // Find the last user message index
-        let lastUserIndex = -1;
-        for (let i = prev.length - 1; i >= 0; i--) {
-          if (prev[i].role === "user") {
-            lastUserIndex = i;
-            break;
-          }
-        }
-        // If found, update it with final transcript
-        if (lastUserIndex !== -1) {
-          const updatedMessages = [...prev];
-          updatedMessages[lastUserIndex] = {
-            ...updatedMessages[lastUserIndex],
-            status: "completed",
-          };
-          return updatedMessages;
-        }
-
-        return prev;
-      });
+      markLastMessageAsComplete("user");
     },
     onInterimTranscript: (transcript) => {
       handleMessageDelta({ role: "user", transcript: transcript });
@@ -213,6 +216,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           <h1>{chat.title || "New Chat"}</h1>
           {messages.map((message) => (
             <div key={message.id}>
+              <p>{message.role}: </p>{" "}
               <MarkdownRenderer>{message.content}</MarkdownRenderer>
             </div>
           ))}
@@ -268,8 +272,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               stopRecognition();
             }}
             isEnabled={voiceModeEnabled}
-            onAssistantTranscript={(transcript) => {
-              // TODO: assistant text response is complete
+            onAssistantTranscript={() => {
+              markLastMessageAsComplete("assistant");
             }}
             onAssistantTranscriptDelta={(delta) => {
               handleMessageDelta({ role: "assistant", delta: delta });
