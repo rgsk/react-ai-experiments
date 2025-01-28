@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import useWebSTT from "~/hooks/auth/useWebSTT";
+import useWebSTT from "~/hooks/useWebSTT";
 import { Button } from "../ui/button";
 
 interface SampleWebTranscriptionWithHookProps {}
