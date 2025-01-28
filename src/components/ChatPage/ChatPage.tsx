@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
+import useWebSTT from "~/hooks/auth/useWebSTT";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useTextStream from "~/hooks/useTextStream";
@@ -10,6 +11,7 @@ import { Chat, Message } from "~/lib/typesJsonData";
 import { uuidPlaceholder } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
+import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Button } from "../ui/button";
 import { MarkdownRenderer } from "./Children/MarkdownRenderer";
 import MessageInput from "./Children/MessageInput";
@@ -19,6 +21,66 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
   const { handleGenerate, loading: textStreamLoading, text } = useTextStream();
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+  const [voiceModeLoading, setVoiceModeLoading] = useState(false);
+  const handleMessageDelta = ({
+    delta,
+    role,
+    transcript,
+  }: {
+    delta?: string;
+    transcript?: string;
+    role: "user" | "assistant";
+  }) => {
+    setMessages((prev) => {
+      const lastMessage = prev?.[prev.length - 1];
+      if (lastMessage?.role === role && lastMessage.status === "in_progress") {
+        // Update the existing last message
+        const updatedMessage = {
+          ...lastMessage,
+          content: transcript ? transcript : lastMessage.content + delta,
+        };
+        return [...prev!.slice(0, -1), updatedMessage];
+      }
+      // Create a new message
+      const newMessage: Message = {
+        id: v4(),
+        role: role,
+        content: transcript ?? delta ?? "",
+        status: "in_progress",
+      };
+      return [...(prev ?? []), newMessage];
+    });
+  };
+  const { startRecognition, stopRecognition } = useWebSTT({
+    onFinalTranscript: () => {
+      // get the last user message and mark it as complete
+      setMessages((prev) => {
+        if (!prev) return prev;
+        // Find the last user message index
+        let lastUserIndex = -1;
+        for (let i = prev.length - 1; i >= 0; i--) {
+          if (prev[i].role === "user") {
+            lastUserIndex = i;
+            break;
+          }
+        }
+        // If found, update it with final transcript
+        if (lastUserIndex !== -1) {
+          const updatedMessages = [...prev];
+          updatedMessages[lastUserIndex] = {
+            ...updatedMessages[lastUserIndex],
+            status: "completed",
+          };
+          return updatedMessages;
+        }
+
+        return prev;
+      });
+    },
+    onInterimTranscript: (transcript) => {
+      handleMessageDelta({ role: "user", transcript: transcript });
+    },
+  });
   const { data: chatHistory, refetch: refetchChatHistory } =
     useJsonDataKeysLike<Chat>(`chats/${uuidPlaceholder}`);
   const navigate = useNavigate();
@@ -100,7 +162,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         produce((draft) => {
           if (draft) {
             if (draft[draft.length - 1].role === "user") {
-              draft.push({ id: v4(), role: "assistant", content: text });
+              draft.push({
+                id: v4(),
+                role: "assistant",
+                content: text,
+                status: "completed",
+              });
             } else {
               draft[draft.length - 1].content = text;
             }
@@ -112,7 +179,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const handleSend: HandleSend = ({ text }) => {
     setMessages((prev) => [
       ...(prev ?? []),
-      { id: v4(), role: "user", content: text },
+      { id: v4(), role: "user", content: text, status: "completed" },
     ]);
   };
   if (!chat || !messages || !chatHistory) {
@@ -157,11 +224,20 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             placeholder="Message"
             interruptEnabled={false}
           />
+          {voiceModeLoading ? (
+            <div>
+              <p>Initialising Voice Mode...</p>
+              <LoadingSpinner />
+            </div>
+          ) : voiceModeEnabled ? (
+            <p>Voice Mode Running</p>
+          ) : null}
           <div className="flex gap-2">
             <div>
               <Button
                 onClick={() => {
                   setVoiceModeEnabled(true);
+                  setVoiceModeLoading(true);
                 }}
                 disabled={voiceModeEnabled}
               >
@@ -172,6 +248,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               <Button
                 onClick={() => {
                   setVoiceModeEnabled(false);
+                  stopRecognition();
                 }}
                 disabled={!voiceModeEnabled}
               >
@@ -180,30 +257,26 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             </div>
           </div>
           <OpenAIRealtimeWebRTC
-            isEnabled={voiceModeEnabled}
-            onUserTranscript={(transcript) => {
-              setMessages((prev) => {
-                return [
-                  ...(prev ?? []),
-                  {
-                    id: v4(),
-                    role: "user",
-                    content: transcript,
-                  },
-                ];
-              });
+            onDataChannelOpened={() => {
+              setVoiceModeLoading(false);
+              startRecognition();
             }}
+            onUserSpeechStarted={() => {
+              startRecognition();
+            }}
+            onUserSpeechStopped={() => {
+              stopRecognition();
+            }}
+            isEnabled={voiceModeEnabled}
             onAssistantTranscript={(transcript) => {
-              setMessages((prev) => {
-                return [
-                  ...(prev ?? []),
-                  {
-                    id: v4(),
-                    role: "assistant",
-                    content: transcript,
-                  },
-                ];
-              });
+              // TODO: assistant text response is complete
+            }}
+            onAssistantTranscriptDelta={(delta) => {
+              handleMessageDelta({ role: "assistant", delta: delta });
+            }}
+            onAssistantSpeechStopped={() => {
+              // assistant audio response is complete
+              startRecognition();
             }}
             initialMessages={messages}
           />

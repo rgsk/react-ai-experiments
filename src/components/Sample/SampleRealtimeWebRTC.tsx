@@ -69,7 +69,7 @@ const SampleRealtimeWebRTC = ({
       });
 
       dc.addEventListener("message", (e) => {
-        console.log("Realtime event : ", e.data);
+        // console.log("Realtime event : ", e.data);
         const realtimeEvent = JSON.parse(e.data);
         if (realtimeEvent.type === sampleAudioTranscriptDoneEvent.type) {
           const event = realtimeEvent as typeof sampleAudioTranscriptDoneEvent;
@@ -81,6 +81,11 @@ const SampleRealtimeWebRTC = ({
           const event =
             realtimeEvent as typeof sampleInputAudioTranscriptionCompletedEvent;
           // console.log("Transcript sent: ", event.transcript);
+        } else if (
+          realtimeEvent.type === sampleAudioTranscriptDeltaEvent.type
+        ) {
+          const event = realtimeEvent as typeof sampleAudioTranscriptDeltaEvent;
+          console.log(event.delta);
         }
       });
 
@@ -176,4 +181,14 @@ const sampleAudioTranscriptDoneEvent = {
   output_index: 0,
   content_index: 0,
   transcript: "Hi there! How's it going today? ",
+};
+
+const sampleAudioTranscriptDeltaEvent = {
+  type: "response.audio_transcript.delta",
+  event_id: "event_Audqx2Upmna4SoL36aDg7",
+  response_id: "resp_Audqxa3yBNwzQe4ZN3yGx",
+  item_id: "item_AudqxsoubuEPNX7m7SOQJ",
+  output_index: 0,
+  content_index: 0,
+  delta: " there",
 };

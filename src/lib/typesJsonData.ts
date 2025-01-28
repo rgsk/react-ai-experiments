@@ -3,6 +3,7 @@ export type Message = {
   id: string;
   role: "system" | "user" | "assistant";
   content: string;
+  status: "in_progress" | "incomplete" | "completed";
 };
 export type Chat = {
   id: string | undefined;

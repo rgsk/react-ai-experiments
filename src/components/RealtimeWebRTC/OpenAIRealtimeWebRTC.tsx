@@ -8,10 +8,20 @@ const OpenAIRealtimeWebRTC = ({
   onUserTranscript,
   onAssistantTranscript,
   isEnabled,
+  onAssistantTranscriptDelta,
+  onUserSpeechStarted,
+  onUserSpeechStopped,
+  onAssistantSpeechStopped,
+  onDataChannelOpened,
 }: {
   initialMessages: CompletionMessage[];
-  onUserTranscript: (transcript: string) => void;
+  onUserTranscript?: (transcript: string) => void;
   onAssistantTranscript: (transcript: string) => void;
+  onAssistantTranscriptDelta: (delta: string) => void;
+  onUserSpeechStarted: () => void;
+  onUserSpeechStopped: () => void;
+  onAssistantSpeechStopped: () => void;
+  onDataChannelOpened: () => void;
   isEnabled: boolean;
 }) => {
   const pcRef = useRef<any>(null);
@@ -68,15 +78,16 @@ const OpenAIRealtimeWebRTC = ({
           };
           dc.send(JSON.stringify(responseCreate));
         }
+        onDataChannelOpened();
       });
 
       dc.addEventListener("message", (e) => {
-        // console.log("Realtime event : ", e.data);
+        console.log("Realtime event : ", e.data);
         const realtimeEvent = JSON.parse(e.data);
         if (realtimeEvent.type === sampleAudioTranscriptDoneEvent.type) {
           const event = realtimeEvent as typeof sampleAudioTranscriptDoneEvent;
           // console.log("Transcript received: ", event.transcript);
-          onUserTranscript(event.transcript);
+          onAssistantTranscript(event.transcript);
         } else if (
           realtimeEvent.type ===
           sampleInputAudioTranscriptionCompletedEvent.type
@@ -84,7 +95,24 @@ const OpenAIRealtimeWebRTC = ({
           const event =
             realtimeEvent as typeof sampleInputAudioTranscriptionCompletedEvent;
           // console.log("Transcript sent: ", event.transcript);
-          onAssistantTranscript(event.transcript);
+          onUserTranscript?.(event.transcript);
+          /*
+            input_audio_transcription: {
+                model: "whisper-1",
+            },
+            must be set in backend for this to work
+          */
+        } else if (
+          realtimeEvent.type === sampleAudioTranscriptDeltaEvent.type
+        ) {
+          const event = realtimeEvent as typeof sampleAudioTranscriptDeltaEvent;
+          onAssistantTranscriptDelta(event.delta);
+        } else if (realtimeEvent.type === "input_audio_buffer.speech_started") {
+          onUserSpeechStarted();
+        } else if (realtimeEvent.type === "input_audio_buffer.speech_stopped") {
+          onUserSpeechStopped();
+        } else if (realtimeEvent.type === "output_audio_buffer.audio_stopped") {
+          onAssistantSpeechStopped();
         }
       });
 
@@ -138,14 +166,16 @@ const OpenAIRealtimeWebRTC = ({
 
     ephemeralKeyRef.current = null;
   };
-
+  const handleStartRef = useRef(handleStart);
+  handleStartRef.current = handleStart;
+  const handleStopRef = useRef(handleStop);
+  handleStopRef.current = handleStop;
   useEffect(() => {
     if (isEnabled) {
-      handleStart();
+      handleStartRef.current();
     } else {
-      handleStop();
+      handleStopRef.current();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEnabled]);
 
   return <div>hii</div>;
@@ -169,4 +199,14 @@ const sampleAudioTranscriptDoneEvent = {
   output_index: 0,
   content_index: 0,
   transcript: "Hi there! How's it going today? ",
+};
+
+const sampleAudioTranscriptDeltaEvent = {
+  type: "response.audio_transcript.delta",
+  event_id: "event_Audqx2Upmna4SoL36aDg7",
+  response_id: "resp_Audqxa3yBNwzQe4ZN3yGx",
+  item_id: "item_AudqxsoubuEPNX7m7SOQJ",
+  output_index: 0,
+  content_index: 0,
+  delta: " there",
 };
