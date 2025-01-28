@@ -1,15 +1,19 @@
-import { useRef, useState } from "react";
-import { Button } from "~/components/ui/button";
+import { useEffect, useRef } from "react";
 import experimentsService, {
   CompletionMessage,
 } from "~/services/experimentsService";
 
-const SampleRealtimeWebRTC = ({
+const OpenAIRealtimeWebRTC = ({
   initialMessages,
+  onUserTranscript,
+  onAssistantTranscript,
+  isEnabled,
 }: {
   initialMessages: CompletionMessage[];
+  onUserTranscript: (transcript: string) => void;
+  onAssistantTranscript: (transcript: string) => void;
+  isEnabled: boolean;
 }) => {
-  const [isRunning, setIsRunning] = useState(false);
   const pcRef = useRef<any>(null);
   const dcRef = useRef<any>(null);
   const localStreamRef = useRef<any>(null);
@@ -17,8 +21,6 @@ const SampleRealtimeWebRTC = ({
   const ephemeralKeyRef = useRef<any>(null);
 
   const handleStart = async () => {
-    if (isRunning) return;
-
     try {
       // Fetch ephemeral key
       const data = await experimentsService.getSession();
@@ -69,11 +71,12 @@ const SampleRealtimeWebRTC = ({
       });
 
       dc.addEventListener("message", (e) => {
-        console.log("Realtime event : ", e.data);
+        // console.log("Realtime event : ", e.data);
         const realtimeEvent = JSON.parse(e.data);
         if (realtimeEvent.type === sampleAudioTranscriptDoneEvent.type) {
           const event = realtimeEvent as typeof sampleAudioTranscriptDoneEvent;
           // console.log("Transcript received: ", event.transcript);
+          onUserTranscript(event.transcript);
         } else if (
           realtimeEvent.type ===
           sampleInputAudioTranscriptionCompletedEvent.type
@@ -81,6 +84,7 @@ const SampleRealtimeWebRTC = ({
           const event =
             realtimeEvent as typeof sampleInputAudioTranscriptionCompletedEvent;
           // console.log("Transcript sent: ", event.transcript);
+          onAssistantTranscript(event.transcript);
         }
       });
 
@@ -102,8 +106,6 @@ const SampleRealtimeWebRTC = ({
 
       const answerSDP = await sdpResponse.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSDP });
-
-      setIsRunning(true);
     } catch (err) {
       console.error("Error starting session:", err);
     }
@@ -135,30 +137,21 @@ const SampleRealtimeWebRTC = ({
     }
 
     ephemeralKeyRef.current = null;
-
-    setIsRunning(false);
   };
 
-  return (
-    <div className="p-5">
-      <p className="text-lg mb-2">Test Realtime WebRTC API</p>
-      <div className="flex gap-2">
-        <div>
-          <Button onClick={handleStart} disabled={isRunning}>
-            Start
-          </Button>
-        </div>
-        <div>
-          <Button onClick={handleStop} disabled={!isRunning}>
-            Stop
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    if (isEnabled) {
+      handleStart();
+    } else {
+      handleStop();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEnabled]);
+
+  return <div>hii</div>;
 };
 
-export default SampleRealtimeWebRTC;
+export default OpenAIRealtimeWebRTC;
 
 const sampleInputAudioTranscriptionCompletedEvent = {
   type: "conversation.item.input_audio_transcription.completed",

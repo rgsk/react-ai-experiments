@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
@@ -9,6 +9,7 @@ import useTextStream from "~/hooks/useTextStream";
 import { Chat, Message } from "~/lib/typesJsonData";
 import { uuidPlaceholder } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
+import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import { Button } from "../ui/button";
 import { MarkdownRenderer } from "./Children/MarkdownRenderer";
 import MessageInput from "./Children/MessageInput";
@@ -17,6 +18,7 @@ interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
   const { handleGenerate, loading: textStreamLoading, text } = useTextStream();
+  const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const { data: chatHistory, refetch: refetchChatHistory } =
     useJsonDataKeysLike<Chat>(`chats/${uuidPlaceholder}`);
   const navigate = useNavigate();
@@ -43,6 +45,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     }
   }, [chat?.title, chatUpdating, refetchChatHistory]);
   useEffect(() => {
+    if (voiceModeEnabled) return;
     if (messages) {
       if (
         messages.length > 0 &&
@@ -90,7 +93,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         });
       }
     }
-  }, [handleGenerate, messages, setChat]);
+  }, [handleGenerate, messages, setChat, voiceModeEnabled]);
   useEffect(() => {
     if (text) {
       setMessages(
@@ -146,12 +149,63 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               <MarkdownRenderer>{message.content}</MarkdownRenderer>
             </div>
           ))}
+
           <MessageInput
             handleSend={handleSend}
             loading={textStreamLoading}
             interrupt={() => {}}
             placeholder="Message"
             interruptEnabled={false}
+          />
+          <div className="flex gap-2">
+            <div>
+              <Button
+                onClick={() => {
+                  setVoiceModeEnabled(true);
+                }}
+                disabled={voiceModeEnabled}
+              >
+                Start
+              </Button>
+            </div>
+            <div>
+              <Button
+                onClick={() => {
+                  setVoiceModeEnabled(false);
+                }}
+                disabled={!voiceModeEnabled}
+              >
+                Stop
+              </Button>
+            </div>
+          </div>
+          <OpenAIRealtimeWebRTC
+            isEnabled={voiceModeEnabled}
+            onUserTranscript={(transcript) => {
+              setMessages((prev) => {
+                return [
+                  ...(prev ?? []),
+                  {
+                    id: v4(),
+                    role: "user",
+                    content: transcript,
+                  },
+                ];
+              });
+            }}
+            onAssistantTranscript={(transcript) => {
+              setMessages((prev) => {
+                return [
+                  ...(prev ?? []),
+                  {
+                    id: v4(),
+                    role: "assistant",
+                    content: transcript,
+                  },
+                ];
+              });
+            }}
+            initialMessages={messages}
           />
         </div>
       </div>
