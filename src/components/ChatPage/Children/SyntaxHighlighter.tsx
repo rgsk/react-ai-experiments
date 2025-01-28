@@ -75,6 +75,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       <div
         contentEditable
         ref={editableContentRef}
+        spellCheck={false}
         className="rounded-[16px] outline-none"
         onKeyDown={(e) => {
           if (e.key === "Enter" && e.shiftKey) {
