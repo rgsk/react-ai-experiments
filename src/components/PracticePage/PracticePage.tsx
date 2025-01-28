@@ -1,11 +1,11 @@
-import SampleJsonData from "../Sample/SampleJsonData";
+import SampleLinkPreview from "../Sample/SampleLinkPreview";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
       <h1>Practice Page</h1>
-      <SampleJsonData />
+      <SampleLinkPreview />
     </div>
   );
 };
