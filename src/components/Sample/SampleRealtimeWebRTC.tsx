@@ -1,8 +1,14 @@
 import { useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
-import experimentsService from "~/services/experimentsService";
+import experimentsService, {
+  CompletionMessage,
+} from "~/services/experimentsService";
 
-const SampleRealtimeWebRTC = () => {
+const SampleRealtimeWebRTC = ({
+  initialMessages,
+}: {
+  initialMessages: CompletionMessage[];
+}) => {
   const [isRunning, setIsRunning] = useState(false);
   const pcRef = useRef<any>(null);
   const dcRef = useRef<any>(null);
@@ -41,8 +47,41 @@ const SampleRealtimeWebRTC = () => {
       // Create data channel
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
+      dc.addEventListener("open", () => {
+        console.log("Data channel is open");
+        for (const message of initialMessages) {
+          const responseCreate = {
+            type: "conversation.item.create",
+            previous_item_id: null,
+            item: {
+              type: "message",
+              role: message.role,
+              content: [
+                {
+                  type: message.role === "user" ? "input_text" : "text",
+                  text: message.content,
+                },
+              ],
+            },
+          };
+          dc.send(JSON.stringify(responseCreate));
+        }
+      });
+
       dc.addEventListener("message", (e) => {
-        console.log("Realtime event: ", e.data);
+        // console.log("Realtime event : ", e.data);
+        const realtimeEvent = JSON.parse(e.data);
+        if (realtimeEvent.type === sampleAudioTranscriptDoneEvent.type) {
+          const event = realtimeEvent as typeof sampleAudioTranscriptDoneEvent;
+          // console.log("Transcript received: ", event.transcript);
+        } else if (
+          realtimeEvent.type ===
+          sampleInputAudioTranscriptionCompletedEvent.type
+        ) {
+          const event =
+            realtimeEvent as typeof sampleInputAudioTranscriptionCompletedEvent;
+          // console.log("Transcript sent: ", event.transcript);
+        }
       });
 
       // Create offer and set local description
@@ -120,3 +159,21 @@ const SampleRealtimeWebRTC = () => {
 };
 
 export default SampleRealtimeWebRTC;
+
+const sampleInputAudioTranscriptionCompletedEvent = {
+  type: "conversation.item.input_audio_transcription.completed",
+  event_id: "event_AucppWPtRXNgx2ksKAVLi",
+  item_id: "item_AucpnWc39PkRqHsRla7Cf",
+  content_index: 0,
+  transcript: "Do you know who Steve Jobs is?\n",
+};
+
+const sampleAudioTranscriptDoneEvent = {
+  type: "response.audio_transcript.done",
+  event_id: "event_AucqzwgNVcoLvF9upRLzC",
+  response_id: "resp_AucqyyqtK01CJr1XNI8c9",
+  item_id: "item_AucqyNm6lp32vpEN08KLq",
+  output_index: 0,
+  content_index: 0,
+  transcript: "Hi there! How's it going today? ",
+};
