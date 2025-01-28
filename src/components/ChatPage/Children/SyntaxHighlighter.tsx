@@ -29,6 +29,15 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       });
     },
   });
+  const executeCode = () => {
+    const editedCode = editableContentRef.current?.textContent;
+    if (editedCode) {
+      executeCodeMutationResult.mutate({
+        code: editedCode,
+        language,
+      });
+    }
+  };
   return (
     <div className="relative">
       <div
@@ -56,15 +65,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           {!isCodeOutput && (
             <button
               className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
-              onClick={async () => {
-                const editedCode = editableContentRef.current?.textContent;
-                if (editedCode) {
-                  executeCodeMutationResult.mutate({
-                    code: editedCode,
-                    language,
-                  });
-                }
-              }}
+              onClick={executeCode}
             >
               Run Code
             </button>
@@ -75,6 +76,12 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         contentEditable
         ref={editableContentRef}
         className="rounded-[16px] outline-none"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && e.shiftKey) {
+            e.preventDefault();
+            executeCode();
+          }
+        }}
       >
         {/* @ts-ignore */}
         <Prism
