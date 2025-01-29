@@ -47,7 +47,8 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   executeCodeRef.current = executeCode;
 
   const countOfLines = code?.split("\n").length;
-  const lineHeight = 18;
+  const monacoFontSize = 14;
+  const lineHeight = monacoFontSize * 1.5;
   const paddingTop = 20;
   const paddingBottom = 20;
   return (
@@ -130,7 +131,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 theme="vs-dark"
                 height={countOfLines * lineHeight + paddingBottom}
                 options={{
-                  fontSize: 12,
+                  fontSize: monacoFontSize,
                   lineHeight: lineHeight,
                   scrollBeyondLastLine: false,
                   lineNumbers: "off",
