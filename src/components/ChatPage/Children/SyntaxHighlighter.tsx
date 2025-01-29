@@ -1,8 +1,9 @@
 import Editor from "@monaco-editor/react";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
+import useGlobalContext from "~/hooks/useGlobalContext";
 
 import { cn } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
@@ -19,6 +20,8 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   codeProps,
 }) => {
   const [code, setCode] = useState(initialCode);
+  const codeRef = useRef(code);
+  codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
   const executeCodeMutationResult = useMutation({
     mutationFn: ({ code, language }: { code: string; language: string }) => {
@@ -28,12 +31,16 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       });
     },
   });
+  const { currentExecuteCodeRef } = useGlobalContext();
+
   const executeCode = () => {
     executeCodeMutationResult.mutate({
       code: code,
       language,
     });
   };
+  const executeCodeRef = useRef(executeCode);
+  executeCodeRef.current = executeCode;
 
   const countOfLines = code.split("\n").length;
   const lineHeight = 18;
@@ -87,13 +94,27 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             scrollBeyondLastLine: false,
             lineNumbers: "off",
             minimap: {
-              enabled: false, // Disable the minimap
+              enabled: false,
             },
             padding: {
               top: paddingTop,
             },
+            readOnly: isCodeOutput, // Ensure output is read-only
           }}
           onChange={(newValue) => setCode(newValue || "")}
+          onMount={(editor, monaco) => {
+            if (!isCodeOutput) {
+              editor.onDidFocusEditorWidget(() => {
+                currentExecuteCodeRef.current = executeCodeRef;
+              });
+              editor.addCommand(
+                monaco.KeyMod.Shift | monaco.KeyCode.Enter,
+                () => {
+                  currentExecuteCodeRef.current?.current();
+                }
+              );
+            }
+          }}
         />
       </div>
       <div className="mt-[20px]">
