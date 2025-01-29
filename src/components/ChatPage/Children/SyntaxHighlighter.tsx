@@ -9,6 +9,7 @@ import useGlobalContext from "~/hooks/useGlobalContext";
 
 import { cn } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
+import IFramePreview from "./IFramePreview";
 interface SyntaxHighlighterProps {
   language: string;
   code: string;
@@ -24,6 +25,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   loading,
 }) => {
   const [code, setCode] = useState(initialCode);
+  const [showPreview, setShowPreview] = useState(false);
   const codeRef = useRef(code);
   codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
@@ -79,12 +81,24 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               <></>
             ) : (
               <>
-                <button
-                  className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
-                  onClick={executeCode}
-                >
-                  Run Code
-                </button>
+                {language === "html" ? (
+                  <button
+                    className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
+                    onClick={() => {
+                      setShowPreview((prev) => !prev);
+                    }}
+                  >
+                    {showPreview ? "Hide" : "Show"} Preview
+                  </button>
+                ) : (
+                  <button
+                    className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
+                    onClick={executeCode}
+                  >
+                    Run Code
+                  </button>
+                )}
+
                 {code !== initialCode && (
                   <button
                     className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
@@ -162,6 +176,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           </>
         )}
       </div>
+      {showPreview && (
+        <div className="mt-[20px]">
+          <div className="border border-red-500 h-[50vh]">
+            <IFramePreview srcDoc={code} />
+          </div>
+        </div>
+      )}
       <div className="mt-[20px]">
         {executeCodeMutationResult.isPending && (
           <div>
