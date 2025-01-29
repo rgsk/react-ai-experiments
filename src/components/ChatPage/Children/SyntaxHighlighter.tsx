@@ -1,10 +1,9 @@
 import Editor from "@monaco-editor/react";
 import { useMutation } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
-import { v4 } from "uuid";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
@@ -32,7 +31,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const [showPreview, setShowPreview] = useState(false);
   const [showIframe, setShowIframe] = useState(true);
   const codeRef = useRef(code);
-  const id = useMemo(() => v4(), []);
+  const previewRef = useRef<HTMLDivElement>(null);
   codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
   const executeCodeMutationResult = useMutation({
@@ -96,9 +95,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                       } else {
                         setShowPreview(true);
                         setTimeout(() => {
-                          document
-                            .getElementById(`html-preview-${id}`)
-                            ?.scrollIntoView();
+                          previewRef.current?.scrollIntoView();
                         });
                       }
                     }}
@@ -195,7 +192,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
 
       {showPreview && (
         <>
-          <div className="pt-[20px]" id={`html-preview-${id}`}>
+          <div className="pt-[20px]" ref={previewRef}>
             <div className="flex gap-2">
               <Button
                 onClick={() => {
