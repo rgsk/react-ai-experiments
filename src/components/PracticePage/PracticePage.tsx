@@ -1,11 +1,20 @@
-import SampleWebTranscriptionWithHook from "../Sample/SampleWebTranscriptionWithHook";
+import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
+  const [count, setCount] = useBroadcastChannelState("count", 1);
   return (
     <div>
-      <h1>Practice Page</h1>
-      <SampleWebTranscriptionWithHook />
+      <p>Count: {count}</p>
+      <button
+        onClick={() => {
+          if (count) {
+            setCount(count + 1);
+          }
+        }}
+      >
+        increment
+      </button>
     </div>
   );
 };

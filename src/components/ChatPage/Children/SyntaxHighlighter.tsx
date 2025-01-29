@@ -1,11 +1,13 @@
 import Editor from "@monaco-editor/react";
 import { useMutation } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
+import { v4 } from "uuid";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
+import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { cn } from "~/lib/utils";
@@ -14,7 +16,7 @@ import IFramePreview from "./IFramePreview";
 import SingleGrid from "./SingleGrid";
 interface SyntaxHighlighterProps {
   language: string;
-  code: string;
+  code?: string;
   isCodeOutput: boolean;
   codeProps: any;
   loading: boolean;
@@ -27,13 +29,16 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   loading,
 }) => {
   const [divRef, divBounds] = useMeasure();
-  const [code, setCode] = useState(initialCode);
+  const id = useMemo(() => v4(), []);
+  const [code, setCode] = useBroadcastChannelState(`code-${id}`, initialCode);
+
   const [showPreview, setShowPreview] = useState(false);
   const [showIframe, setShowIframe] = useState(true);
   const codeRef = useRef(code);
   const previewRef = useRef<HTMLDivElement>(null);
   codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
+
   const executeCodeMutationResult = useMutation({
     mutationFn: ({ code, language }: { code: string; language: string }) => {
       return experimentsService.executeCode({
@@ -45,19 +50,22 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const { currentExecuteCodeRef } = useGlobalContext();
 
   const executeCode = () => {
-    executeCodeMutationResult.mutate({
-      code: code,
-      language,
-    });
+    if (code) {
+      executeCodeMutationResult.mutate({
+        code: code,
+        language,
+      });
+    }
   };
   const executeCodeRef = useRef(executeCode);
   executeCodeRef.current = executeCode;
-
-  const countOfLines = code?.split("\n").length;
+  const iframePreviewLink = `/iframe-preview-page?id=${id}`;
+  const countOfLines = code?.split("\n").length ?? 0;
   const monacoFontSize = 14;
   const lineHeight = monacoFontSize * 1.5;
   const paddingTop = 20;
   const paddingBottom = 20;
+
   return (
     <div>
       <div className="rounded-[12px] overflow-hidden">
@@ -77,7 +85,9 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             <button
               className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
               onClick={() => {
-                copy(code);
+                if (code) {
+                  copy(code);
+                }
               }}
             >
               {copied ? "Copied!" : "Copy"}
@@ -87,21 +97,28 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             ) : (
               <>
                 {language === "html" ? (
-                  <button
-                    className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
-                    onClick={() => {
-                      if (showPreview) {
-                        setShowPreview(false);
-                      } else {
-                        setShowPreview(true);
-                        setTimeout(() => {
-                          previewRef.current?.scrollIntoView();
-                        });
-                      }
-                    }}
-                  >
-                    {showPreview ? "Hide" : "Show"} Preview
-                  </button>
+                  <>
+                    <button
+                      className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
+                      onClick={() => {
+                        if (showPreview) {
+                          setShowPreview(false);
+                        } else {
+                          setShowPreview(true);
+                          setTimeout(() => {
+                            previewRef.current?.scrollIntoView();
+                          });
+                        }
+                      }}
+                    >
+                      {showPreview ? "Hide" : "Show"} Inline Preview
+                    </button>
+                    <a href={iframePreviewLink} target="_blank">
+                      <button className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]">
+                        Open Preview in New Tab
+                      </button>
+                    </a>
+                  </>
                 ) : (
                   <button
                     className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
@@ -211,13 +228,16 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               >
                 Close
               </Button>
+              <a href={iframePreviewLink} target="_blank">
+                <Button>Open in New Tab</Button>
+              </a>
             </div>
             <div className="h-[20px]"></div>
             <SingleGrid
               gridWidth={divBounds.width}
               gridHeight={window.innerHeight / 2}
             >
-              {showIframe && <IFramePreview srcDoc={code} />}
+              {showIframe && code && <IFramePreview srcDoc={code} />}
             </SingleGrid>
           </div>
         </>
