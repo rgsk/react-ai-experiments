@@ -7,10 +7,12 @@ import SyntaxHighlighter from "./SyntaxHighlighter";
 
 type MarkdownRendererProps = {
   children: string;
+  loading: boolean;
 };
 
 export function MarkdownRenderer({
   children: markdown,
+  loading,
 }: MarkdownRendererProps) {
   return (
     <Markdown
@@ -37,6 +39,7 @@ export function MarkdownRenderer({
           }
           return (
             <SyntaxHighlighter
+              loading={loading}
               code={children}
               language={language}
               codeProps={props}

@@ -119,18 +119,23 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         handleGenerate({
           messages: messages,
           onComplete: async () => {
-            if (chatRef.current?.title) {
-              return;
-            }
-            const currentMessages = messagesRef.current;
-            if (currentMessages) {
-              // set the title of chat based on current messages
-              const { content: title } = await experimentsService.getCompletion(
-                {
-                  messages: [
-                    {
-                      role: "user",
-                      content: `
+            setMessages(
+              produce((draft) => {
+                if (draft && draft[draft.length - 1].role === "assistant") {
+                  draft[draft.length - 1].status = "completed";
+                }
+              })
+            );
+            if (!chatRef.current?.title) {
+              const currentMessages = messagesRef.current;
+              if (currentMessages) {
+                // set the title of chat based on current messages
+                const { content: title } =
+                  await experimentsService.getCompletion({
+                    messages: [
+                      {
+                        role: "user",
+                        content: `
                       generate a title for this chat
                       based on following conversation
                       only respond with the title
@@ -140,25 +145,25 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                         currentMessages
                       )}</currentMessages>
                       `,
-                    },
-                  ],
-                }
-              );
-              setChat((prev) => {
-                if (prev) {
-                  return {
-                    ...prev,
-                    title,
-                  };
-                }
-                return prev;
-              });
+                      },
+                    ],
+                  });
+                setChat((prev) => {
+                  if (prev) {
+                    return {
+                      ...prev,
+                      title,
+                    };
+                  }
+                  return prev;
+                });
+              }
             }
           },
         });
       }
     }
-  }, [handleGenerate, messages, setChat, voiceModeEnabled]);
+  }, [handleGenerate, messages, setChat, setMessages, voiceModeEnabled]);
   useEffect(() => {
     if (text) {
       setMessages(
@@ -169,7 +174,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 id: v4(),
                 role: "assistant",
                 content: text,
-                status: "completed",
+                status: "in_progress",
               });
             } else {
               draft[draft.length - 1].content = text;
@@ -218,7 +223,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             <div key={message.id}>
               <p>{message.role}: </p>{" "}
               {/* IMPORTANT: using MemoizedMarkdownRenderer is essential here, to prevent rerenders */}
-              <MemoizedMarkdownRenderer>
+              <MemoizedMarkdownRenderer
+                loading={message.status === "in_progress"}
+              >
                 {message.content}
               </MemoizedMarkdownRenderer>
             </div>

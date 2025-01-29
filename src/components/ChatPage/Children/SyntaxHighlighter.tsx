@@ -1,6 +1,8 @@
 import Editor from "@monaco-editor/react";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
+import { Prism } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
@@ -12,12 +14,14 @@ interface SyntaxHighlighterProps {
   code: string;
   isCodeOutput: boolean;
   codeProps: any;
+  loading: boolean;
 }
 const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   language,
   code: initialCode,
   isCodeOutput,
   codeProps,
+  loading,
 }) => {
   const [code, setCode] = useState(initialCode);
   const codeRef = useRef(code);
@@ -42,7 +46,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const executeCodeRef = useRef(executeCode);
   executeCodeRef.current = executeCode;
 
-  const countOfLines = code.split("\n").length;
+  const countOfLines = code?.split("\n").length;
   const lineHeight = 18;
   const paddingTop = 20;
   const paddingBottom = 20;
@@ -70,7 +74,9 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             >
               {copied ? "Copied!" : "Copy"}
             </button>
-            {!isCodeOutput && (
+            {isCodeOutput ? (
+              <></>
+            ) : (
               <>
                 <button
                   className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
@@ -78,50 +84,82 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 >
                   Run Code
                 </button>
+                {code !== initialCode && (
+                  <button
+                    className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
+                    onClick={() => {
+                      setCode(initialCode);
+                    }}
+                  >
+                    Reset Code
+                  </button>
+                )}
               </>
             )}
           </div>
         </div>
 
-        <div
-          onWheelCapture={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          <Editor
-            defaultLanguage={language}
-            defaultValue={code}
-            theme="vs-dark"
-            height={countOfLines * lineHeight + paddingBottom}
-            options={{
-              fontSize: 12,
-              lineHeight: lineHeight,
-              scrollBeyondLastLine: false,
-              lineNumbers: "off",
-              minimap: {
-                enabled: false,
-              },
-              padding: {
-                top: paddingTop,
-              },
-              readOnly: isCodeOutput, // Ensure output is read-only
-            }}
-            onChange={(newValue) => setCode(newValue || "")}
-            onMount={(editor, monaco) => {
-              if (!isCodeOutput) {
-                editor.onDidFocusEditorWidget(() => {
-                  currentExecuteCodeRef.current = executeCodeRef;
-                });
-                editor.addCommand(
-                  monaco.KeyMod.Shift | monaco.KeyCode.Enter,
-                  () => {
-                    currentExecuteCodeRef.current?.current();
+        {loading ? (
+          <>
+            {/* @ts-ignore */}
+            <Prism
+              style={vscDarkPlus}
+              PreTag="div"
+              language={language}
+              {...codeProps}
+              customStyle={{
+                padding: 26,
+                marginTop: 0,
+                marginBottom: 0,
+                paddingTop: paddingTop,
+              }}
+            >
+              {code}
+            </Prism>
+          </>
+        ) : (
+          <>
+            <div
+              onWheelCapture={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Editor
+                defaultLanguage={language}
+                value={code}
+                theme="vs-dark"
+                height={countOfLines * lineHeight + paddingBottom}
+                options={{
+                  fontSize: 12,
+                  lineHeight: lineHeight,
+                  scrollBeyondLastLine: false,
+                  lineNumbers: "off",
+                  minimap: {
+                    enabled: false,
+                  },
+                  padding: {
+                    top: paddingTop,
+                  },
+                  readOnly: isCodeOutput, // Ensure output is read-only
+                }}
+                onChange={(newValue) => setCode(newValue || "")}
+                onMount={(editor, monaco) => {
+                  if (!isCodeOutput) {
+                    editor.onDidFocusEditorWidget(() => {
+                      currentExecuteCodeRef.current = executeCodeRef;
+                    });
+                    editor.addCommand(
+                      monaco.KeyMod.Shift | monaco.KeyCode.Enter,
+                      () => {
+                        currentExecuteCodeRef.current?.current();
+                      }
+                    );
                   }
-                );
-              }
-            }}
-          />
-        </div>
+                }}
+              />
+            </div>
+          </>
+        )}
       </div>
       <div className="mt-[20px]">
         {executeCodeMutationResult.isPending && (
@@ -135,6 +173,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             language={language}
             codeProps={codeProps}
             isCodeOutput={true}
+            loading={loading}
           />
         )}
       </div>
