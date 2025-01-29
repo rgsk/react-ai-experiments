@@ -13,7 +13,7 @@ import experimentsService from "~/services/experimentsService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Button } from "../ui/button";
-import { MarkdownRenderer } from "./Children/MarkdownRenderer";
+import { MemoizedMarkdownRenderer } from "./Children/MarkdownRenderer";
 import MessageInput from "./Children/MessageInput";
 export type HandleSend = ({ text }: { text: string }) => void;
 interface ChatPageProps {}
@@ -217,7 +217,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           {messages.map((message) => (
             <div key={message.id}>
               <p>{message.role}: </p>{" "}
-              <MarkdownRenderer>{message.content}</MarkdownRenderer>
+              {/* IMPORTANT: using MemoizedMarkdownRenderer is essential here, to prevent rerenders */}
+              <MemoizedMarkdownRenderer>
+                {message.content}
+              </MemoizedMarkdownRenderer>
             </div>
           ))}
 

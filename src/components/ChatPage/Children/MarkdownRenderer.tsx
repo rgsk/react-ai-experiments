@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -49,3 +50,6 @@ export function MarkdownRenderer({
     </Markdown>
   );
 }
+
+// IMPORTANT: using MemoizedMarkdownRenderer is essential, to prevent rerenders of code block
+export const MemoizedMarkdownRenderer = memo(MarkdownRenderer);
