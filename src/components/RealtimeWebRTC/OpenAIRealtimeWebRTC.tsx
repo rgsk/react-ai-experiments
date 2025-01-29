@@ -61,23 +61,29 @@ const OpenAIRealtimeWebRTC = ({
       dcRef.current = dc;
       dc.addEventListener("open", () => {
         // console.log("Data channel is open");
-        for (const message of initialMessages) {
-          const responseCreate = {
-            type: "conversation.item.create",
-            previous_item_id: null,
-            item: {
-              type: "message",
-              role: message.role,
-              content: [
-                {
-                  type: message.role === "user" ? "input_text" : "text",
-                  text: message.content,
-                },
-              ],
-            },
-          };
-          dc.send(JSON.stringify(responseCreate));
-        }
+        const responseCreate = {
+          type: "conversation.item.create",
+          previous_item_id: null,
+          item: {
+            type: "message",
+            role: "user",
+            content: [
+              {
+                type: "input_text",
+                text: `
+                    here is the conversation so far,
+                    <conversation>${JSON.stringify(
+                      initialMessages.map((m) => ({
+                        role: m.role,
+                        content: m.content,
+                      }))
+                    )}</conversation>
+                  `,
+              },
+            ],
+          },
+        };
+        dc.send(JSON.stringify(responseCreate));
         onDataChannelOpened();
       });
 
