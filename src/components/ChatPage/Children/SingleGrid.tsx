@@ -19,7 +19,9 @@ const SingleGrid: React.FC<SingleGridProps> = ({ gridWidth, children }) => {
         rowHeight={rowHeight}
         width={gridWidth}
       >
-        <div key="b">{children}</div>
+        <div key="b" className="border border-black rounded-lg overflow-hidden">
+          {children}
+        </div>
       </ReactGridLayout>
     </div>
   );

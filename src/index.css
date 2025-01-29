@@ -140,8 +140,8 @@
 
 .react-resizable-handle {
   cursor: grab;
-  background: darkblue;
+  /* background: darkblue;
   color: white;
   padding: 5px;
-  border-radius: 4px;
+  border-radius: 4px; */
 }
