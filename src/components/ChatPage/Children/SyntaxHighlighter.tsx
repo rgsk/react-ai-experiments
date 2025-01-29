@@ -1,10 +1,12 @@
 import Editor from "@monaco-editor/react";
 import { useMutation } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
+import { v4 } from "uuid";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
+import { Button } from "~/components/ui/button";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { cn } from "~/lib/utils";
@@ -28,7 +30,9 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const [divRef, divBounds] = useMeasure();
   const [code, setCode] = useState(initialCode);
   const [showPreview, setShowPreview] = useState(false);
+  const [showIframe, setShowIframe] = useState(true);
   const codeRef = useRef(code);
+  const id = useMemo(() => v4(), []);
   codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
   const executeCodeMutationResult = useMutation({
@@ -87,7 +91,16 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                   <button
                     className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
                     onClick={() => {
-                      setShowPreview((prev) => !prev);
+                      if (showPreview) {
+                        setShowPreview(false);
+                      } else {
+                        setShowPreview(true);
+                        setTimeout(() => {
+                          document
+                            .getElementById(`html-preview-${id}`)
+                            ?.scrollIntoView();
+                        });
+                      }
                     }}
                   >
                     {showPreview ? "Hide" : "Show"} Preview
@@ -179,12 +192,38 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         )}
       </div>
       <div ref={divRef} className="w-full"></div>
+
       {showPreview && (
-        <div className="mt-[20px]">
-          <SingleGrid gridWidth={divBounds.width}>
-            <IFramePreview srcDoc={code} />
-          </SingleGrid>
-        </div>
+        <>
+          <div className="pt-[20px]" id={`html-preview-${id}`}>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  setShowIframe(false);
+                  setTimeout(() => {
+                    setShowIframe(true);
+                  });
+                }}
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowPreview(false);
+                }}
+              >
+                Close
+              </Button>
+            </div>
+            <div className="h-[20px]"></div>
+            <SingleGrid
+              gridWidth={divBounds.width}
+              gridHeight={window.innerHeight / 2}
+            >
+              {showIframe && <IFramePreview srcDoc={code} />}
+            </SingleGrid>
+          </div>
+        </>
       )}
       <div className="mt-[20px]">
         {executeCodeMutationResult.isPending && (
