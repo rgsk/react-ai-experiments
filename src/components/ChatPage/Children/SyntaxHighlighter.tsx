@@ -3,13 +3,14 @@ import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import useMeasure from "react-use-measure";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
-
 import { cn } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
+import SingleGrid from "./SingleGrid";
 interface SyntaxHighlighterProps {
   language: string;
   code: string;
@@ -24,6 +25,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   codeProps,
   loading,
 }) => {
+  const [divRef, divBounds] = useMeasure();
   const [code, setCode] = useState(initialCode);
   const [showPreview, setShowPreview] = useState(false);
   const codeRef = useRef(code);
@@ -176,11 +178,12 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           </>
         )}
       </div>
+      <div ref={divRef} className="w-full"></div>
       {showPreview && (
         <div className="mt-[20px]">
-          <div className="border border-red-500 h-[50vh]">
+          <SingleGrid gridWidth={divBounds.width}>
             <IFramePreview srcDoc={code} />
-          </div>
+          </SingleGrid>
         </div>
       )}
       <div className="mt-[20px]">

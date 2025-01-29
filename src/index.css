@@ -137,3 +137,11 @@
     background-color: #f1f1f1;
   }
 }
+
+.react-resizable-handle {
+  cursor: grab;
+  background: darkblue;
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+}
