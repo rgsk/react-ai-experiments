@@ -1,9 +1,9 @@
 // Add this to your component or a utility file
 const originalError = console.error;
 console.error = (...args) => {
-  if (/Warning: A component is `contentEditable`/.test(args[0])) {
-    return;
-  }
+  // if (/Warning: A component is `contentEditable`/.test(args[0])) {
+  //   return;
+  // }
   originalError.apply(console, args);
 };
 const originalWarn = console.warn;
