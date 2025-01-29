@@ -83,39 +83,45 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           </div>
         </div>
 
-        <Editor
-          defaultLanguage={language}
-          defaultValue={code}
-          theme="vs-dark"
-          height={countOfLines * lineHeight + paddingBottom}
-          options={{
-            fontSize: 12,
-            lineHeight: lineHeight,
-            scrollBeyondLastLine: false,
-            lineNumbers: "off",
-            minimap: {
-              enabled: false,
-            },
-            padding: {
-              top: paddingTop,
-            },
-            readOnly: isCodeOutput, // Ensure output is read-only
+        <div
+          onWheelCapture={(e) => {
+            e.stopPropagation();
           }}
-          onChange={(newValue) => setCode(newValue || "")}
-          onMount={(editor, monaco) => {
-            if (!isCodeOutput) {
-              editor.onDidFocusEditorWidget(() => {
-                currentExecuteCodeRef.current = executeCodeRef;
-              });
-              editor.addCommand(
-                monaco.KeyMod.Shift | monaco.KeyCode.Enter,
-                () => {
-                  currentExecuteCodeRef.current?.current();
-                }
-              );
-            }
-          }}
-        />
+        >
+          <Editor
+            defaultLanguage={language}
+            defaultValue={code}
+            theme="vs-dark"
+            height={countOfLines * lineHeight + paddingBottom}
+            options={{
+              fontSize: 12,
+              lineHeight: lineHeight,
+              scrollBeyondLastLine: false,
+              lineNumbers: "off",
+              minimap: {
+                enabled: false,
+              },
+              padding: {
+                top: paddingTop,
+              },
+              readOnly: isCodeOutput, // Ensure output is read-only
+            }}
+            onChange={(newValue) => setCode(newValue || "")}
+            onMount={(editor, monaco) => {
+              if (!isCodeOutput) {
+                editor.onDidFocusEditorWidget(() => {
+                  currentExecuteCodeRef.current = executeCodeRef;
+                });
+                editor.addCommand(
+                  monaco.KeyMod.Shift | monaco.KeyCode.Enter,
+                  () => {
+                    currentExecuteCodeRef.current?.current();
+                  }
+                );
+              }
+            }}
+          />
+        </div>
       </div>
       <div className="mt-[20px]">
         {executeCodeMutationResult.isPending && (
