@@ -1,6 +1,7 @@
 import { addSeconds } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useRunOnWindowFocus from "./useRunOnWindowFocus";
+import useWindowMessageAndBroadcastChannelState from "./useWindowMessageAndBroadcastChannelState";
 
 export const localStorageWithExpiry = {
   getItem<T>(key: string, { version }: { version?: string } = {}) {
@@ -62,7 +63,8 @@ const useLocalStorageState = <T>(
 ) => {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState<T>();
+  const [storedValue, setStoredValue] =
+    useWindowMessageAndBroadcastChannelState<T>(key);
 
   const [loading, setLoading] = useState(true);
 
@@ -88,50 +90,28 @@ const useLocalStorageState = <T>(
       setStoredValue(value);
     }
     setLoading(false);
-  }, [enabled, expirationTime, key, version]);
+  }, [enabled, expirationTime, key, setStoredValue, version]);
 
   useEffect(() => {
     populateStateFromLocalStorage();
   }, [populateStateFromLocalStorage]);
 
-  // below takes care of populating the state if user loggedin in another tab and
-  // then when he comes back on this tab
+  // below ensures if we change something in Inspect -> Application
+  // that change is visible
   useRunOnWindowFocus(populateStateFromLocalStorage);
 
-  const storedValueRef = useRef(storedValue);
-  storedValueRef.current = storedValue;
-  // Return a wrapped version of useState's setter function that ...
-  // ... persists the new value to localStorage.
-  const setValue = useCallback(
-    (
-      valueOrFunction:
-        | (T | undefined)
-        | ((prev: T | undefined) => T | undefined)
-    ) => {
-      try {
-        // Allow value to be a function so we have same API as useState
-        const valueToStore =
-          valueOrFunction instanceof Function
-            ? valueOrFunction(storedValueRef.current)
-            : valueOrFunction;
-        // Save state
-        setStoredValue(valueToStore);
-        // Save to local storage
-        localStorageWithExpiry.setItem(key, valueToStore, {
-          expireAt: localStorageWithExpiry.getExpireAt(expirationTime),
-          version,
-        });
-      } catch (error) {
-        // A more advanced implementation would handle the error case
-        console.log(error);
-      }
-    },
-    [expirationTime, key, version]
-  );
+  useEffect(() => {
+    if (!loading) {
+      localStorageWithExpiry.setItem(key, storedValue, {
+        expireAt: localStorageWithExpiry.getExpireAt(expirationTime),
+        version,
+      });
+    }
+  }, [expirationTime, key, loading, storedValue, version]);
 
   return [
     storedValue,
-    setValue,
+    setStoredValue,
     {
       loading,
       refetch: populateStateFromLocalStorage,

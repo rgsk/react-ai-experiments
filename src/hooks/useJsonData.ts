@@ -1,15 +1,7 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { v4 } from "uuid";
+import { useCallback, useEffect, useRef, useState } from "react";
 import jsonDataService from "~/services/jsonDataService";
 import usePrevious from "./usePrevious";
+import useWindowMessageAndBroadcastChannelState from "./useWindowMessageAndBroadcastChannelState";
 
 function useJsonData<T>(
   key: string,
@@ -22,12 +14,13 @@ function useJsonData<T>(
     migration?: (previousValue: any) => T;
   } = {}
 ) {
-  const [localValue, setLocalValue] = useState<T | undefined>();
+  const [localValue, setLocalValue] = useWindowMessageAndBroadcastChannelState<
+    T | undefined
+  >(key);
 
   const localValueRef = useRef(localValue);
   localValueRef.current = localValue;
   const [loading, setLoading] = useState(true);
-  const postMessageId = useMemo(() => v4(), []);
   const keyRef = useRef(key);
   keyRef.current = key;
 
@@ -75,7 +68,7 @@ function useJsonData<T>(
       setLocalValue(finalInitialValue);
     }
     setLoading(false);
-  }, [enabled, key]);
+  }, [enabled, key, setLocalValue]);
 
   useEffect(() => {
     void populateState();
@@ -98,6 +91,7 @@ function useJsonData<T>(
       localValue !== undefined &&
       localValue !== lastFetchedValueRef.current // this check so that we don't keep pushing expirationTime
     ) {
+      setUpdating(true);
       const timer = setTimeout(async () => {
         await jsonDataService.setKey({
           key: keyRef.current,
@@ -109,48 +103,9 @@ function useJsonData<T>(
     }
   }, [localValue]);
 
-  useEffect(() => {
-    const cb = (event: MessageEvent) => {
-      if (event.data.type === "watchedDataSetKey") {
-        const { key, value, id } = event.data.payload;
-        if (keyRef.current === key && id !== postMessageId) {
-          setLocalValue(value);
-        }
-      }
-    };
-    window.addEventListener("message", cb);
-    return () => {
-      window.removeEventListener("message", cb);
-    };
-  }, [postMessageId]);
-
-  const augmentedSetLocalValue: Dispatch<SetStateAction<T | undefined>> =
-    useCallback(
-      (valueOrFunction) => {
-        setUpdating(true);
-        setLocalValue(valueOrFunction);
-        const valueToStore =
-          valueOrFunction instanceof Function
-            ? valueOrFunction(localValueRef.current)
-            : valueOrFunction;
-        window.postMessage(
-          {
-            type: "watchedDataSetKey",
-            payload: {
-              key: keyRef.current,
-              value: valueToStore,
-              id: postMessageId,
-            },
-          },
-          "*"
-        );
-      },
-      [postMessageId]
-    );
-
   return [
     localValue,
-    augmentedSetLocalValue,
+    setLocalValue,
     { loading, refetch: populateState, updating },
   ] as const;
 }

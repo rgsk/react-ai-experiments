@@ -3,15 +3,19 @@ import { Button } from "../ui/button";
 
 interface SampleCounterProps {}
 const SampleCounter: React.FC<SampleCounterProps> = ({}) => {
-  const [count, setCount] = useBroadcastChannelState("count", 1);
+  const [count, setCount] = useBroadcastChannelState("count", {
+    value: 1,
+  });
   return (
     <div>
       <Button
         onClick={() => {
-          setCount((count ?? 0) + 1);
+          setCount((prev) => {
+            return { value: (prev?.value ?? 0) + 1 };
+          });
         }}
       >
-        Count: {count}
+        Count: {count?.value}
       </Button>
     </div>
   );
