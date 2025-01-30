@@ -65,7 +65,8 @@ const useLocalStorageState = <T>(
   // Pass initial state function to useState so logic is only executed once
   const [storedValue, setStoredValue] =
     useWindowMessageAndBroadcastChannelState<T>(key);
-
+  const storedValueRef = useRef(storedValue);
+  storedValueRef.current = storedValue;
   const [loading, setLoading] = useState(true);
 
   const initialValueRef = useRef(initialValue);
@@ -100,18 +101,29 @@ const useLocalStorageState = <T>(
   // that change is visible
   useRunOnWindowFocus(populateStateFromLocalStorage);
 
-  useEffect(() => {
-    if (!loading) {
-      localStorageWithExpiry.setItem(key, storedValue, {
+  const setSharedState = useCallback(
+    (
+      valueOrFunction:
+        | (T | undefined)
+        | ((prev: T | undefined) => T | undefined)
+    ) => {
+      // Allow value to be a function so we have same API as useState
+      const newState =
+        valueOrFunction instanceof Function
+          ? valueOrFunction(storedValueRef.current)
+          : valueOrFunction;
+      setStoredValue(newState);
+      localStorageWithExpiry.setItem(key, newState, {
         expireAt: localStorageWithExpiry.getExpireAt(expirationTime),
         version,
       });
-    }
-  }, [expirationTime, key, loading, storedValue, version]);
+    },
+    [expirationTime, key, setStoredValue, version]
+  );
 
   return [
     storedValue,
-    setStoredValue,
+    setSharedState,
     {
       loading,
       refetch: populateStateFromLocalStorage,

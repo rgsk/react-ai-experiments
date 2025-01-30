@@ -86,26 +86,38 @@ function useJsonData<T>(
     };
   }, []);
   const [updating, setUpdating] = useState(false);
-  useEffect(() => {
-    if (
-      localValue !== undefined &&
-      localValue !== lastFetchedValueRef.current // this check so that we don't keep pushing expirationTime
-    ) {
+  const timerRef = useRef<NodeJS.Timeout>();
+
+  const setSharedState = useCallback(
+    (
+      valueOrFunction:
+        | (T | undefined)
+        | ((prev: T | undefined) => T | undefined)
+    ) => {
+      // Allow value to be a function so we have same API as useState
+      const newState =
+        valueOrFunction instanceof Function
+          ? valueOrFunction(localValueRef.current)
+          : valueOrFunction;
+      setLocalValue(newState);
       setUpdating(true);
-      const timer = setTimeout(async () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      timerRef.current = setTimeout(async () => {
         await jsonDataService.setKey({
           key: keyRef.current,
-          value: localValue,
+          value: newState,
         });
         setUpdating(false);
       }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [localValue]);
+    },
+    [setLocalValue]
+  );
 
   return [
     localValue,
-    setLocalValue,
+    setSharedState,
     { loading, refetch: populateState, updating },
   ] as const;
 }

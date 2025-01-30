@@ -1,9 +1,9 @@
-import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
+import useLocalStorageState from "~/hooks/useLocalStorageState";
 import { Button } from "../ui/button";
 
 interface SampleCounterProps {}
 const SampleCounter: React.FC<SampleCounterProps> = ({}) => {
-  const [count, setCount] = useBroadcastChannelState("count", {
+  const [count, setCount] = useLocalStorageState("count", {
     value: 1,
   });
   return (
