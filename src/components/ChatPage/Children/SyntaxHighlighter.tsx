@@ -10,6 +10,7 @@ import { Button } from "~/components/ui/button";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
+import { useWindowSize } from "~/hooks/useWindowSize";
 import { cn } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
@@ -28,6 +29,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   codeProps,
   loading,
 }) => {
+  const windowSize = useWindowSize();
   const [divRef, divBounds] = useMeasure();
   const id = useMemo(() => v4(), []);
   const [code, setCode] = useBroadcastChannelState(`code-${id}`, initialCode);
@@ -206,7 +208,17 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         )}
       </div>
       <div ref={divRef} className="w-full"></div>
-
+      {language === "html" && !showPreview ? (
+        <div className="pt-[20px]">
+          <Button
+            onClick={() => {
+              setShowPreview(true);
+            }}
+          >
+            Show Preview
+          </Button>
+        </div>
+      ) : null}
       {showPreview && (
         <>
           <div className="pt-[20px]" ref={previewRef}>
@@ -226,7 +238,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                   setShowPreview(false);
                 }}
               >
-                Close
+                Close Preview
               </Button>
               <a href={iframePreviewLink} target="_blank">
                 <Button>Open in New Tab</Button>
@@ -235,7 +247,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             <div className="h-[20px]"></div>
             <SingleGrid
               gridWidth={divBounds.width}
-              gridHeight={window.innerHeight / 2}
+              gridHeight={windowSize.height / 2}
             >
               {showIframe && code && <IFramePreview srcDoc={code} />}
             </SingleGrid>
