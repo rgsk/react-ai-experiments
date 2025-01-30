@@ -20,6 +20,7 @@ const SingleGrid: React.FC<SingleGridProps> = ({
       <ReactGridLayout
         className="layout"
         layout={layout}
+        isDraggable={false}
         cols={cols}
         rowHeight={rowHeight}
         width={gridWidth}

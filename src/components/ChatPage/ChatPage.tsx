@@ -119,13 +119,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         handleGenerate({
           messages: messages,
           onComplete: async () => {
-            setMessages(
-              produce((draft) => {
-                if (draft && draft[draft.length - 1].role === "assistant") {
-                  draft[draft.length - 1].status = "completed";
-                }
-              })
-            );
+            setTimeout(() => {
+              setMessages(
+                produce((draft) => {
+                  if (draft && draft[draft.length - 1].role === "assistant") {
+                    draft[draft.length - 1].status = "completed";
+                  }
+                })
+              );
+            }, 100);
             if (!chatRef.current?.title) {
               const currentMessages = messagesRef.current;
               if (currentMessages) {

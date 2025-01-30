@@ -14,6 +14,7 @@ import { useWindowSize } from "~/hooks/useWindowSize";
 import { cn } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
+import JsxPreview from "./JsxPreview";
 import SingleGrid from "./SingleGrid";
 interface SyntaxHighlighterProps {
   language: string;
@@ -33,6 +34,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const [divRef, divBounds] = useMeasure();
   const id = useMemo(() => v4(), []);
   const [code, setCode] = useBroadcastChannelState(`code-${id}`, initialCode);
+  useBroadcastChannelState(`language-${id}`, language);
 
   const [showPreview, setShowPreview] = useState(false);
   const [showIframe, setShowIframe] = useState(true);
@@ -61,13 +63,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   };
   const executeCodeRef = useRef(executeCode);
   executeCodeRef.current = executeCode;
-  const iframePreviewLink = `/iframe-preview-page?id=${id}`;
+  const iframePreviewLink = `/preview-page?id=${id}`;
   const countOfLines = code?.split("\n").length ?? 0;
   const monacoFontSize = 14;
   const lineHeight = monacoFontSize * 1.5;
   const paddingTop = 20;
   const paddingBottom = 20;
-
+  const previewLanguages = ["html", "jsx"];
   return (
     <div>
       <div className="rounded-[12px] overflow-hidden">
@@ -98,7 +100,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               <></>
             ) : (
               <>
-                {language === "html" ? (
+                {previewLanguages.includes(language) ? (
                   <>
                     <button
                       className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
@@ -171,7 +173,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               }}
             >
               <Editor
-                defaultLanguage={language}
+                defaultLanguage={language === "jsx" ? "javascript" : language}
                 value={code}
                 theme="vs-dark"
                 height={countOfLines * lineHeight + paddingBottom}
@@ -208,7 +210,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         )}
       </div>
       <div ref={divRef} className="w-full"></div>
-      {language === "html" && !showPreview ? (
+      {previewLanguages.includes(language) && !showPreview ? (
         <div className="pt-[20px]">
           <Button
             onClick={() => {
@@ -249,7 +251,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               gridWidth={divBounds.width}
               gridHeight={windowSize.height / 2}
             >
-              {showIframe && code && <IFramePreview srcDoc={code} />}
+              {showIframe &&
+                code &&
+                (language === "html" ? (
+                  <IFramePreview srcDoc={code} />
+                ) : (
+                  <JsxPreview code={code} />
+                ))}
             </SingleGrid>
           </div>
         </>

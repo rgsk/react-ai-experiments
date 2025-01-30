@@ -1,11 +1,10 @@
-import SampleCounter from "../Sample/SampleCounter";
+import SampleReactLive from "../Sample/SampleReactLive";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleCounter />
-      <SampleCounter />
+      <SampleReactLive />
     </div>
   );
 };
