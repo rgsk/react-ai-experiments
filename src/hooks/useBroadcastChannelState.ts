@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { v4 } from "uuid";
 
 const channels: Record<string, BroadcastChannel> = {};
 
@@ -9,21 +10,28 @@ const useBroadcastChannelState = <T>(channelName: string, initialValue?: T) => {
   const channel = channels[channelName];
 
   const [state, setState] = useState<T | undefined>(initialValue);
-  const isLocalUpdate = useRef(false); // ✅ Prevent recursive updates
-
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const id = useMemo(() => v4(), []);
   useEffect(() => {
     // Request latest state from other tabs
-    channel.postMessage({ type: "REQUEST_STATE", payload: null });
+    channel.postMessage({ type: "REQUEST_STATE", payload: null, postId: id });
 
     const handleMessage = (event: MessageEvent) => {
-      const { type, payload } = event.data;
-
-      if (type === "REQUEST_STATE" && state !== undefined) {
-        channel.postMessage({ type: "SYNC_STATE", payload: state });
-      } else if (type === "SYNC_STATE" || type === "UPDATE_STATE") {
-        if (!isLocalUpdate.current) {
-          setState(payload as T);
+      const { type, payload, postId } = event.data;
+      if (id === postId) {
+        return;
+      }
+      if (type === "REQUEST_STATE") {
+        if (stateRef.current !== undefined) {
+          channel.postMessage({
+            type: "UPDATE_STATE",
+            payload: stateRef.current,
+            postId: id,
+          });
         }
+      } else if (type === "UPDATE_STATE") {
+        setState(payload as T);
       }
     };
 
@@ -32,20 +40,18 @@ const useBroadcastChannelState = <T>(channelName: string, initialValue?: T) => {
     return () => {
       channel.removeEventListener("message", handleMessage);
     };
-  }, [channel, state]);
+  }, [channel, id]);
 
   const setSharedState = useCallback(
     (newState: T | undefined) => {
-      isLocalUpdate.current = true; // ✅ Mark as local update
       setState(newState);
-      channel.postMessage({ type: "UPDATE_STATE", payload: newState });
-
-      // ✅ Reset flag after short delay to allow external updates later
-      setTimeout(() => {
-        isLocalUpdate.current = false;
-      }, 100);
+      channel.postMessage({
+        type: "UPDATE_STATE",
+        payload: newState,
+        postId: id,
+      });
     },
-    [channel]
+    [channel, id]
   );
 
   return [state, setSharedState] as const;
