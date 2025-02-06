@@ -72,14 +72,14 @@ const SampleRealtimeWebRTC = ({
         // console.log("Realtime event : ", e.data);
         const realtimeEvent = JSON.parse(e.data);
         if (realtimeEvent.type === sampleAudioTranscriptDoneEvent.type) {
-          const event = realtimeEvent as typeof sampleAudioTranscriptDoneEvent;
+          // const event = realtimeEvent as typeof sampleAudioTranscriptDoneEvent;
           // console.log("Transcript received: ", event.transcript);
         } else if (
           realtimeEvent.type ===
           sampleInputAudioTranscriptionCompletedEvent.type
         ) {
-          const event =
-            realtimeEvent as typeof sampleInputAudioTranscriptionCompletedEvent;
+          // const event =
+          //   realtimeEvent as typeof sampleInputAudioTranscriptionCompletedEvent;
           // console.log("Transcript sent: ", event.transcript);
         } else if (
           realtimeEvent.type === sampleAudioTranscriptDeltaEvent.type
