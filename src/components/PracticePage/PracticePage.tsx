@@ -1,10 +1,11 @@
-import SampleReactLive from "../Sample/SampleReactLive";
+import SampleJsonData from "../Sample/SampleJsonData";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleReactLive />
+      <SampleJsonData />
+      <SampleJsonData />
     </div>
   );
 };

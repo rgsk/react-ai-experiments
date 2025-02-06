@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "~/hooks/auth/useToken";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
-const baseUrl = "http://localhost:4004";
+const baseUrl = "http://localhost:4001";
 export const axiosExperimentsInstance = axios.create({
   baseURL: baseUrl,
 });
