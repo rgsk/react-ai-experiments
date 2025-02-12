@@ -1,8 +1,9 @@
 import axios from "axios";
+import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/auth/useToken";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
-const baseUrl = "http://localhost:4001";
+const baseUrl = "http://localhost:4004";
 export const axiosExperimentsInstance = axios.create({
   baseURL: baseUrl,
 });
@@ -111,6 +112,18 @@ const experimentsService = {
       }
     );
     return result.data;
+  },
+  getYoutubeVideoTranscripts: ({ videoUrlOrId }: { videoUrlOrId: string }) => {
+    const query = encodeQueryParams({ s: videoUrlOrId });
+    return {
+      key: ["youtube-transcript", query],
+      fn: async () => {
+        const response = await axiosExperimentsInstance.get<
+          TranscriptResponse[]
+        >(`/youtube-transcript?${query}`);
+        return response.data;
+      },
+    };
   },
 };
 export default experimentsService;

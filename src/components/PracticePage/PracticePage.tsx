@@ -1,8 +1,10 @@
+import YoutubeTranscriptPage from "../YoutubeTranscriptPage/YoutubeTranscriptPage";
+
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <p>practice page</p>
+      <YoutubeTranscriptPage />
     </div>
   );
 };
