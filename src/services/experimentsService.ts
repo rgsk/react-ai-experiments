@@ -120,7 +120,7 @@ const experimentsService = {
       fn: async () => {
         const response = await axiosExperimentsInstance.get<
           TranscriptResponse[]
-        >(`/youtube-transcript?${query}`);
+        >(`/youtube/transcript?${query}`);
         return response.data;
       },
     };

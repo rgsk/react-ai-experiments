@@ -10,6 +10,7 @@ import HomePage from "./components/HomePage/HomePage";
 import LoginPage from "./components/LoginPage/LoginPage";
 import PracticePage from "./components/PracticePage/PracticePage";
 import PreviewPage from "./components/PreviewPage/PreviewPage";
+import YoutubeTranscriptPage from "./components/YoutubeTranscriptPage/YoutubeTranscriptPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,6 +28,9 @@ const router = createBrowserRouter(
       <Route path="preview-page" element={<PreviewPage />} />
       <Route path="chat">
         <Route path=":id" element={<ChatPage />} />
+      </Route>
+      <Route path="youtube">
+        <Route path="transcript" element={<YoutubeTranscriptPage />} />
       </Route>
     </Route>
   )
