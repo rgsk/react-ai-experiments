@@ -1,11 +1,11 @@
 import axios from "axios";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/auth/useToken";
+import environmentVars from "~/lib/environmentVars";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
-const baseUrl = "http://localhost:4004";
 export const axiosExperimentsInstance = axios.create({
-  baseURL: baseUrl,
+  baseURL: environmentVars.EXPERIMENTS_SERVER_URL,
 });
 axiosExperimentsInstance.interceptors.request.use((config) => {
   const token = getToken();
@@ -61,7 +61,7 @@ const experimentsService = {
       content: string;
     }[];
   }) => {
-    const url = `${baseUrl}/text`;
+    const url = `${environmentVars.EXPERIMENTS_SERVER_URL}/text`;
     const payload = {
       messages: messages,
     };
@@ -160,4 +160,5 @@ const experimentsService = {
     };
   },
 };
+
 export default experimentsService;

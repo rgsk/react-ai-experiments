@@ -24,5 +24,3 @@ export function html(strings: any, ...values: any) {
   }
   return result;
 }
-
-export const uuidPlaceholder = "________-____-____-____-____________";
