@@ -294,12 +294,6 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   };
 
   return (
-    <div>
-      <p>practice</p>
-    </div>
-  );
-
-  return (
     <div className="flex h-full">
       <div
         className="flex-1 h-full flex flex-col relative"

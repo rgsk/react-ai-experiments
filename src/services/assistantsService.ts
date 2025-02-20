@@ -29,7 +29,7 @@ const getMimeTypeFromFilename = (filename?: string) => {
 const assistantsService = {
   getMessages: async ({ threadId }: { threadId: string }) => {
     const result = await axiosExperimentsInstance.get<Message[]>(
-      `/threads/${threadId}/messages`
+      `/assistants/threads/${threadId}/messages`
     );
     return result.data;
   },
@@ -54,7 +54,7 @@ const assistantsService = {
 
   createThread: async () => {
     const result = await axiosExperimentsInstance.post<{ threadId: string }>(
-      `/threads`
+      `/assistants/threads`
     );
     return result.data;
   },
@@ -68,14 +68,14 @@ const assistantsService = {
   }) => {
     const result =
       await axiosExperimentsInstance.post<OpenAI.Beta.Threads.Runs.Run>(
-        `/threads/${threadId}/runs/${runId}/cancel`
+        `/assistants/threads/${threadId}/runs/${runId}/cancel`
       );
     return result.data;
   },
   retrieveFileContent: async (fileId: string, fileObject?: FileObject) => {
     // Make a GET request using Axios to fetch the file content as a blob
     const response = await axiosExperimentsInstance.get(
-      `/files/${fileId}/content`,
+      `/assistants/files/${fileId}/content`,
       {
         responseType: "blob", // Specify the response type as 'blob'
       }
@@ -90,7 +90,7 @@ const assistantsService = {
   },
   retrieveFile: async (fileId: string) => {
     const result = await axiosExperimentsInstance.get<FileObject>(
-      `/files/${fileId}`
+      `/assistants/files/${fileId}`
     );
     return result.data;
   },
@@ -101,7 +101,7 @@ const assistantsService = {
     const formData = new FormData();
     formData.append("file", file);
     const result = await axiosExperimentsInstance.post<FileObject>(
-      "/files",
+      "/assistants/files",
       formData,
       {
         onUploadProgress: (progressEvent) => {
@@ -117,7 +117,7 @@ const assistantsService = {
   },
   deleteFile: async (fileId: string) => {
     const result = await axiosExperimentsInstance.delete<FileDeleted>(
-      `/files/${fileId}`
+      `/assistants/files/${fileId}`
     );
     return result.data;
   },

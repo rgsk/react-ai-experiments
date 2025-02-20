@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import App from "~/App";
 import Providers from "~/Providers";
+import AssistantsChatPage from "./components/AssistantsChatPage/AssistantsChatPage";
 import ChatPage from "./components/ChatPage/ChatPage";
 import HomePage from "./components/HomePage/HomePage";
 import LoginPage from "./components/LoginPage/LoginPage";
@@ -35,6 +36,9 @@ const router = createBrowserRouter(
       </Route>
       <Route path="ocr">
         <Route index element={<OcrPage />} />
+      </Route>
+      <Route path="assistants">
+        <Route path="chat" element={<AssistantsChatPage />} />
       </Route>
     </Route>
   )
