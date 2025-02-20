@@ -19,6 +19,40 @@ export type CompletionMessage = {
   content: string;
 };
 const experimentsService = {
+  ocrFile: async (
+    file: File,
+    onUploadProgress?: (progress: number) => void
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await axiosExperimentsInstance.post<{ text: string }>(
+      "/experiments/ocr/file",
+      formData,
+      {
+        onUploadProgress: (progressEvent) => {
+          if (onUploadProgress) {
+            if (progressEvent.progress) {
+              onUploadProgress(progressEvent.progress);
+            }
+          }
+        },
+      }
+    );
+    return result.data;
+  },
+  ocrImage: ({ imageUrl }: { imageUrl: string }) => {
+    const query = encodeQueryParams({ imageUrl });
+    return {
+      key: ["experiments", "ocr", query],
+      fn: async () => {
+        const response = await axiosExperimentsInstance.get<{ text: string }>(
+          `/experiments/ocr?${query}`
+        );
+        return response.data;
+      },
+    };
+  },
+
   getTextStreamReader: async ({
     messages,
   }: {

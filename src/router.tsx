@@ -8,6 +8,7 @@ import Providers from "~/Providers";
 import ChatPage from "./components/ChatPage/ChatPage";
 import HomePage from "./components/HomePage/HomePage";
 import LoginPage from "./components/LoginPage/LoginPage";
+import OcrPage from "./components/OcrPage/OcrPage";
 import PracticePage from "./components/PracticePage/PracticePage";
 import PreviewPage from "./components/PreviewPage/PreviewPage";
 import YoutubeTranscriptPage from "./components/YoutubeTranscriptPage/YoutubeTranscriptPage";
@@ -31,6 +32,9 @@ const router = createBrowserRouter(
       </Route>
       <Route path="youtube">
         <Route path="transcript" element={<YoutubeTranscriptPage />} />
+      </Route>
+      <Route path="ocr">
+        <Route index element={<OcrPage />} />
       </Route>
     </Route>
   )
