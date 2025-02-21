@@ -2,7 +2,6 @@ import { ArrowUp, Paperclip2 } from "iconsax-react";
 import { FileObject } from "openai/resources/files";
 import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
-import useBreakpoints from "~/hooks/useBreakpoints";
 import { cn } from "~/lib/utils";
 import assistantsService, {
   supportedExtensions,
@@ -41,14 +40,13 @@ const MessageInput: React.FC<MessageInputProps> = ({
   showFilesUploadedPreview,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [inputFocused, setInputFocused] = useState(false);
   const handleFileInputClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click(); // Trigger the file input click
     }
   };
   const [text, setText] = useState("");
-  const { md } = useBreakpoints();
   const canSend = useMemo(() => {
     return (
       !loading &&
@@ -66,7 +64,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <div
       className={cn(
-        "border border-input focus-within:ring-1 focus-within:ring-ring",
+        "border border-input",
+        inputFocused && "ring-1 ring-ring",
         "bg-transparent rounded-lg py-[16px] px-[16px]",
         disabled &&
           "border-gslearnlightmodeGrey1 bg-gslearnlightmodeGrey6 cursor-not-allowed"
@@ -139,6 +138,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
               e.preventDefault();
               handleSubmit();
             }
+          }}
+          onFocus={() => {
+            setInputFocused(true);
+          }}
+          onBlur={() => {
+            setInputFocused(false);
           }}
           onPaste={(event) => {
             const items = event.clipboardData.items;
