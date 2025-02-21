@@ -23,9 +23,9 @@ import {
 import { MarkdownRenderer } from "~/components/ChatPage/Children/MarkdownRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Skeleton } from "~/components/ui/skeleton";
-import { fileIcons } from "~/lib/constants";
 import { questionsCode } from "~/lib/prompts";
 import assistantsService from "~/services/assistantsService";
+import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import MessageActions, {
   ActionButton,
 } from "./Children/MessageActions/MessageActions";
@@ -333,27 +333,13 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
     );
   }
   return (
-    <div className="bg-[#F7F7F8] w-[295px] px-[12px] border border-[#030A2133] py-[16px] rounded-[8px] relative">
-      <div className="flex gap-[8px] items-center">
-        <div className="rounded-[8px] relative w-[30px] h-[30px] flex justify-center items-center border border-foreground bg-white">
-          {role === "assistant" && !fileUrl ? (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-75">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            fileIcons.document
-          )}
-        </div>
-        <p className="text-[14px] font-medium text-ellipsis overflow-hidden whitespace-nowrap flex-1">
-          {filename}
-        </p>
-        {role === "assistant" && fileUrl && (
-          <a href={fileUrl} download={filename}>
-            <ArrowCircleDown2 size={20} className="stroke-foreground" />
-          </a>
-        )}
-      </div>
-    </div>
+    <FilePreview fileName={filename} loading={role === "assistant" && !fileUrl}>
+      {role === "assistant" && fileUrl && (
+        <a href={fileUrl} download={filename}>
+          <ArrowCircleDown2 size={20} className="stroke-foreground" />
+        </a>
+      )}
+    </FilePreview>
   );
 };
 
