@@ -15,7 +15,7 @@ const Container: React.FC<ContainerProps> = ({
     <div
       ref={divRef}
       className={cn(
-        "w-full max-w-[1264px] m-auto flex-1 overflow-auto",
+        "w-full max-w-[800px] m-auto flex-1 overflow-auto",
         centerContent ? "py-[32px]" : "py-[32px] px-[32px]"
       )}
     >

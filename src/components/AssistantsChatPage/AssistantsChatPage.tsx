@@ -391,7 +391,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
           <>
             {messages.length === 0 ? (
               <>
-                <div className="w-full h-full flex justify-center items-center">
+                <Container centerContent={true}>
                   <div className="w-full">
                     <h1 className="text-center text-4xl mb-[50px]">
                       What can I help with?
@@ -400,7 +400,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
                       {renderMessageInput({ showFilesUploadedPreview: true })}
                     </MessageInputContainer>
                   </div>
-                </div>
+                </Container>
               </>
             ) : (
               <>
@@ -432,7 +432,7 @@ const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
   children,
 }) => {
   return (
-    <div className="m-auto max-w-[1264px] pb-[28px] md:pb-[36px] px-[32px] w-full">
+    <div className="m-auto max-w-[800px] pb-[28px] md:pb-[36px] px-[32px] w-full">
       {children}
     </div>
   );

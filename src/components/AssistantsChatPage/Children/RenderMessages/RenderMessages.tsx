@@ -310,7 +310,12 @@ const RenderAttachment: React.FC<RenderAttachmentProps> = ({
   );
   if (isImage) {
     return (
-      <div className="relative w-full md:w-[50%] min-h-[100px] min-w-[100px]">
+      <div
+        className={cn(
+          "relative w-full md:w-[50%] min-h-[100px] min-w-[100px]",
+          role === "user" && "ml-auto"
+        )}
+      >
         {!fileUrl ? (
           <div className="absolute top-0 left-0 w-full h-full rounded-[8px] bg-black bg-opacity-5 flex justify-center items-center">
             <div>
