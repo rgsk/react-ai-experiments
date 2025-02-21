@@ -29,6 +29,7 @@ import assistantsService, {
 import experimentsService from "~/services/experimentsService";
 import jsonDataService from "~/services/jsonDataService";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
+import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
@@ -298,6 +299,8 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
       `assistants/${assistantId}/conversations/${uuidPlaceholder}`
     );
 
+  const conversation = conversations?.find((c) => c.threadId === threadId);
+
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(conversations || []);
   }, [conversations]);
@@ -380,12 +383,16 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
             </div>
           </div>
         )}
-
+        <div className="border-b border-b-input p-4 flex justify-between items-center">
+          <span></span>
+          <span>{conversation?.title ?? "New Chat"}</span>
+          <ModeToggle />
+        </div>
         {messagesLoading ? (
           <>
-            <div className="w-full h-full flex justify-center items-center">
+            <Container centerContent={true}>
               <LoadingSpinner />
-            </div>
+            </Container>
           </>
         ) : (
           <>
