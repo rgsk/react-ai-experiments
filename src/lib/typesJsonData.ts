@@ -16,3 +16,14 @@ export type UserData = {
   email: string;
   createdAt: ISODateString;
 };
+export type Memory = {
+  id: string;
+  statement: string;
+  createdAt: ISODateString;
+};
+export type Conversation = {
+  id: string | undefined;
+  threadId: string;
+  title: string;
+  createdAt: ISODateString;
+};

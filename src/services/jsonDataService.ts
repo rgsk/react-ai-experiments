@@ -57,7 +57,7 @@ const jsonDataService = {
       key: addPrefixToKey(key),
       value,
     });
-    return result.data;
+    return result.data as (Omit<JsonData, "value"> & { value: T }) | null;
   },
   createMany: async <T>(data: { key: string; value?: T }[]) => {
     const result = await axiosExperimentsInstance.post(`/json-data/bulk`, {

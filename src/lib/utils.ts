@@ -24,3 +24,11 @@ export function html(strings: any, ...values: any) {
   }
   return result;
 }
+export function extractTagContent(inputString: string, tagName: string) {
+  const regex = new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`);
+  const match = inputString.match(regex);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+}

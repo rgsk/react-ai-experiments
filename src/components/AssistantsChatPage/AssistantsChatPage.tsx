@@ -5,29 +5,37 @@ import {
   Message,
   MessageCreateParams,
 } from "openai/resources/beta/threads/messages";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 } from "uuid";
 import useDropArea from "~/hooks/useDropArea";
 
-import { encodeQueryParams } from "~/lib/utils";
+import { encodeQueryParams, extractTagContent } from "~/lib/utils";
 
+import { PlusCircle } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Container from "~/components/Shared/Container";
 import useUserData from "~/hooks/auth/useUserData";
 import { useAssistantsChatSocketListeners } from "~/hooks/useAssistantsChatSocketListeners";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
+import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
+import { uuidPlaceholder } from "~/lib/constants";
 import environmentVars from "~/lib/environmentVars";
 import { generateQuestionPrompt } from "~/lib/prompts";
+import { Conversation } from "~/lib/typesJsonData";
 import assistantsService, {
   getToolForFile,
   supportedExtensions,
 } from "~/services/assistantsService";
+import experimentsService from "~/services/experimentsService";
+import jsonDataService from "~/services/jsonDataService";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
+import { Button } from "../ui/button";
+import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
+import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput, { FileEntry } from "./Children/MessageInput/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 
 export const TemporaryUserMessageId = "temp-id";
-
 export const observeImageResizeClassname = "observe-img-resize";
 const specialBehaviours = {
   generateQuestions: generateQuestionPrompt,
@@ -103,8 +111,40 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
 
   const handleSendBodyRef = useRef<HandleSendBody>(undefined);
 
-  const createConversationForUser = (firstUserMessage: string) => {
-    console.log({ firstUserMessage });
+  const updateConversationTitle = async (firstUserMessage: string) => {
+    if (!threadId) return;
+    let title = extractTagContent(firstUserMessage, "title");
+    if (!title) {
+      const result = await experimentsService.getCompletion({
+        messages: [
+          {
+            role: "user",
+            content: `
+              generate a title for this chat
+              based on following conversation
+              only respond with the title
+              the title should max 50 characters
+              don't add double quotes at start and end
+              <firstUserMessage>${JSON.stringify(
+                firstUserMessage
+              )}</firstUserMessage>
+              `,
+          },
+        ],
+      });
+      title = result.content;
+    }
+
+    await jsonDataService.setKey<Conversation>({
+      key: `assistants/${assistantId}/conversations/${v4()}`,
+      value: {
+        id: v4(),
+        threadId: threadId,
+        createdAt: new Date().toISOString(),
+        title: title,
+      },
+    });
+    refetchConversations();
   };
 
   const handleSend: HandleSend = async ({
@@ -149,7 +189,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
         : "";
 
       if (messages.length === 0) {
-        createConversationForUser(text);
+        updateConversationTitle(text);
       }
 
       setMessages((prev) => [
@@ -253,7 +293,14 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   const { dropAreaProps, isDragging } = useDropArea({
     onFilesChange: handleFilesChange,
   });
+  const { data: conversations, refetch: refetchConversations } =
+    useJsonDataKeysLike<Conversation>(
+      `assistants/${assistantId}/conversations/${uuidPlaceholder}`
+    );
 
+  const historyBlocks = useMemo(() => {
+    return getHistoryBlocks(conversations || []);
+  }, [conversations]);
   const assistantMessageInProgress =
     messages[messages.length - 1]?.role === "assistant" &&
     messages[messages.length - 1]?.status === "in_progress";
@@ -294,7 +341,26 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   };
 
   return (
-    <div className="h-screen">
+    <div className="h-screen flex">
+      <div className="w-[260px] p-[16px] border-r border-r-input">
+        <div>
+          <Button
+            onClick={() => {
+              openNewChat();
+            }}
+          >
+            <PlusCircle />
+            <span>New Chat</span>
+          </Button>
+        </div>
+        <div>
+          <div className="space-y-[20px]">
+            {historyBlocks.map(([date, items], i) => (
+              <HistoryBlock key={i} date={date} conversations={items} />
+            ))}
+          </div>
+        </div>
+      </div>
       <div
         className="flex-1 h-full flex flex-col relative"
         style={{
@@ -325,10 +391,16 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
           <>
             {messages.length === 0 ? (
               <>
-                <p>no messages yet</p>
-                <MessageInputContainer>
-                  {renderMessageInput({ showFilesUploadedPreview: true })}
-                </MessageInputContainer>
+                <div className="w-full h-full flex justify-center items-center">
+                  <div className="w-full">
+                    <h1 className="text-center text-4xl mb-[50px]">
+                      What can I help with?
+                    </h1>
+                    <MessageInputContainer>
+                      {renderMessageInput({ showFilesUploadedPreview: true })}
+                    </MessageInputContainer>
+                  </div>
+                </div>
               </>
             ) : (
               <>
