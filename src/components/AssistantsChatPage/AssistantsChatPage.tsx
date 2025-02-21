@@ -59,8 +59,8 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   const pathname = location.pathname;
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [searchParams] = useSearchParams();
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const threadId = searchParams?.get("threadId");
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
   const { userData } = useUserData();
@@ -353,7 +353,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
             <span>New Chat</span>
           </Button>
         </div>
-        <div>
+        <div className="mt-[30px]">
           <div className="space-y-[20px]">
             {historyBlocks.map(([date, items], i) => (
               <HistoryBlock key={i} date={date} conversations={items} />

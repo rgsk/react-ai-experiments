@@ -3,8 +3,8 @@ interface HistoryDateProps {
 }
 const HistoryDate: React.FC<HistoryDateProps> = ({ children }) => {
   return (
-    <div>
-      <span className="text-[14px] text-gslearnlightmodeGrey1">{children}</span>
+    <div className="px-[8px]">
+      <span className="text-[14px] font-medium">{children}</span>
     </div>
   );
 };
