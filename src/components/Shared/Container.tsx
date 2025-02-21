@@ -15,16 +15,16 @@ const Container: React.FC<ContainerProps> = ({
     <div
       ref={divRef}
       className={cn(
-        "w-full max-w-[800px] m-auto flex-1 overflow-auto",
+        "w-full m-auto flex-1 overflow-auto",
         centerContent ? "py-[32px]" : "py-[32px] px-[32px]"
       )}
     >
       {centerContent ? (
         <div className="h-full overflow-auto px-[32px] grid place-items-center">
-          {children}
+          <div className="max-w-[800px] mx-auto">{children}</div>
         </div>
       ) : (
-        children
+        <div className="max-w-[800px] mx-auto">{children}</div>
       )}
     </div>
   );

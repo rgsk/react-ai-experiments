@@ -180,7 +180,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         <div className="absolute bottom-1/2 translate-y-1/2 right-0">
           {loading && interruptEnabled ? (
             <ActionButton onClick={interrupt}>
-              <div className="h-[8px] w-[8px] md:h-[12px] md:w-[12px] rounded-[1px] md:rounded-[2px] bg-white"></div>
+              <div className="h-[8px] w-[8px] md:h-[12px] md:w-[12px] rounded-[1px] md:rounded-[2px] bg-background"></div>
             </ActionButton>
           ) : (
             <ActionButton onClick={handleSubmit} disabled={!canSend}>
@@ -209,8 +209,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     <button
       className={cn(
         "rounded-full w-[24px] h-[24px] md:w-[36px] md:h-[36px] flex justify-center items-center",
-        "bg-foreground disabled:bg-gslearnlightmodeGrey1",
-        disabled && "cursor-not-allowed"
+        "bg-foreground",
+        "disabled:opacity-50 disabled:cursor-not-allowed"
       )}
       onClick={onClick}
       disabled={disabled}

@@ -11,7 +11,6 @@ import useDropArea from "~/hooks/useDropArea";
 
 import { encodeQueryParams, extractTagContent } from "~/lib/utils";
 
-import { PlusCircle } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Container from "~/components/Shared/Container";
 import useUserData from "~/hooks/auth/useUserData";
@@ -28,6 +27,7 @@ import assistantsService, {
 } from "~/services/assistantsService";
 import experimentsService from "~/services/experimentsService";
 import jsonDataService from "~/services/jsonDataService";
+import NewChatIcon from "../Icons/NewChatIcon";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";
@@ -82,6 +82,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
       setMessagesLoading(false);
       return;
     }
+    setMessagesLoading(true);
     const messages = await assistantsService.getMessages({ threadId });
     setMessages(messages);
     setMessagesLoading(false);
@@ -352,7 +353,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
               openNewChat();
             }}
           >
-            <PlusCircle />
+            <NewChatIcon />
             <span>New Chat</span>
           </Button>
         </div>
@@ -393,6 +394,9 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
             <Container centerContent={true}>
               <LoadingSpinner />
             </Container>
+            <MessageInputContainer>
+              {renderMessageInput({ showFilesUploadedPreview: true })}
+            </MessageInputContainer>
           </>
         ) : (
           <>
