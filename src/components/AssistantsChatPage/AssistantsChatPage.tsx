@@ -294,7 +294,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="h-screen">
       <div
         className="flex-1 h-full flex flex-col relative"
         style={{
@@ -360,6 +360,8 @@ const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
   children,
 }) => {
   return (
-    <div className="pb-[28px] md:pb-[36px] px-[32px] w-full">{children}</div>
+    <div className="m-auto max-w-[1264px] pb-[28px] md:pb-[36px] px-[32px] w-full">
+      {children}
+    </div>
   );
 };

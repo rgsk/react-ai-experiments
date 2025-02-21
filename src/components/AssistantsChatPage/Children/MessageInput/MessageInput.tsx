@@ -1,4 +1,4 @@
-import { Paperclip2 } from "iconsax-react";
+import { ArrowUp, Paperclip2 } from "iconsax-react";
 import { FileObject } from "openai/resources/files";
 import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
@@ -66,9 +66,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <div
       className={cn(
-        "border border-foreground",
-        canSend ? "outline outline-[#FFFF66]" : "",
-        "bg-white rounded-[2px] py-[16px] px-[16px]",
+        "border border-input focus-within:ring-1 focus-within:ring-ring",
+        "bg-transparent rounded-lg py-[16px] px-[16px]",
         disabled &&
           "border-gslearnlightmodeGrey1 bg-gslearnlightmodeGrey6 cursor-not-allowed"
       )}
@@ -124,7 +123,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           }}
         />
         <button onClick={handleFileInputClick}>
-          <Paperclip2 />
+          <Paperclip2 size={20} />
         </button>
         <div className="w-[8px]"></div>
         <TextareaAutosize
@@ -164,8 +163,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
           disabled={disabled}
           placeholder={placeholder}
           className={cn(
-            `w-full resize-none text-foreground
-            placeholder:text-[#030a2180] text-[14px] focus:outline-none bg-transparent`,
+            `w-full resize-none
+            placeholder:text-muted-foreground text-[14px] focus:outline-none bg-transparent`,
             disabled && "cursor-not-allowed"
           )}
           style={{
@@ -180,12 +179,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             </ActionButton>
           ) : (
             <ActionButton onClick={handleSubmit} disabled={!canSend}>
-              <img
-                width={md ? 24 : 14}
-                height={md ? 24 : 14}
-                src="/icons/direct-right.svg"
-                alt="Send"
-              />
+              <ArrowUp className="text-background" size={18} />
             </ActionButton>
           )}
         </div>

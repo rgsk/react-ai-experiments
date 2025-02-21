@@ -4,9 +4,7 @@ interface MessageActionsProps {
 const MessageActions: React.FC<MessageActionsProps> = ({ children }) => {
   return (
     <div className="flex">
-      <div className="flex gap-[4px] border border-gslearnlightmodeGrey4 rounded-sm p-[6px] bg-white">
-        {children}
-      </div>
+      <div className="flex gap-[4px] rounded-sm p-[6px]">{children}</div>
     </div>
   );
 };
@@ -21,10 +19,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
 }) => {
   return (
-    <button
-      onClick={onClick}
-      className="hover:bg-[#F2F3F4] rounded-[4px] p-0.5"
-    >
+    <button onClick={onClick} className="hover:bg-accent rounded-[4px] p-1">
       {icon}
     </button>
   );

@@ -1,11 +1,17 @@
-import { ArrowCircleDown2 } from "iconsax-react";
+import {
+  ArrowCircleDown2,
+  ArrowRotateRight,
+  Copy,
+  Dislike,
+  Like1,
+  TickSquare,
+} from "iconsax-react";
 import {
   Message,
   TextContentBlock,
 } from "openai/resources/beta/threads/messages";
 import { FileObject } from "openai/resources/files";
 import { useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { cn } from "~/lib/utils";
 import { imageExtensions } from "~/services/assistantsService";
@@ -16,6 +22,7 @@ import {
 // import { SuperPowerPromptPrefix } from "../InputForm/InputForm";
 import { MarkdownRenderer } from "~/components/ChatPage/Children/MarkdownRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
+import { Skeleton } from "~/components/ui/skeleton";
 import { fileIcons } from "~/lib/constants";
 import { questionsCode } from "~/lib/prompts";
 import assistantsService from "~/services/assistantsService";
@@ -175,18 +182,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                         </MarkdownRenderer>
                       </MessageContainer>
                       {message.status !== "in_progress" && (
-                        <div className="absolute bottom-0 right-0 translate-y-1/2">
+                        <div>
                           <MessageActions>
                             <>
                               <ActionButton
-                                icon={
-                                  <img
-                                    src={"/icons/rotate-right.svg"}
-                                    alt={"rotate-right"}
-                                    width={20}
-                                    height={20}
-                                  />
-                                }
+                                icon={<ArrowRotateRight size={18} />}
                                 onClick={() => {
                                   // rerun the last user message
                                   const lastUserMessage = [...messages]
@@ -206,19 +206,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                               <ActionButton
                                 icon={
                                   copiedText === text && copied ? (
-                                    <img
-                                      src={"/icons/CopyFilled.svg"}
-                                      alt={"tick"}
-                                      width={20}
-                                      height={20}
-                                    />
+                                    <TickSquare size={18} />
                                   ) : (
-                                    <img
-                                      src={"/icons/Copy.svg"}
-                                      alt={"tick"}
-                                      width={20}
-                                      height={20}
-                                    />
+                                    <Copy size={18} />
                                   )
                                 }
                                 onClick={() => {
@@ -226,25 +216,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                                 }}
                               ></ActionButton>
                               <ActionButton
-                                icon={
-                                  <img
-                                    src={"/icons/ThumbsUp.svg"}
-                                    alt={"like"}
-                                    width={20}
-                                    height={20}
-                                  />
-                                }
+                                icon={<Like1 size={18} />}
                                 onClick={() => {}}
                               ></ActionButton>
                               <ActionButton
-                                icon={
-                                  <img
-                                    src={"/icons/ThumbsDown.svg"}
-                                    alt={"dislike"}
-                                    width={20}
-                                    height={20}
-                                  />
-                                }
+                                icon={<Dislike size={18} />}
                                 onClick={() => {}}
                               ></ActionButton>
                             </>
@@ -276,13 +252,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
       {assistantMessageLoading && (
         <div>
           <MessageContainer role="assistant">
-            <div className="p-[16px]">
-              <Skeleton className="rounded-full h-[20px] w-1/2" />
-              <div className="h-[2px]"></div>
-              <Skeleton className="rounded-full h-[20px]" />
-              <div className="h-[2px]"></div>
-              <Skeleton className="rounded-full h-[20px]" />
-            </div>
+            <SkeletonLoaders />
           </MessageContainer>
         </div>
       )}
@@ -393,14 +363,24 @@ const MessageContainer: React.FC<MessageContainerProps> = ({
   return (
     <div
       className={cn(
-        "w-full rounded-sm",
-        role === "assistant" ? "border border-foreground" : ""
+        "rounded-lg",
+        role === "assistant"
+          ? "bg-transparent"
+          : "bg-gray-100 dark:bg-gray-800",
+        role === "user" ? "ml-auto text-right max-w-[80%]" : ""
       )}
-      style={{
-        backgroundColor: role === "assistant" ? "#FFFFEF" : "#F7F7F8",
-      }}
     >
       {children}
+    </div>
+  );
+};
+
+const SkeletonLoaders = () => {
+  return (
+    <div className="space-y-2">
+      <Skeleton className="rounded-full h-[20px] w-1/2" />
+      <Skeleton className="rounded-full h-[20px]" />
+      <Skeleton className="rounded-full h-[20px]" />
     </div>
   );
 };
@@ -418,13 +398,7 @@ const RenderQuestionSuggestions: React.FC<RenderQuestionSuggestionsProps> = ({
   if (questionSuggestionsLoading) {
     return (
       <MessageContainer role="assistant">
-        <div className="p-[16px]">
-          <Skeleton className="rounded-full h-[20px] w-1/2" />
-          <div className="h-[2px]"></div>
-          <Skeleton className="rounded-full h-[20px]" />
-          <div className="h-[2px]"></div>
-          <Skeleton className="rounded-full h-[20px]" />
-        </div>
+        <SkeletonLoaders />
       </MessageContainer>
     );
   }
