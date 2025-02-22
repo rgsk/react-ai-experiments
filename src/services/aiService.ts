@@ -1,7 +1,8 @@
 import axios from "axios";
+import environmentVars from "~/lib/environmentVars";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: environmentVars.PYTHON_EXPERIMENTS_SERVER_URL,
 });
 
 const aiService = {
