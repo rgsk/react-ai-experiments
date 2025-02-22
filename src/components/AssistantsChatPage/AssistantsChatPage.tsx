@@ -50,7 +50,7 @@ export type HandleSend = (body: HandleSendBody) => Promise<void>;
 interface AssistantsChatPageProps {}
 
 const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
-  const assistantId = "asst_pJJLw9OMP4eF7KEfNDfHkB9w";
+  const assistantId = "asst_3auQcimRvVz510Ug8cjMSV3z";
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInputDisabled, setMessageInputDisabled] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<FileEntry[]>([]);
@@ -61,6 +61,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const threadId = searchParams?.get("threadId");
+  const personaId = searchParams?.get("personaId") ?? undefined;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
@@ -216,7 +217,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
           threadId,
           assistantId,
           userMessage: text,
-          userId: userId,
+          personaId,
           secondaryMessages: secondaryMessages,
           socketId: socketRef.current?.id,
           attachments,

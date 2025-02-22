@@ -53,11 +53,10 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
         ...(prev ?? []),
         { source: source, url: url, embedded: false },
       ]);
-      const collectionName = persona.id;
       const websiteMeta = await experimentsService.getWebsiteMeta({ url }).fn();
       const content = websiteMeta.bodyTextContent;
       const result = await aiService.saveText({
-        collectionName,
+        collectionName: persona.collectionName,
         content,
         source,
       });

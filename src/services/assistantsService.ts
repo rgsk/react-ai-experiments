@@ -39,7 +39,7 @@ const assistantsService = {
     userMessage: string;
     userContextString?: string;
     secondaryMessages?: string[];
-    userId: string;
+    personaId?: string;
     socketId?: string;
     attachments?: MessageCreateParams.Attachment[];
     imageFileIds?: string[];
