@@ -7,6 +7,7 @@ import App from "~/App";
 import Providers from "~/Providers";
 import AssistantsChatPage from "./components/AssistantsChatPage/AssistantsChatPage";
 import ChatPage from "./components/ChatPage/ChatPage";
+import EditPersonaPage from "./components/EditPersonaPage/EditPersonaPage";
 import HomePage from "./components/HomePage/HomePage";
 import LoginPage from "./components/LoginPage/LoginPage";
 import OcrPage from "./components/OcrPage/OcrPage";
@@ -39,6 +40,11 @@ const router = createBrowserRouter(
       </Route>
       <Route path="assistants">
         <Route path="chat" element={<AssistantsChatPage />} />
+      </Route>
+      <Route path="personas">
+        <Route path="edit">
+          <Route path=":personaId" element={<EditPersonaPage />} />
+        </Route>
       </Route>
     </Route>
   )

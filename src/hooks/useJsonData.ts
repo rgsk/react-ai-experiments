@@ -56,7 +56,7 @@ function useJsonData<T>(
     if (value !== undefined) {
       if (migrationRef.current) {
         const migratedValue = migrationRef.current(value);
-        setLocalValue(migratedValue);
+        setSharedState(migratedValue);
       } else {
         setLocalValue(value);
       }
@@ -65,7 +65,7 @@ function useJsonData<T>(
         initialValueRef.current instanceof Function
           ? initialValueRef.current()
           : initialValueRef.current;
-      setLocalValue(finalInitialValue);
+      setSharedState(finalInitialValue);
     }
     setLoading(false);
   }, [enabled, key, setLocalValue]);

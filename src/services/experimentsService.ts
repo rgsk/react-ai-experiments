@@ -5,7 +5,7 @@ import environmentVars from "~/lib/environmentVars";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 export const axiosExperimentsInstance = axios.create({
-  baseURL: environmentVars.EXPERIMENTS_SERVER_URL,
+  baseURL: environmentVars.NODE_EXPERIMENTS_SERVER_URL,
 });
 axiosExperimentsInstance.interceptors.request.use((config) => {
   const token = getToken();
@@ -61,7 +61,7 @@ const experimentsService = {
       content: string;
     }[];
   }) => {
-    const url = `${environmentVars.EXPERIMENTS_SERVER_URL}/text`;
+    const url = `${environmentVars.NODE_EXPERIMENTS_SERVER_URL}/text`;
     const payload = {
       messages: messages,
     };
@@ -159,6 +159,19 @@ const experimentsService = {
       },
     };
   },
+  getWebsiteMeta: ({ url }: { url: string }) => {
+    const query = encodeQueryParams({ url });
+    return {
+      key: ["meta", query],
+      fn: async () => {
+        const response = await axiosExperimentsInstance.get<WebsiteMeta>(
+          `/experiments/meta?${query}`
+        );
+        return response.data;
+      },
+    };
+  },
 };
-
 export default experimentsService;
+
+export type WebsiteMeta = SampleResponseType["getMeta"];

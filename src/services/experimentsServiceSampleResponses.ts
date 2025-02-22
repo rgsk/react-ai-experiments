@@ -41,6 +41,15 @@ const experimentsServiceSampleResponses = {
       },
     },
   ],
+  getMeta: {
+    title: "Become Top 1% in the AI-First World",
+    description:
+      "Whether it is Product, Growth, Design, Management, Tech & Data, Business, GrowthSchool is the place to learn from top experts in the field.",
+    image:
+      "https://assets-global.website-files.com/624194472db3153002097068/624ace96c9f9ab0aed097ba6_GS%20Logo%20(5)%201.svg",
+    url: "https://www.growthschool.io/in",
+    bodyTextContent: "",
+  },
 };
 
 export default experimentsServiceSampleResponses;
