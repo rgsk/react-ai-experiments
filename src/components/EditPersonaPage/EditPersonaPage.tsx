@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import { z } from "zod";
 import useJsonData from "~/hooks/useJsonData";
@@ -68,6 +68,11 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   };
   return (
     <div className="p-[20px]">
+      <div>
+        <Link to={`/assistants/chat?personaId=${personaId}`}>
+          <Button>Chat with me</Button>
+        </Link>
+      </div>
       <Label>Knowledge</Label>
       <Label>Add Websites</Label>
       <Input

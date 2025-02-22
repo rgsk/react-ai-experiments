@@ -62,6 +62,9 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   const [searchParams] = useSearchParams();
   const threadId = searchParams?.get("threadId");
   const personaId = searchParams?.get("personaId") ?? undefined;
+  const assistantOrPersonaPrefix = personaId
+    ? `assistants/${assistantId}/personas/${personaId}`
+    : `assistants/${assistantId}`;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
@@ -74,9 +77,10 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
     navigate(
       `${pathname}?${encodeQueryParams({
         threadId,
+        personaId,
       })}`
     );
-  }, [navigate, pathname]);
+  }, [navigate, pathname, personaId]);
   const fetchMessages = useCallback(async () => {
     if (!threadId) {
       setMessages([]);
@@ -139,7 +143,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
     }
 
     await jsonDataService.setKey<Conversation>({
-      key: `assistants/${assistantId}/conversations/${v4()}`,
+      key: `${assistantOrPersonaPrefix}/conversations/${v4()}`,
       value: {
         id: v4(),
         threadId: threadId,
@@ -263,7 +267,11 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   }, [messagesLoading, threadId]);
 
   const openNewChat = () => {
-    navigate(pathname);
+    navigate(
+      `${pathname}?${encodeQueryParams({
+        personaId,
+      })}`
+    );
   };
 
   const handleFilesChange = async (files: File[]) => {
@@ -298,7 +306,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   });
   const { data: conversations, refetch: refetchConversations } =
     useJsonDataKeysLike<Conversation>(
-      `assistants/${assistantId}/conversations/${uuidPlaceholder}`
+      `${assistantOrPersonaPrefix}/conversations/${uuidPlaceholder}`
     );
 
   const conversation = conversations?.find((c) => c.threadId === threadId);

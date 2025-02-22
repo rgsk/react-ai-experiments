@@ -16,6 +16,9 @@ const HomePage: React.FC<HomePageProps> = ({}) => {
         <p>
           <Link to={`/chat/${v4()}`}>Chat</Link>
         </p>
+        <p>
+          <Link to={`/assistants/chat`}>Assistants Chat</Link>
+        </p>
       </div>
       <Button
         onClick={() => {
