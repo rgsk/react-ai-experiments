@@ -412,7 +412,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
             {messages.length === 0 ? (
               <>
                 <Container centerContent={true}>
-                  <div className="w-full">
+                  <div className="w-[800px]">
                     <h1 className="text-center text-4xl mb-[50px]">
                       What can I help with?
                     </h1>
