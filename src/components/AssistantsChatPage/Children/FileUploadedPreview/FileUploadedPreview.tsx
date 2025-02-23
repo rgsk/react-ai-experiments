@@ -32,14 +32,17 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
   const fileType = file ? file.type : fileMetadata?.type;
   const fileName = file ? file.name : fileMetadata?.name;
   const isImage = fileType?.startsWith("image/");
+  const uploadCalledRef = useRef(false);
   const localHandleUpload = useCallback(async () => {
     if (!file) return;
+    if (uploadCalledRef.current) return;
+    uploadCalledRef.current = true;
     setLoading(true);
     if (destination === "s3") {
       const s3Url = await experimentsService.uploadFileToS3(
         file,
         (progress) => {
-          setUploadProgress((prev) => Math.max(prev, progress * 100));
+          setUploadProgress(progress * 100);
         }
       );
       onS3UploadRef.current?.(s3Url);
@@ -47,7 +50,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
       const newFileObject = await assistantsService.uploadFile(
         file,
         (progress) => {
-          setUploadProgress((prev) => Math.max(prev, progress * 100));
+          setUploadProgress(progress * 100);
         }
       );
       onFileObjectUploadRef.current?.(newFileObject);

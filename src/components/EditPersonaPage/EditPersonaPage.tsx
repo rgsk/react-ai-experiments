@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useJsonData from "~/hooks/useJsonData";
@@ -33,7 +33,7 @@ const getContent = async ({
     const content = await experimentsService.getUrlContent({ url }).fn();
     return content;
   }
-  return "";
+  return "empty content";
 };
 interface EditPersonaPageProps {}
 const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
@@ -67,6 +67,32 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   personaKnowledgeItemsRef.current = personaKnowledgeItems;
   const [websiteInput, setWebsiteInput] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<FileEntry[]>([]);
+
+  useEffect(() => {
+    if (!personaKnowledgeItemsLoading && personaKnowledgeItemsRef.current) {
+      const fileItems = personaKnowledgeItemsRef.current.filter(
+        (v) => v.type === "file"
+      );
+      (async () => {
+        const attachmentEntries = await Promise.all(
+          fileItems.map(async (f) => {
+            const signedS3Url = (
+              await experimentsService.getAWSDownloadUrl({ url: f.url }).fn()
+            ).url;
+            return {
+              id: f.id,
+              fileMetadata: {
+                name: f.metadata.filename,
+                type: f.metadata.filetype,
+              },
+              s3Url: signedS3Url,
+            };
+          })
+        );
+        setAttachedFiles(attachmentEntries);
+      })();
+    }
+  }, [personaKnowledgeItemsLoading]);
 
   const handleFilesChange = async (files: File[]) => {
     if (files) {
@@ -314,13 +340,13 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                     )
                   );
                   console.log({ s3Url });
-                  // if (fileEntry.file) {
-                  //   onAddFile({
-                  //     url: s3Url,
-                  //     filename: fileEntry.file.name,
-                  //     filetype: fileEntry.file.type,
-                  //   });
-                  // }
+                  if (fileEntry.file) {
+                    onAddFile({
+                      url: s3Url,
+                      filename: fileEntry.file.name,
+                      filetype: fileEntry.file.type,
+                    });
+                  }
                 }}
               />
             ))}

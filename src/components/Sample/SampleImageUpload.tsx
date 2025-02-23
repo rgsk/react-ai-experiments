@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { v4 } from "uuid";
 import experimentsService from "~/services/experimentsService";
+import { Button } from "../ui/button";
 interface SampleImageUploadProps {}
 const SampleImageUpload: React.FC<SampleImageUploadProps> = ({}) => {
   const [imageUrl, setImageUrl] = useState<string>();
@@ -32,7 +33,25 @@ const SampleImageUpload: React.FC<SampleImageUploadProps> = ({}) => {
           }
         }}
       />
-      {imageUrl && <img src={imageUrl} alt="image url" width={400} />}
+      {imageUrl && (
+        <>
+          <img src={imageUrl} alt="image url" width={400} />
+          <p>
+            Download URL:{" "}
+            <a href={imageUrl} className="underline" target="_blank">
+              {imageUrl}
+            </a>
+          </p>
+          <Button
+            onClick={async () => {
+              const res = await experimentsService.deleteFileFromS3(imageUrl);
+              console.log(res);
+            }}
+          >
+            Delete
+          </Button>
+        </>
+      )}
     </div>
   );
 };
