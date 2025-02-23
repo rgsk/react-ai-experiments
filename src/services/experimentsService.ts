@@ -197,10 +197,6 @@ const experimentsService = {
         key: key,
       })
       .fn();
-
-    const { url: downloadUrl } = await experimentsService
-      .getAWSDownloadUrl({ url: uploadUrl.split("?")[0] })
-      .fn();
     await axios.put(uploadUrl, file, {
       onUploadProgress: (progressEvent) => {
         if (onUploadProgress) {
@@ -210,9 +206,17 @@ const experimentsService = {
         }
       },
     });
-    return downloadUrl;
+    const url = uploadUrl.split("?")[0];
+    return url;
   },
-  deleteFileFromS3: async (url: string) => {},
+  deleteFileFromS3: async (url: string) => {
+    const result = await axiosExperimentsInstance.delete(
+      `/aws/s3-url?${encodeQueryParams({
+        url,
+      })}`
+    );
+    return result.data;
+  },
 };
 export default experimentsService;
 

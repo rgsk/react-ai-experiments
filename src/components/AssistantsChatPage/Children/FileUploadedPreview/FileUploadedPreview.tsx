@@ -54,11 +54,11 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
     }
   }, [destination, fileObject, localHandleUpload, s3Url]);
   const imageUrl = useMemo(() => {
-    if (s3Url) {
-      return s3Url;
-    }
     if (file) {
       return URL.createObjectURL(file);
+    }
+    if (s3Url) {
+      return s3Url;
     }
     return undefined;
   }, [file, s3Url]);
