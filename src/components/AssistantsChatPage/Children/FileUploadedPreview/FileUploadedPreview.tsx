@@ -4,33 +4,64 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { fileIcons } from "~/lib/constants";
 import assistantsService from "~/services/assistantsService";
+import experimentsService from "~/services/experimentsService";
 import { FileEntry } from "../MessageInput/MessageInput";
 interface FileUploadedPreviewProps {
   fileEntry: FileEntry;
   onRemove: () => void;
-  onFileObjectUpload: (fileObject: FileObject) => void;
+  destination: "s3" | "assistants";
+  onFileObjectUpload?: (fileObject: FileObject) => void;
+  onS3Upload?: (s3Url: string) => void;
 }
+
 const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
-  fileEntry: { file, fileObject },
+  fileEntry: { file, fileObject, id, s3Url, fileMetadata },
   onRemove,
   onFileObjectUpload,
+  destination,
+  onS3Upload,
 }) => {
   const [loading, setLoading] = useState(false);
   const onFileObjectUploadRef = useRef(onFileObjectUpload);
   onFileObjectUploadRef.current = onFileObjectUpload;
-  const isImage = file.type.startsWith("image/");
+  const onS3UploadRef = useRef(onS3Upload);
+  onS3UploadRef.current = onS3Upload;
+  const fileType = file ? file.type : fileMetadata?.type;
+  const fileName = file ? file.name : fileMetadata?.name;
+  const isImage = fileType?.startsWith("image/");
   const localHandleUpload = useCallback(async () => {
+    if (!file) return;
     setLoading(true);
-    const newFileObject = await assistantsService.uploadFile(file);
-    onFileObjectUploadRef.current(newFileObject);
-    setLoading(false);
-  }, [file]);
-  useEffect(() => {
-    if (!fileObject) {
-      localHandleUpload();
+    if (destination === "s3") {
+      const s3Url = await experimentsService.uploadFileToS3(file);
+      onS3UploadRef.current?.(s3Url);
+    } else {
+      const newFileObject = await assistantsService.uploadFile(file);
+      onFileObjectUploadRef.current?.(newFileObject);
     }
-  }, [fileObject, localHandleUpload]);
-  const imageUrl = useMemo(() => URL.createObjectURL(file), [file]);
+    setLoading(false);
+  }, [destination, file]);
+  useEffect(() => {
+    if (destination === "assistants") {
+      if (!fileObject) {
+        localHandleUpload();
+      }
+    }
+    if (destination === "s3") {
+      if (!s3Url) {
+        localHandleUpload();
+      }
+    }
+  }, [destination, fileObject, localHandleUpload, s3Url]);
+  const imageUrl = useMemo(() => {
+    if (s3Url) {
+      return s3Url;
+    }
+    if (file) {
+      return URL.createObjectURL(file);
+    }
+    return undefined;
+  }, [file, s3Url]);
   const renderCloseButton = () => {
     return (
       <div className="absolute top-0 right-0 translate-x-[10px] -translate-y-1/2">
@@ -48,7 +79,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
       <div className="relative min-w-[64px] w-[64px] h-[64px]">
         <img
           src={imageUrl}
-          alt={file.name}
+          alt={fileName}
           className="rounded-[8px] object-cover object-center w-full h-full"
         />
         {renderCloseButton()}
@@ -63,7 +94,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
     );
   }
   return (
-    <FilePreview fileName={file.name} loading={loading}>
+    <FilePreview fileName={fileName ?? "Unknown file"} loading={loading}>
       {renderCloseButton()}
     </FilePreview>
   );

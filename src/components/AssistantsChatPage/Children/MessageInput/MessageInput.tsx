@@ -11,8 +11,13 @@ import FileUploadedPreview from "../FileUploadedPreview/FileUploadedPreview";
 
 export type FileEntry = {
   id: string;
-  file: File;
+  file?: File;
+  fileMetadata?: {
+    name: string;
+    type: string;
+  };
   fileObject?: FileObject;
+  s3Url?: string;
 };
 interface MessageInputProps {
   handleSend: HandleSend;
@@ -76,6 +81,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
           {attachedFiles.map((fileEntry) => (
             <FileUploadedPreview
               key={fileEntry.id}
+              destination="assistants"
               fileEntry={fileEntry}
               onRemove={() => {
                 if (fileEntry.fileObject) {

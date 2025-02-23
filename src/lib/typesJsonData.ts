@@ -35,10 +35,25 @@ export type Persona = {
   description: string;
   instructions: string;
 };
-export type PersonaKnowledgeItem = {
+
+interface BasePersonaKnowledgeItem {
   id: string;
   source: string;
   url: string;
-  type: "website" | "youtube" | "image" | "file";
   embedded: boolean;
-};
+}
+
+export type PersonaKnowledgeItem = BasePersonaKnowledgeItem &
+  (
+    | {
+        type: "website";
+        metadata: {};
+      }
+    | {
+        type: "file";
+        metadata: {
+          filename: string;
+          filetype: string;
+        };
+      }
+  );

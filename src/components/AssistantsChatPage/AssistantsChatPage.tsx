@@ -172,8 +172,8 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
       const imageFileIds: string[] = [];
       const imageUrls: Record<string, string> = {};
       attachedFiles.forEach((fileEntry) => {
-        const isImage = fileEntry.file.type.startsWith("image/");
-        if (fileEntry.fileObject) {
+        if (fileEntry.fileObject && fileEntry.file) {
+          const isImage = fileEntry.file.type.startsWith("image/");
           if (isImage) {
             imageFileIds.push(fileEntry.fileObject.id);
           } else {
@@ -383,16 +383,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
         }}
         {...dropAreaProps}
       >
-        {isDragging && (
-          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="text-gray-100 text-center">
-              <p className="text-[18px] font-bold">Add anything</p>
-              <p className="text-[14px]">
-                Drop any file here to add it to the conversation
-              </p>
-            </div>
-          </div>
-        )}
+        {isDragging && <DraggingBackdrop />}
         <div className="border-b border-b-input p-4 flex justify-between items-center">
           <span></span>
           <span>{conversation?.title ?? "New Chat"}</span>
@@ -454,6 +445,20 @@ const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
   return (
     <div className="m-auto max-w-[800px] pb-[28px] md:pb-[36px] px-[32px] w-full">
       {children}
+    </div>
+  );
+};
+
+interface DraggingBackdropProps {}
+export const DraggingBackdrop: React.FC<DraggingBackdropProps> = ({}) => {
+  return (
+    <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center">
+      <div className="text-gray-100 text-center">
+        <p className="text-[18px] font-bold">Add anything</p>
+        <p className="text-[14px]">
+          Drop any file here to add it to the conversation
+        </p>
+      </div>
     </div>
   );
 };

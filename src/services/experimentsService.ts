@@ -1,4 +1,5 @@
 import axios from "axios";
+import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/auth/useToken";
 import environmentVars from "~/lib/environmentVars";
@@ -183,6 +184,35 @@ const experimentsService = {
       },
     };
   },
+  uploadFileToS3: async (
+    file: File,
+    onUploadProgress?: (progress: number) => void
+  ) => {
+    // Extract file extension
+    const fileExtension = file.name.split(".").pop();
+    const key = `${v4()}.${fileExtension}`;
+
+    const { url: uploadUrl } = await experimentsService
+      .getAWSUploadUrl({
+        key: key,
+      })
+      .fn();
+
+    const { url: downloadUrl } = await experimentsService
+      .getAWSDownloadUrl({ url: uploadUrl.split("?")[0] })
+      .fn();
+    await axios.put(uploadUrl, file, {
+      onUploadProgress: (progressEvent) => {
+        if (onUploadProgress) {
+          if (progressEvent.progress) {
+            onUploadProgress(progressEvent.progress);
+          }
+        }
+      },
+    });
+    return downloadUrl;
+  },
+  deleteFileFromS3: async (url: string) => {},
 };
 export default experimentsService;
 
