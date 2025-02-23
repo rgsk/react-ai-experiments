@@ -33,6 +33,7 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-function": "off",
       "prefer-const": "off",
       "no-inner-declarations": "off",
+      "no-empty": "off",
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-empty-object-type": "off",
     },

@@ -45,3 +45,26 @@ export function extractTagContent(inputString: string, tagName: string) {
   }
   return null;
 }
+export const handleInputOnPaste = (
+  event: React.ClipboardEvent<HTMLElement>,
+  onFilesChange: (files: File[]) => void
+) => {
+  const items = event.clipboardData.items;
+  const files: File[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+
+    if (item.kind === "file") {
+      const file = item.getAsFile();
+
+      if (file) {
+        files.push(file);
+      }
+    }
+  }
+  if (files.length > 0) {
+    // Prevent default paste behavior (which pastes the file name)
+    event.preventDefault();
+    onFilesChange(files);
+  }
+};

@@ -13,6 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import useDropArea from "~/hooks/useDropArea";
 import { Persona, PersonaKnowledgeItem } from "~/lib/typesJsonData";
+import { handleInputOnPaste } from "~/lib/utils";
 import { supportedExtensions } from "~/services/assistantsService";
 import { DraggingBackdrop } from "../AssistantsChatPage/AssistantsChatPage";
 import FileUploadedPreview from "../AssistantsChatPage/Children/FileUploadedPreview/FileUploadedPreview";
@@ -22,24 +23,37 @@ import IconButtonWithTooltip from "../Shared/IconButtonWithTooltip";
 import TargetBlankLink from "../Shared/TargetBlankLink";
 import { Textarea } from "../ui/textarea";
 
-const getContent = async ({
-  url,
-  type,
-}: {
-  url: string;
-  type: PersonaKnowledgeItem["type"];
-}) => {
-  if (type === "website") {
-    const content = await experimentsService.getUrlContent({ url }).fn();
+const getContent = async (item: PersonaKnowledgeItem) => {
+  if (item.type === "website") {
+    const content = await experimentsService
+      .getUrlContent({ url: item.url })
+      .fn();
     return content;
+  } else if (item.type === "file") {
+    const isImage = item.metadata.filetype.startsWith("image/");
+    if (isImage) {
+      // perform ocr
+      const imageUrl = item.url;
+      const { url: signedUrl } = await experimentsService
+        .getAWSDownloadUrl({ url: imageUrl })
+        .fn();
+      const result = await experimentsService
+        .getUrlContent({ url: signedUrl, type: "image" })
+        .fn();
+      return result;
+    } else {
+    }
   }
   return "empty content";
 };
 interface EditPersonaPageProps {}
 const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   const { personaId } = useParams<{ personaId: string }>();
-  const [itemsDeletingIds, setItemsDeletingIds] = useState<string[]>([]);
-  const [itemsEmbeddingIds, setItemsEmbeddingIds] = useState<string[]>([]);
+  const [itemsDeleteInProgressIds, setItemsDeleteInProgressIds] = useState<
+    string[]
+  >([]);
+  const [itemsEmbeddingInProgressIds, setItemsEmbeddingInProgressIds] =
+    useState<string[]>([]);
   const [addWebsiteLoading, setAddWebsiteLoading] = useState(false);
   const [persona, setPersona, { loading: personaLoading }] =
     useJsonData<Persona>(`personas/${personaId}`, () => {
@@ -177,8 +191,9 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   const onItemEmbed = async (item: PersonaKnowledgeItem) => {
     if (!persona) return;
     try {
-      setItemsEmbeddingIds((prev) => [...prev, item.id]);
-      const content = await getContent({ url: item.url, type: item.type });
+      setItemsEmbeddingInProgressIds((prev) => [...prev, item.id]);
+      const content = await getContent(item);
+      console.log({ content });
       const result = await aiService.saveText({
         collectionName: persona.collectionName,
         content: content,
@@ -194,17 +209,19 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
       console.error(err);
       return alert("error while generating embeddings, see console");
     } finally {
-      setItemsEmbeddingIds((prev) => prev.filter((v) => v !== item.id));
+      setItemsEmbeddingInProgressIds((prev) =>
+        prev.filter((v) => v !== item.id)
+      );
     }
   };
   const onDeletePersonaKnowledgeItem = async (item: PersonaKnowledgeItem) => {
     if (!persona || !personaKnowledgeItems) return;
-    setItemsDeletingIds((prev) => [...prev, item.id]);
+    setItemsDeleteInProgressIds((prev) => [...prev, item.id]);
     await aiService.deleteText({
       collectionName: persona.collectionName,
       source: item.source,
     });
-    setItemsDeletingIds((prev) => prev.filter((v) => v !== item.id));
+    setItemsDeleteInProgressIds((prev) => prev.filter((v) => v !== item.id));
     setPersonaKnowledgeItems((prev) => prev?.filter((p) => p.id !== item.id));
   };
   if (!persona || !personaKnowledgeItems) {
@@ -248,7 +265,9 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
       <Label>Knowledge</Label>
       <div>
         <div>
-          <Label>Add Websites</Label>
+          <Label>
+            Add Url of website/youtube/image/pdf/public google doc/sheet
+          </Label>
           <Input
             value={websiteInput}
             onChange={(e) => {
@@ -261,6 +280,9 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                 onAddWebsite();
               }
             }}
+            onPaste={(event) => {
+              handleInputOnPaste(event, handleFilesChange);
+            }}
           />
         </div>
 
@@ -272,17 +294,19 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
       {personaKnowledgeItems
         .filter((v) => v.type === "website")
         .map((w) => {
-          const deleting = itemsDeletingIds.includes(w.id);
-          const embedding = itemsEmbeddingIds.includes(w.id);
+          const deleteInProgress = itemsDeleteInProgressIds.includes(w.id);
+          const embeddingInProgress = itemsEmbeddingInProgressIds.includes(
+            w.id
+          );
           return (
             <div key={w.id} className="flex justify-between items-center">
               <TargetBlankLink href={w.url}>{w.url}</TargetBlankLink>
               <span>
                 {!w.embedded ? (
                   <IconButtonWithTooltip
-                    disabled={embedding}
+                    disabled={embeddingInProgress}
                     icon={
-                      embedding ? (
+                      embeddingInProgress ? (
                         <LoadingSpinner size={16} />
                       ) : (
                         <RotateCcw size={16} />
@@ -295,9 +319,9 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                   />
                 ) : (
                   <IconButtonWithTooltip
-                    disabled={deleting}
+                    disabled={deleteInProgress}
                     icon={
-                      deleting ? (
+                      deleteInProgress ? (
                         <LoadingSpinner size={16} />
                       ) : (
                         <Trash2 size={16} />
@@ -320,36 +344,75 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
 
         {attachedFiles.length > 0 && (
           <div className="flex gap-[16px] pb-[24px] pt-[12px]">
-            {attachedFiles.map((fileEntry) => (
-              <FileUploadedPreview
-                key={fileEntry.id}
-                destination="s3"
-                fileEntry={fileEntry}
-                onRemove={() => {
-                  if (fileEntry.s3Url) {
-                    experimentsService.deleteFileFromS3(fileEntry.s3Url);
-                  }
-                  setAttachedFiles((prev) =>
-                    prev.filter((entry) => entry.id !== fileEntry.id)
-                  );
-                }}
-                onS3Upload={(s3Url) => {
-                  setAttachedFiles((prev) =>
-                    prev.map((entry) =>
-                      entry.id === fileEntry.id ? { ...entry, s3Url } : entry
-                    )
-                  );
-                  console.log({ s3Url });
-                  if (fileEntry.file) {
-                    onAddFile({
-                      url: s3Url,
-                      filename: fileEntry.file.name,
-                      filetype: fileEntry.file.type,
-                    });
-                  }
-                }}
-              />
-            ))}
+            {attachedFiles.map((fileEntry) => {
+              const personaKnowledgeItem = personaKnowledgeItems.find(
+                (v) => v.url === fileEntry.s3Url?.split("?")[0]
+              );
+              const embeddingInProgress = personaKnowledgeItem
+                ? itemsEmbeddingInProgressIds.includes(personaKnowledgeItem.id)
+                : false;
+              return (
+                <div key={fileEntry.id}>
+                  <FileUploadedPreview
+                    key={fileEntry.id}
+                    destination="s3"
+                    fileEntry={fileEntry}
+                    onRemove={() => {
+                      if (fileEntry.s3Url) {
+                        experimentsService.deleteFileFromS3(fileEntry.s3Url);
+                      }
+                      setAttachedFiles((prev) =>
+                        prev.filter((entry) => entry.id !== fileEntry.id)
+                      );
+                      if (personaKnowledgeItem) {
+                        onDeletePersonaKnowledgeItem(personaKnowledgeItem);
+                      }
+                    }}
+                    onS3Upload={(s3Url) => {
+                      setAttachedFiles((prev) =>
+                        prev.map((entry) =>
+                          entry.id === fileEntry.id
+                            ? { ...entry, s3Url }
+                            : entry
+                        )
+                      );
+                      console.log({ s3Url });
+                      if (fileEntry.file) {
+                        onAddFile({
+                          url: s3Url,
+                          filename: fileEntry.file.name,
+                          filetype: fileEntry.file.type,
+                        });
+                      }
+                    }}
+                  />
+                  {!personaKnowledgeItem ? (
+                    <p>personaKnowledgeItem doesn't exists</p>
+                  ) : (
+                    <div>
+                      {!personaKnowledgeItem.embedded ? (
+                        <div>
+                          <IconButtonWithTooltip
+                            disabled={embeddingInProgress}
+                            icon={
+                              embeddingInProgress ? (
+                                <LoadingSpinner size={16} />
+                              ) : (
+                                <RotateCcw size={16} />
+                              )
+                            }
+                            tooltip="Retry"
+                            onClick={() => {
+                              onItemEmbed(personaKnowledgeItem);
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

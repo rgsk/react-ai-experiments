@@ -2,7 +2,7 @@ import { ArrowUp, Paperclip2 } from "iconsax-react";
 import { FileObject } from "openai/resources/files";
 import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
-import { cn } from "~/lib/utils";
+import { cn, handleInputOnPaste } from "~/lib/utils";
 import assistantsService, {
   supportedExtensions,
 } from "~/services/assistantsService";
@@ -152,24 +152,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             setInputFocused(false);
           }}
           onPaste={(event) => {
-            const items = event.clipboardData.items;
-            const files: File[] = [];
-            for (let i = 0; i < items.length; i++) {
-              const item = items[i];
-
-              if (item.kind === "file") {
-                const file = item.getAsFile();
-
-                if (file) {
-                  files.push(file);
-                }
-              }
-            }
-            if (files.length > 0) {
-              // Prevent default paste behavior (which pastes the file name)
-              event.preventDefault();
-              handleFilesChange(files);
-            }
+            handleInputOnPaste(event, handleFilesChange);
           }}
           disabled={disabled}
           placeholder={placeholder}

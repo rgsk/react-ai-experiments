@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/auth/useToken";
@@ -93,7 +94,11 @@ const experimentsService = {
     });
     return result.data;
   },
-  getCompletion: async ({ messages }: { messages: CompletionMessage[] }) => {
+  getCompletion: async ({
+    messages,
+  }: {
+    messages: ChatCompletionMessageParam[];
+  }) => {
     const result = await axiosExperimentsInstance.post<{ content: string }>(
       "/completion",
       {
@@ -172,8 +177,8 @@ const experimentsService = {
       },
     };
   },
-  getUrlContent: ({ url }: { url: string }) => {
-    const query = encodeQueryParams({ url });
+  getUrlContent: ({ url, type }: { url: string; type?: UrlContentType }) => {
+    const query = encodeQueryParams({ url, type });
     return {
       key: ["url-content", query],
       fn: async () => {
@@ -219,5 +224,12 @@ const experimentsService = {
   },
 };
 export default experimentsService;
+type UrlContentType =
+  | "pdf"
+  | "google_doc"
+  | "google_sheet"
+  | "web_page"
+  | "youtube_video"
+  | "image";
 
 export type WebsiteMeta = SampleResponseType["getMeta"];
