@@ -1,32 +1,24 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { v4 } from "uuid";
-import { z } from "zod";
 import useJsonData from "~/hooks/useJsonData";
 import aiService from "~/services/aiService";
 import experimentsService from "~/services/experimentsService";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-type Persona = {
-  id: string;
-  name: string;
-  collectionName: string;
-  description: string;
-  instructions: string;
-};
-type Website = {
-  source: string;
-  url: string;
-  embedded: boolean;
-};
+
+import { z } from "zod";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Persona, Website } from "~/lib/typesJsonData";
+import CentralLoader from "../Shared/CentralLoader";
+import { Textarea } from "../ui/textarea";
+
 interface EditPersonaPageProps {}
 const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   const { personaId } = useParams<{ personaId: string }>();
-  const [persona, setPersona] = useJsonData<Persona>(
-    `personas/${personaId}`,
-    () => {
+  const [persona, setPersona, { loading: personaLoading }] =
+    useJsonData<Persona>(`personas/${personaId}`, () => {
       return {
         id: personaId!,
         collectionName: v4(),
@@ -34,8 +26,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
         description: "",
         instructions: "",
       };
-    }
-  );
+    });
 
   const [websites, setWebsites] = useJsonData<Website[]>(
     `personas/${persona?.id}/websites`,
@@ -66,12 +57,42 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
       );
     }
   };
+  if (!persona) {
+    return <CentralLoader />;
+  }
   return (
     <div className="p-[20px]">
       <div>
         <Link to={`/assistants/chat?personaId=${personaId}`}>
           <Button>Chat with me</Button>
         </Link>
+      </div>
+      <div>
+        <Label>Name</Label>
+        <Input
+          placeholder="Name your GPT"
+          value={persona.name}
+          onChange={(e) => {
+            setPersona({ ...persona, name: e.target.value });
+          }}
+        />
+        <Label>Description</Label>
+        <Input
+          placeholder="Add a short description about what this GPT does"
+          value={persona.description}
+          onChange={(e) => {
+            setPersona({ ...persona, description: e.target.value });
+          }}
+        />
+        <Label>Instructions</Label>
+        <Textarea
+          rows={5}
+          placeholder="What does this GPT do? How does it behave? What should it avoid doing?"
+          value={persona.instructions}
+          onChange={(e) => {
+            setPersona({ ...persona, instructions: e.target.value });
+          }}
+        />
       </div>
       <Label>Knowledge</Label>
       <Label>Add Websites</Label>
