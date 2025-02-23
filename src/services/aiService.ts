@@ -15,6 +15,7 @@ const aiService = {
     content: string;
     source: string;
   }) => {
+    // throw new Error("what are you doing");
     const result = await axiosInstance.post<string[]>("/save_text", {
       collection_name: collectionName,
       content: content,

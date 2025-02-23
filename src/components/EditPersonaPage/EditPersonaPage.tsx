@@ -24,6 +24,21 @@ function normalizeUrl(url: string): string {
     throw new Error("Invalid URL");
   }
 }
+
+const getContent = async ({
+  url,
+  type,
+}: {
+  url: string;
+  type: PersonaKnowledgeItem["type"];
+}) => {
+  if (type === "website") {
+    const websiteMeta = await experimentsService.getWebsiteMeta({ url }).fn();
+    const content = websiteMeta.bodyTextContent;
+    return content;
+  }
+  return "";
+};
 interface EditPersonaPageProps {}
 const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   const { personaId } = useParams<{ personaId: string }>();
@@ -47,19 +62,18 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
     enabled: !!persona,
   });
   const [websiteInput, setWebsiteInput] = useState("");
+
   const onAddWebsite = async () => {
     if (!personaKnowledgeItems) return;
     if (z.string().url().safeParse(websiteInput).success) {
+      const type: PersonaKnowledgeItem["type"] = "website";
       const url = normalizeUrl(websiteInput);
-      if (
-        personaKnowledgeItems.find((w) => w.type === "website" && w.url === url)
-      ) {
+      if (personaKnowledgeItems.find((w) => w.type === type && w.url === url)) {
         return alert("this website is already added");
       }
       setAddWebsiteLoading(true);
-      const websiteMeta = await experimentsService.getWebsiteMeta({ url }).fn();
-      const content = websiteMeta.bodyTextContent;
-      onAddPersonaKnowledgeItem({ url, content, type: "website" });
+
+      onAddPersonaKnowledgeItem({ url, type: type });
       setWebsiteInput("");
       setAddWebsiteLoading(false);
     } else {
@@ -68,37 +82,46 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   };
   const onAddPersonaKnowledgeItem = async ({
     url,
-    content,
     type,
   }: {
     url: string;
-    content: string;
     type: PersonaKnowledgeItem["type"];
   }) => {
     if (!persona || !personaKnowledgeItems) return;
     const source = `website:${url}`;
     const itemId = v4();
-    setPersonaKnowledgeItems((prev) => [
-      ...(prev ?? []),
-      {
-        id: itemId,
-        source: source,
-        url: url,
-        embedded: false,
-        type: type,
-      },
-    ]);
-    setItemsEmbeddingIds((prev) => [...prev, itemId]);
-    const result = await aiService.saveText({
-      collectionName: persona.collectionName,
-      content,
-      source,
-    });
-    setItemsEmbeddingIds((prev) => prev.filter((v) => v !== itemId));
-    console.log(result);
-    setPersonaKnowledgeItems((prev) =>
-      prev?.map((w) => (w.source === source ? { ...w, embedded: true } : w))
-    );
+    const newItem = {
+      id: itemId,
+      source: source,
+      url: url,
+      embedded: false,
+      type: type,
+    };
+    setPersonaKnowledgeItems((prev) => [...(prev ?? []), newItem]);
+    onItemEmbed(newItem);
+  };
+  const onItemEmbed = async (item: PersonaKnowledgeItem) => {
+    if (!persona) return;
+    try {
+      setItemsEmbeddingIds((prev) => [...prev, item.id]);
+      const content = await getContent({ url: item.url, type: item.type });
+      const result = await aiService.saveText({
+        collectionName: persona.collectionName,
+        content: content,
+        source: item.source,
+      });
+      console.log(result);
+      setPersonaKnowledgeItems((prev) =>
+        prev?.map((w) =>
+          w.source === item.source ? { ...w, embedded: true } : w
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      return alert("error while generating embeddings, see console");
+    } finally {
+      setItemsEmbeddingIds((prev) => prev.filter((v) => v !== item.id));
+    }
   };
   const onDeletePersonaKnowledgeItem = async (item: PersonaKnowledgeItem) => {
     if (!persona || !personaKnowledgeItems) return;
@@ -192,7 +215,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                     }
                     tooltip="Retry"
                     onClick={() => {
-                      onDeletePersonaKnowledgeItem(w);
+                      onItemEmbed(w);
                     }}
                   />
                 ) : (
