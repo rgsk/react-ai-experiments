@@ -1,11 +1,13 @@
 import { X as XIcon } from "lucide-react";
 import { FileObject } from "openai/resources/files";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import LoadingProgress from "~/components/Shared/LoadingProgress";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { fileIcons } from "~/lib/constants";
 import assistantsService from "~/services/assistantsService";
 import experimentsService from "~/services/experimentsService";
 import { FileEntry } from "../MessageInput/MessageInput";
+
 interface FileUploadedPreviewProps {
   fileEntry: FileEntry;
   onRemove: () => void;
@@ -24,6 +26,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
   const [loading, setLoading] = useState(false);
   const onFileObjectUploadRef = useRef(onFileObjectUpload);
   onFileObjectUploadRef.current = onFileObjectUpload;
+  const [uploadProgress, setUploadProgress] = useState(0);
   const onS3UploadRef = useRef(onS3Upload);
   onS3UploadRef.current = onS3Upload;
   const fileType = file ? file.type : fileMetadata?.type;
@@ -33,10 +36,20 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
     if (!file) return;
     setLoading(true);
     if (destination === "s3") {
-      const s3Url = await experimentsService.uploadFileToS3(file);
+      const s3Url = await experimentsService.uploadFileToS3(
+        file,
+        (progress) => {
+          setUploadProgress((prev) => Math.max(prev, progress * 100));
+        }
+      );
       onS3UploadRef.current?.(s3Url);
     } else {
-      const newFileObject = await assistantsService.uploadFile(file);
+      const newFileObject = await assistantsService.uploadFile(
+        file,
+        (progress) => {
+          setUploadProgress((prev) => Math.max(prev, progress * 100));
+        }
+      );
       onFileObjectUploadRef.current?.(newFileObject);
     }
     setLoading(false);
@@ -62,6 +75,9 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
     }
     return undefined;
   }, [file, s3Url]);
+  const renderLoader = () => {
+    return <LoadingProgress progress={uploadProgress} size={18} />;
+  };
   const renderCloseButton = () => {
     return (
       <div className="absolute top-0 right-0 translate-x-[10px] -translate-y-1/2">
@@ -85,16 +101,18 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
         {renderCloseButton()}
         {loading && (
           <div className="absolute top-0 left-0 w-full h-full rounded-[8px] bg-black bg-opacity-5 flex justify-center items-center">
-            <div className="scale-75">
-              <LoadingSpinner />
-            </div>
+            {renderLoader()}
           </div>
         )}
       </div>
     );
   }
   return (
-    <FilePreview fileName={fileName ?? "Unknown file"} loading={loading}>
+    <FilePreview
+      fileName={fileName ?? "Unknown file"}
+      loading={loading}
+      loader={renderLoader()}
+    >
       {renderCloseButton()}
     </FilePreview>
   );
@@ -104,19 +122,21 @@ interface FilePreviewProps {
   loading: boolean;
   fileName: string;
   children?: any;
+  loader?: any;
 }
 export const FilePreview: React.FC<FilePreviewProps> = ({
   loading,
   fileName,
   children,
+  loader,
 }) => {
   return (
     <div className="w-[295px] min-w-[295px] px-[12px] border border-input py-[16px] rounded-[8px] relative">
       <div className="flex gap-[8px] items-center">
-        <div className="rounded-[8px] relative w-[30px] h-[30px] flex justify-center items-center bg-[#FF5588]">
+        <div className="rounded-[8px] relative w-[30px] min-w-[30px] h-[30px] flex justify-center items-center bg-[#FF5588]">
           {loading ? (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-75">
-              <LoadingSpinner />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              {loader ?? <LoadingSpinner size={20} />}
             </div>
           ) : (
             <span className="text-white">{fileIcons.document}</span>

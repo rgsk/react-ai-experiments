@@ -1,6 +1,7 @@
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import { Link } from "react-router-dom";
-import SampleForm from "../Sample/SampleForm";
 import SampleImageUpload from "../Sample/SampleImageUpload";
+import { LoadingSpinner } from "../Shared/LoadingSpinner";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
@@ -10,7 +11,20 @@ const PracticePage: React.FC<PracticePageProps> = ({}) => {
       <Link to={`/personas/edit/ba4626c9-c385-48e9-b5f6-b80bcc8aefd9`}>
         edit persona
       </Link>
-      <SampleForm />
+      <div className="w-[20px]">
+        <CircularProgressbar
+          value={70}
+          counterClockwise
+          strokeWidth={10}
+          styles={buildStyles({
+            pathColor: "#fff",
+            trailColor: "#808080",
+          })}
+        />
+      </div>
+      <div>
+        <LoadingSpinner />
+      </div>
     </div>
   );
 };
