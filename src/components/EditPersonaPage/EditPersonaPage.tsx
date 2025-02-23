@@ -30,18 +30,20 @@ const getContent = async (item: PersonaKnowledgeItem) => {
       .fn();
     return content;
   } else if (item.type === "file") {
+    const { url: signedUrl } = await experimentsService
+      .getAWSDownloadUrl({ url: item.url })
+      .fn();
     const isImage = item.metadata.filetype.startsWith("image/");
     if (isImage) {
-      // perform ocr
-      const imageUrl = item.url;
-      const { url: signedUrl } = await experimentsService
-        .getAWSDownloadUrl({ url: imageUrl })
-        .fn();
       const result = await experimentsService
         .getUrlContent({ url: signedUrl, type: "image" })
         .fn();
       return result;
     } else {
+      const result = await experimentsService
+        .getUrlContent({ url: signedUrl })
+        .fn();
+      return result;
     }
   }
   return "empty content";
