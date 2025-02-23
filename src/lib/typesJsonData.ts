@@ -35,8 +35,10 @@ export type Persona = {
   description: string;
   instructions: string;
 };
-export type Website = {
+export type PersonaKnowledgeItem = {
+  id: string;
   source: string;
   url: string;
+  type: "website" | "youtube" | "image" | "file";
   embedded: boolean;
 };

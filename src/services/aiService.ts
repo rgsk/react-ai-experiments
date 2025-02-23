@@ -22,5 +22,18 @@ const aiService = {
     });
     return result.data;
   },
+  deleteText: async ({
+    collectionName,
+    source,
+  }: {
+    collectionName: string;
+    source: string;
+  }) => {
+    const result = await axiosInstance.post("/delete_text", {
+      collection_name: collectionName,
+      source: source,
+    });
+    return result.data;
+  },
 };
 export default aiService;
