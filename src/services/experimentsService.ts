@@ -171,6 +171,18 @@ const experimentsService = {
       },
     };
   },
+  getUrlContent: ({ url }: { url: string }) => {
+    const query = encodeQueryParams({ url });
+    return {
+      key: ["url-content", query],
+      fn: async () => {
+        const response = await axiosExperimentsInstance.get<string>(
+          `/experiments/url-content?${query}`
+        );
+        return response.data;
+      },
+    };
+  },
 };
 export default experimentsService;
 

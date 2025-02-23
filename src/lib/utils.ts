@@ -45,3 +45,12 @@ export function extractTagContent(inputString: string, tagName: string) {
   }
   return null;
 }
+
+export function normalizeUrl(url: string): string {
+  try {
+    const parsedUrl = new URL(url);
+    return `https://${parsedUrl.hostname}`.toLowerCase().replace(/\/$/, "");
+  } catch (error) {
+    throw new Error("Invalid URL");
+  }
+}

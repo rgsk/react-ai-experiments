@@ -16,14 +16,6 @@ import CentralLoader from "../Shared/CentralLoader";
 import IconButtonWithTooltip from "../Shared/IconButtonWithTooltip";
 import TargetBlankLink from "../Shared/TargetBlankLink";
 import { Textarea } from "../ui/textarea";
-function normalizeUrl(url: string): string {
-  try {
-    const parsedUrl = new URL(url);
-    return `https://${parsedUrl.hostname}`.toLowerCase().replace(/\/$/, "");
-  } catch (error) {
-    throw new Error("Invalid URL");
-  }
-}
 
 const getContent = async ({
   url,
@@ -33,8 +25,7 @@ const getContent = async ({
   type: PersonaKnowledgeItem["type"];
 }) => {
   if (type === "website") {
-    const websiteMeta = await experimentsService.getWebsiteMeta({ url }).fn();
-    const content = websiteMeta.bodyTextContent;
+    const content = await experimentsService.getUrlContent({ url }).fn();
     return content;
   }
   return "";
@@ -67,7 +58,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
     if (!personaKnowledgeItems) return;
     if (z.string().url().safeParse(websiteInput).success) {
       const type: PersonaKnowledgeItem["type"] = "website";
-      const url = normalizeUrl(websiteInput);
+      const url = websiteInput;
       if (personaKnowledgeItems.find((w) => w.type === type && w.url === url)) {
         return alert("this website is already added");
       }
