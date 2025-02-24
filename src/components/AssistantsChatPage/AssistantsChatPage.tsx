@@ -385,7 +385,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
         </div>
         <div className="h-[20px]"></div>
         <div className="flex-1 overflow-auto space-y-[20px] p-[16px]">
-          {[...historyBlocks, ...historyBlocks].map(([date, items], i) => (
+          {historyBlocks.map(([date, items], i) => (
             <HistoryBlock key={i} date={date} conversations={items} />
           ))}
         </div>
