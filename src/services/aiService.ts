@@ -36,5 +36,11 @@ const aiService = {
     });
     return result.data;
   },
+  deleteCollection: async ({ collectionName }: { collectionName: string }) => {
+    const result = await axiosInstance.post("/delete_collection", {
+      collection_name: collectionName,
+    });
+    return result.data;
+  },
 };
 export default aiService;

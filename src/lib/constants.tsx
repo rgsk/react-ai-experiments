@@ -6,3 +6,4 @@ export const fileIcons = {
 };
 
 export const uuidPlaceholder = "________-____-____-____-____________";
+export const openaiIdPlaceholder = "_____________________________";

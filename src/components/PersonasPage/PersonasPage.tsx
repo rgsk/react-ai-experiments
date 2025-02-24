@@ -1,4 +1,5 @@
 import { Edit, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { v4 } from "uuid";
 import {
@@ -9,18 +10,40 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
-import { uuidPlaceholder } from "~/lib/constants";
+import { openaiIdPlaceholder, uuidPlaceholder } from "~/lib/constants";
 import { Persona } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
+import aiService from "~/services/aiService";
+import jsonDataService from "~/services/jsonDataService";
+import NewChatIcon from "../Icons/NewChatIcon";
 import CentralLoader from "../Shared/CentralLoader";
+import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Button } from "../ui/button";
 
 interface PersonasPageProps {}
 const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
-  const { data: personas } = useJsonDataKeysLike<Persona>(
-    `personas/${uuidPlaceholder}`
-  );
+  const { data: personas, refetch: refetchPersonas } =
+    useJsonDataKeysLike<Persona>(`personas/${uuidPlaceholder}`);
   const navigate = useNavigate();
+  const [personasDeleteInProgressIds, setPersonasDeleteInProgressIds] =
+    useState<string[]>([]);
+  const handlePersonaDelete = async (persona: Persona) => {
+    setPersonasDeleteInProgressIds((prev) => [...prev, persona.id]);
+    await aiService.deleteCollection({
+      collectionName: persona.collectionName,
+    });
+    await jsonDataService.deleteKeysLike({
+      key: `assistants/${openaiIdPlaceholder}/personas/${persona.id}/conversations/${uuidPlaceholder}`,
+    });
+    await jsonDataService.deleteKeysLike({
+      key: `personas/${persona.id}/personaKnowledgeItems`,
+    });
+    await jsonDataService.deleteKey({ key: `personas/${persona.id}` });
+    setPersonasDeleteInProgressIds((prev) =>
+      prev.filter((v) => v !== persona.id)
+    );
+    refetchPersonas();
+  };
   if (!personas) {
     return <CentralLoader />;
   }
@@ -41,38 +64,45 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
       <div className="h-[30px]"></div>
       <div className="flex flex-wrap gap-4">
         {personas.map((persona) => (
-          <Link
-            to={`/assistants/chat?personaId=${persona.id}`}
-            key={persona.id}
-          >
-            <Card className="w-[350px]">
-              <CardHeader>
-                <CardTitle>{persona.name}</CardTitle>
-                <CardDescription
-                  className={cn(
-                    "line-clamp-1",
-                    !persona.description && "opacity-0"
-                  )}
-                >
-                  {persona.description || "empty"}
-                </CardDescription>
-              </CardHeader>
-              {/* <CardContent></CardContent> */}
-              <CardFooter className="flex justify-between">
-                <Link to={`/personas/edit/${persona.id}`}>
-                  <Button
-                    variant={"outline"}
-                    className="flex gap-2 items-center"
-                  >
-                    <Edit className="h-4 w-4" /> <span>Edit</span>
+          <Card className="w-[350px]" key={persona.id}>
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center">
+                <p>{persona.name}</p>
+                <Link to={`/assistants/chat?personaId=${persona.id}`}>
+                  <Button variant="outline">
+                    <NewChatIcon />
+                    <span>Chat</span>
                   </Button>
                 </Link>
+              </CardTitle>
+              <div className="h-[8px]"></div>
+              <CardDescription className={cn("min-h-[40px] line-clamp-2")}>
+                {persona.description}
+              </CardDescription>
+            </CardHeader>
+            {/* <CardContent></CardContent> */}
+            <CardFooter className="flex justify-between">
+              <Link to={`/personas/edit/${persona.id}`}>
                 <Button variant={"outline"} className="flex gap-2 items-center">
-                  <Trash2 className="h-4 w-4" /> <span>Delete</span>
+                  <Edit /> <span>Edit</span>
                 </Button>
-              </CardFooter>
-            </Card>
-          </Link>
+              </Link>
+              <Button
+                variant={"outline"}
+                className="flex gap-2 items-center"
+                onClick={() => {
+                  handlePersonaDelete(persona);
+                }}
+              >
+                {personasDeleteInProgressIds.includes(persona.id) ? (
+                  <LoadingSpinner />
+                ) : (
+                  <Trash2 />
+                )}{" "}
+                <span>Delete</span>
+              </Button>
+            </CardFooter>
+          </Card>
         ))}
       </div>
     </div>

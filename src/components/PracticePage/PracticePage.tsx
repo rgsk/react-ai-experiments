@@ -1,14 +1,31 @@
 import { Link } from "react-router-dom";
+import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
+import { openaiIdPlaceholder, uuidPlaceholder } from "~/lib/constants";
+import jsonDataService from "~/services/jsonDataService";
 import SampleImageUpload from "../Sample/SampleImageUpload";
+import { Button } from "../ui/button";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
+  const { data } = useJsonDataKeysLike(
+    `assistants/${openaiIdPlaceholder}/personas/${uuidPlaceholder}/conversations/${uuidPlaceholder}`
+  );
+  console.log({ data });
   return (
     <div className="p-[100px]">
       <Link to={`/personas/edit/ba4626c9-c385-48e9-b5f6-b80bcc8aefd9`}>
         edit persona
       </Link>
       <SampleImageUpload />
+      <Button
+        onClick={async () => {
+          await jsonDataService.deleteKeysLike({
+            key: `assistants/${openaiIdPlaceholder}/personas/${uuidPlaceholder}/conversations/${uuidPlaceholder}`,
+          });
+        }}
+      >
+        Delete
+      </Button>
     </div>
   );
 };

@@ -11,6 +11,7 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({ conversation }) => {
   const pathname = location.pathname;
   const [searchParams] = useSearchParams();
   const threadId = searchParams?.get("threadId");
+  const personaId = searchParams?.get("personaId") ?? undefined;
   if (!conversation.title) {
     return null;
   }
@@ -20,6 +21,7 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({ conversation }) => {
     <Link
       to={`${pathname}?${encodeQueryParams({
         threadId: conversation.threadId,
+        personaId,
       })}`}
     >
       <div
