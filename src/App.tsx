@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import CentralLoader from "./components/Shared/CentralLoader";
 import useAuthRequired from "./hooks/auth/useAuthRequired";
@@ -5,7 +6,9 @@ import useGlobalContext from "./hooks/useGlobalContext";
 import environmentVars from "./lib/environmentVars";
 
 function App() {
-  console.log({ environmentVars });
+  useEffect(() => {
+    console.log({ environmentVars });
+  }, []);
   const { firebaseUserLoading } = useGlobalContext();
   useAuthRequired();
   return (

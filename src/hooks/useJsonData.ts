@@ -61,37 +61,41 @@ function useJsonData<T>(
   );
   const populateState = useCallback(async () => {
     if (!enabled) return;
-    if (
-      previousKeyRef.current !== undefined &&
-      localValueRef.current != undefined
-    ) {
-      // takes care of updating before we change the current key
-      void jsonDataService.setKey({
-        key: previousKeyRef.current,
-        value: localValueRef.current,
-      });
-    }
     setLocalValue(undefined);
     setLoading(true);
-
-    const result = await jsonDataService.getKey<T>({
-      key,
-    });
-    const value = result?.value;
-    lastFetchedValueRef.current = value;
-    if (value !== undefined) {
-      if (migrationRef.current) {
-        const migratedValue = migrationRef.current(value);
-        setSharedState(migratedValue);
-      } else {
-        setLocalValue(value);
+    try {
+      if (
+        previousKeyRef.current !== undefined &&
+        localValueRef.current != undefined
+      ) {
+        // takes care of updating before we change the current key
+        void jsonDataService.setKey({
+          key: previousKeyRef.current,
+          value: localValueRef.current,
+        });
       }
-    } else {
-      const finalInitialValue =
-        initialValueRef.current instanceof Function
-          ? initialValueRef.current()
-          : initialValueRef.current;
-      setSharedState(finalInitialValue);
+
+      const result = await jsonDataService.getKey<T>({
+        key,
+      });
+      const value = result?.value;
+      lastFetchedValueRef.current = value;
+      if (value !== undefined) {
+        if (migrationRef.current) {
+          const migratedValue = migrationRef.current(value);
+          setSharedState(migratedValue);
+        } else {
+          setLocalValue(value);
+        }
+      } else {
+        const finalInitialValue =
+          initialValueRef.current instanceof Function
+            ? initialValueRef.current()
+            : initialValueRef.current;
+        setSharedState(finalInitialValue);
+      }
+    } catch (err) {
+      console.error(err);
     }
     setLoading(false);
   }, [enabled, key, setLocalValue, setSharedState]);

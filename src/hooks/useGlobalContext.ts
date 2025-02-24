@@ -46,7 +46,7 @@ export const useGlobalContextValue = () => {
     if (
       !userDataLoading &&
       !userData &&
-      token && // token condition is important
+      token &&
       firebaseUser &&
       firebaseUser.email &&
       firebaseUser.photoURL &&
