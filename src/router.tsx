@@ -11,6 +11,7 @@ import EditPersonaPage from "./components/EditPersonaPage/EditPersonaPage";
 import HomePage from "./components/HomePage/HomePage";
 import LoginPage from "./components/LoginPage/LoginPage";
 import OcrPage from "./components/OcrPage/OcrPage";
+import PersonasPage from "./components/PersonasPage/PersonasPage";
 import PracticePage from "./components/PracticePage/PracticePage";
 import PreviewPage from "./components/PreviewPage/PreviewPage";
 import YoutubeTranscriptPage from "./components/YoutubeTranscriptPage/YoutubeTranscriptPage";
@@ -42,6 +43,7 @@ const router = createBrowserRouter(
         <Route path="chat" element={<AssistantsChatPage />} />
       </Route>
       <Route path="personas">
+        <Route index element={<PersonasPage />} />
         <Route path="edit">
           <Route path=":personaId" element={<EditPersonaPage />} />
         </Route>

@@ -18,6 +18,7 @@ import { supportedExtensions } from "~/services/assistantsService";
 import { DraggingBackdrop } from "../AssistantsChatPage/AssistantsChatPage";
 import FileUploadedPreview from "../AssistantsChatPage/Children/FileUploadedPreview/FileUploadedPreview";
 import { FileEntry } from "../AssistantsChatPage/Children/MessageInput/MessageInput";
+import NewChatIcon from "../Icons/NewChatIcon";
 import CentralLoader from "../Shared/CentralLoader";
 import IconButtonWithTooltip from "../Shared/IconButtonWithTooltip";
 import TargetBlankLink from "../Shared/TargetBlankLink";
@@ -230,170 +231,110 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
     return <CentralLoader />;
   }
   return (
-    <div className="py-[100px] max-w-[800px] m-auto" {...dropAreaProps}>
+    <div className="p-[32px] relative" {...dropAreaProps}>
       {isDragging && <DraggingBackdrop />}
-      <div>
-        <Link to={`/assistants/chat?personaId=${personaId}`}>
-          <Button>Chat with me</Button>
-        </Link>
-      </div>
-      <div>
-        <Label>Name</Label>
-        <Input
-          placeholder="Name your GPT"
-          value={persona.name}
-          onChange={(e) => {
-            setPersona({ ...persona, name: e.target.value });
-          }}
-        />
-        <Label>Description</Label>
-        <Input
-          placeholder="Add a short description about what this GPT does"
-          value={persona.description}
-          onChange={(e) => {
-            setPersona({ ...persona, description: e.target.value });
-          }}
-        />
-        <Label>Instructions</Label>
-        <Textarea
-          rows={5}
-          placeholder="What does this GPT do? How does it behave? What should it avoid doing?"
-          value={persona.instructions}
-          onChange={(e) => {
-            setPersona({ ...persona, instructions: e.target.value });
-          }}
-        />
-      </div>
-      <Label>Knowledge</Label>
-      <div>
+      <div className="max-w-[800px] m-auto">
+        <h1 className="text-3xl">Persona: {persona.name}</h1>
+        <div className="h-[30px]"></div>
         <div>
-          <Label>
-            Add Url of website/youtube/image/pdf/public google doc/sheet
-          </Label>
-          <Input
-            value={websiteInput}
-            onChange={(e) => {
-              setWebsiteInput(e.target.value);
-            }}
-            placeholder="url"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                onAddWebsite();
-              }
-            }}
-            onPaste={(event) => {
-              handleInputOnPaste(event, handleFilesChange);
-            }}
-          />
+          <Link to={`/assistants/chat?personaId=${personaId}`}>
+            <Button>
+              <NewChatIcon />
+              <span>Chat with me</span>
+            </Button>
+          </Link>
         </div>
-
-        <Button onClick={onAddWebsite} disabled={addWebsiteLoading}>
-          {addWebsiteLoading && <LoadingSpinner />}
-          <span>Add</span>
-        </Button>
-      </div>
-      {personaKnowledgeItems
-        .filter((v) => v.type === "website")
-        .map((w) => {
-          const deleteInProgress = itemsDeleteInProgressIds.includes(w.id);
-          const embeddingInProgress = itemsEmbeddingInProgressIds.includes(
-            w.id
-          );
-          return (
-            <div key={w.id} className="flex justify-between items-center">
-              <TargetBlankLink href={w.url}>{w.url}</TargetBlankLink>
-              <span>
-                {!w.embedded ? (
-                  <IconButtonWithTooltip
-                    disabled={embeddingInProgress}
-                    icon={
-                      embeddingInProgress ? (
-                        <LoadingSpinner size={16} />
-                      ) : (
-                        <RotateCcw size={16} />
-                      )
-                    }
-                    tooltip="Retry"
-                    onClick={() => {
-                      onItemEmbed(w);
-                    }}
-                  />
-                ) : (
-                  <IconButtonWithTooltip
-                    disabled={deleteInProgress}
-                    icon={
-                      deleteInProgress ? (
-                        <LoadingSpinner size={16} />
-                      ) : (
-                        <Trash2 size={16} />
-                      )
-                    }
-                    tooltip="Delete"
-                    onClick={() => {
-                      onDeletePersonaKnowledgeItem(w);
-                    }}
-                  />
-                )}
-              </span>
+        <div className="h-[30px]"></div>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label>Name</Label>
+            <Input
+              placeholder="Name your GPT"
+              value={persona.name}
+              onChange={(e) => {
+                setPersona({ ...persona, name: e.target.value });
+              }}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label>Description</Label>
+            <Input
+              placeholder="Add a short description about what this GPT does"
+              value={persona.description}
+              onChange={(e) => {
+                setPersona({ ...persona, description: e.target.value });
+              }}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label>Instructions</Label>
+            <Textarea
+              rows={5}
+              placeholder="What does this GPT do? How does it behave? What should it avoid doing?"
+              value={persona.instructions}
+              onChange={(e) => {
+                setPersona({ ...persona, instructions: e.target.value });
+              }}
+            />
+          </div>
+        </div>
+        <div className="h-[30px]"></div>
+        <div>
+          <div>
+            <div className="space-y-2">
+              <Label>Knowledge</Label>
+              <p className="text-sm">
+                Add websites or drag/paste images/files here
+              </p>
+              <Input
+                value={websiteInput}
+                onChange={(e) => {
+                  setWebsiteInput(e.target.value);
+                }}
+                placeholder="url of website/youtube video/image/pdf/public google doc/sheet"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    onAddWebsite();
+                  }
+                }}
+                onPaste={(event) => {
+                  handleInputOnPaste(event, handleFilesChange);
+                }}
+              />
             </div>
-          );
-        })}
-      <div>
-        <div>
-          <Label>Upload Files</Label>
-        </div>
-
-        {attachedFiles.length > 0 && (
-          <div className="flex gap-[16px] pb-[24px] pt-[12px]">
-            {attachedFiles.map((fileEntry) => {
-              const personaKnowledgeItem = personaKnowledgeItems.find(
-                (v) => v.url === fileEntry.s3Url?.split("?")[0]
-              );
-              const embeddingInProgress = personaKnowledgeItem
-                ? itemsEmbeddingInProgressIds.includes(personaKnowledgeItem.id)
-                : false;
-              return (
-                <div key={fileEntry.id}>
-                  <FileUploadedPreview
-                    key={fileEntry.id}
-                    destination="s3"
-                    fileEntry={fileEntry}
-                    onRemove={() => {
-                      if (fileEntry.s3Url) {
-                        experimentsService.deleteFileFromS3(fileEntry.s3Url);
-                      }
-                      setAttachedFiles((prev) =>
-                        prev.filter((entry) => entry.id !== fileEntry.id)
-                      );
-                      if (personaKnowledgeItem) {
-                        onDeletePersonaKnowledgeItem(personaKnowledgeItem);
-                      }
-                    }}
-                    onS3Upload={(s3Url) => {
-                      setAttachedFiles((prev) =>
-                        prev.map((entry) =>
-                          entry.id === fileEntry.id
-                            ? { ...entry, s3Url }
-                            : entry
-                        )
-                      );
-                      console.log({ s3Url });
-                      if (fileEntry.file) {
-                        onAddFile({
-                          url: s3Url,
-                          filename: fileEntry.file.name,
-                          filetype: fileEntry.file.type,
-                        });
-                      }
-                    }}
-                  />
-                  {!personaKnowledgeItem ? (
-                    <p>personaKnowledgeItem doesn't exists</p>
-                  ) : (
-                    <div>
-                      {!personaKnowledgeItem.embedded ? (
-                        <div>
+            <div className="h-[8px]"></div>
+            <Button
+              variant="outline"
+              onClick={onAddWebsite}
+              disabled={addWebsiteLoading}
+            >
+              {addWebsiteLoading && <LoadingSpinner />}
+              <span>Add</span>
+            </Button>
+          </div>
+          <div className="h-[20px]"></div>
+          <div>
+            <Label>Added Links</Label>
+            <div>
+              {personaKnowledgeItems
+                .filter((v) => v.type === "website")
+                .map((w) => {
+                  const deleteInProgress = itemsDeleteInProgressIds.includes(
+                    w.id
+                  );
+                  const embeddingInProgress =
+                    itemsEmbeddingInProgressIds.includes(w.id);
+                  return (
+                    <div
+                      key={w.id}
+                      className="flex justify-between items-center"
+                    >
+                      <TargetBlankLink href={w.url}>
+                        <span className="text-sm">{w.url}</span>
+                      </TargetBlankLink>
+                      <span>
+                        {!w.embedded ? (
                           <IconButtonWithTooltip
                             disabled={embeddingInProgress}
                             icon={
@@ -405,18 +346,122 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                             }
                             tooltip="Retry"
                             onClick={() => {
-                              onItemEmbed(personaKnowledgeItem);
+                              onItemEmbed(w);
                             }}
                           />
-                        </div>
-                      ) : null}
+                        ) : (
+                          <IconButtonWithTooltip
+                            disabled={deleteInProgress}
+                            icon={
+                              deleteInProgress ? (
+                                <LoadingSpinner size={16} />
+                              ) : (
+                                <Trash2 size={16} />
+                              )
+                            }
+                            tooltip="Delete"
+                            onClick={() => {
+                              onDeletePersonaKnowledgeItem(w);
+                            }}
+                          />
+                        )}
+                      </span>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+            </div>
           </div>
-        )}
+        </div>
+
+        <div className="h-[30px]"></div>
+        <div>
+          <div>
+            <Label>Uploaded Files</Label>
+          </div>
+
+          <div>
+            {attachedFiles.length > 0 ? (
+              <div className="flex gap-[16px] pb-[24px] pt-[12px]">
+                {attachedFiles.map((fileEntry) => {
+                  const personaKnowledgeItem = personaKnowledgeItems.find(
+                    (v) => v.url === fileEntry.s3Url?.split("?")[0]
+                  );
+                  const embeddingInProgress = personaKnowledgeItem
+                    ? itemsEmbeddingInProgressIds.includes(
+                        personaKnowledgeItem.id
+                      )
+                    : false;
+                  return (
+                    <div key={fileEntry.id}>
+                      <FileUploadedPreview
+                        key={fileEntry.id}
+                        destination="s3"
+                        fileEntry={fileEntry}
+                        onRemove={() => {
+                          if (fileEntry.s3Url) {
+                            experimentsService.deleteFileFromS3(
+                              fileEntry.s3Url
+                            );
+                          }
+                          setAttachedFiles((prev) =>
+                            prev.filter((entry) => entry.id !== fileEntry.id)
+                          );
+                          if (personaKnowledgeItem) {
+                            onDeletePersonaKnowledgeItem(personaKnowledgeItem);
+                          }
+                        }}
+                        onS3Upload={(s3Url) => {
+                          setAttachedFiles((prev) =>
+                            prev.map((entry) =>
+                              entry.id === fileEntry.id
+                                ? { ...entry, s3Url }
+                                : entry
+                            )
+                          );
+                          console.log({ s3Url });
+                          if (fileEntry.file) {
+                            onAddFile({
+                              url: s3Url,
+                              filename: fileEntry.file.name,
+                              filetype: fileEntry.file.type,
+                            });
+                          }
+                        }}
+                      />
+                      {!personaKnowledgeItem ? null : (
+                        <div>
+                          {!personaKnowledgeItem.embedded ? (
+                            <div>
+                              <IconButtonWithTooltip
+                                disabled={embeddingInProgress}
+                                icon={
+                                  embeddingInProgress ? (
+                                    <LoadingSpinner size={16} />
+                                  ) : (
+                                    <RotateCcw size={16} />
+                                  )
+                                }
+                                tooltip="Retry"
+                                onClick={() => {
+                                  onItemEmbed(personaKnowledgeItem);
+                                }}
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm my-2">
+                No Uploaded Files, click the button below add files
+              </p>
+            )}
+          </div>
+          <Button variant="outline">Upload Files</Button>
+        </div>
       </div>
     </div>
   );
