@@ -2,10 +2,10 @@ import { ISODateString } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import { axiosExperimentsInstance } from "./experimentsService";
 
-export type JsonData = {
+export type JsonData<T> = {
   id: string;
   key: string;
-  value: any;
+  value: T;
   version: string;
   expireAt: ISODateString | null;
   createdAt: ISODateString;
@@ -13,14 +13,17 @@ export type JsonData = {
 };
 
 const addPrefixToKey = (key: string) => {
+  if (key.includes("admin")) {
+    return `reactAIExperiments/${key}`;
+  }
   return `reactAIExperiments/users/$userEmail/${key}`;
 };
 
 const jsonDataService = {
   getKey: async <T>({ key }: { key: string }) => {
-    const result = await axiosExperimentsInstance.get<
-      (Omit<JsonData, "value"> & { value: T }) | null
-    >(`/json-data?${encodeQueryParams({ key: addPrefixToKey(key) })}`);
+    const result = await axiosExperimentsInstance.get<JsonData<T> | null>(
+      `/json-data?${encodeQueryParams({ key: addPrefixToKey(key) })}`
+    );
     return result.data;
   },
   getKeysLike: <T>({ key }: { key: string }) => {
@@ -30,9 +33,7 @@ const jsonDataService = {
     return {
       queryKey: [path],
       queryFn: async () => {
-        const result = await axiosExperimentsInstance.get<
-          (Omit<JsonData, "value"> & { value: T })[]
-        >(path);
+        const result = await axiosExperimentsInstance.get<JsonData<T>[]>(path);
         return result.data;
       },
     };
@@ -57,7 +58,7 @@ const jsonDataService = {
       key: addPrefixToKey(key),
       value,
     });
-    return result.data as (Omit<JsonData, "value"> & { value: T }) | null;
+    return result.data as JsonData<T> | null;
   },
   createMany: async <T>(data: { key: string; value?: T }[]) => {
     const result = await axiosExperimentsInstance.post(`/json-data/bulk`, {

@@ -58,3 +58,9 @@ export type PersonaKnowledgeItem = BasePersonaKnowledgeItem &
         };
       }
   );
+
+export type CreditDetails = {
+  id: string;
+  userEmail: string;
+  balance: number;
+};

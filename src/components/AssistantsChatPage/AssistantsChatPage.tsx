@@ -83,7 +83,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
-  const { userData } = useGlobalContext();
+  const { userData, deductCredits } = useGlobalContext();
   const userId = userData?.id;
 
   const openNewThread = useCallback(async () => {
@@ -185,6 +185,9 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
     }
     if (!userId) throw new Error("userId is missing");
     try {
+      const hasRemainingCredits = await deductCredits();
+      if (!hasRemainingCredits) return;
+
       const attachments: MessageCreateParams.Attachment[] = [];
       const imageFileIds: string[] = [];
       const imageUrls: Record<string, string> = {};

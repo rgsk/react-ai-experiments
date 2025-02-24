@@ -4,8 +4,10 @@ import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/useGlobalContext";
 import environmentVars from "~/lib/environmentVars";
+import { CreditDetails } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
+import { JsonData } from "./jsonDataService";
 export const axiosExperimentsInstance = axios.create({
   baseURL: environmentVars.NODE_EXPERIMENTS_SERVER_URL,
 });
@@ -221,6 +223,19 @@ const experimentsService = {
         url,
       })}`
     );
+    return result.data;
+  },
+  initializeCredits: async () => {
+    const result = await axiosExperimentsInstance.post<JsonData<CreditDetails>>(
+      `/initialize-credits`
+    );
+    return result.data;
+  },
+  deductCredits: async () => {
+    const result = await axiosExperimentsInstance.post<{
+      isAllowed: boolean;
+      creditsBalance: number;
+    }>(`/deduct-credits`);
     return result.data;
   },
 };

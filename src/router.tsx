@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import App from "~/App";
 import Providers from "~/Providers";
+import AdminHomePage from "./components/AdminHomePage/AdminHomePage";
 import AssistantsChatPage from "./components/AssistantsChatPage/AssistantsChatPage";
 import ChatPage from "./components/ChatPage/ChatPage";
 import EditPersonaPage from "./components/EditPersonaPage/EditPersonaPage";
@@ -41,6 +42,9 @@ const router = createBrowserRouter(
       </Route>
       <Route path="assistants">
         <Route path="chat" element={<AssistantsChatPage />} />
+      </Route>
+      <Route path="admin">
+        <Route index element={<AdminHomePage />} />
       </Route>
       <Route path="personas">
         <Route index element={<PersonasPage />} />

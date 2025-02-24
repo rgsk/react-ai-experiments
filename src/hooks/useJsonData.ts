@@ -92,7 +92,9 @@ function useJsonData<T>(
           initialValueRef.current instanceof Function
             ? initialValueRef.current()
             : initialValueRef.current;
-        setSharedState(finalInitialValue);
+        if (finalInitialValue !== undefined) {
+          setSharedState(finalInitialValue);
+        }
       }
     } catch (err) {
       console.error(err);

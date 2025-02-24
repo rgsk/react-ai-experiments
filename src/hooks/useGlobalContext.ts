@@ -1,10 +1,18 @@
 // context/GlobalContext.tsx
 
 import { User } from "firebase/auth";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { v4 } from "uuid";
 import { firebaseAuth } from "~/lib/firebaseApp";
-import { UserData } from "~/lib/typesJsonData";
+import { CreditDetails, UserData } from "~/lib/typesJsonData";
+import experimentsService from "~/services/experimentsService";
 import useJsonData from "./useJsonData";
 import useLocalStorageState, {
   localStorageWithExpiry,
@@ -20,14 +28,25 @@ export const getToken = () => {
 export const useGlobalContextValue = () => {
   const [token, setToken] = useLocalStorageState<string>("token");
   const [tokenLoading, setTokenLoading] = useState(true);
-
   const [firebaseUser, setFirebaseUser] = useState<User>();
+  const [
+    creditDetails,
+    ,
+    { loading: creditDetailsLoading, refetch: refetchCreditDetails },
+  ] = useJsonData<CreditDetails>(
+    `admin/public/creditDetails/${firebaseUser?.email}`,
+    undefined,
+    { enabled: !!firebaseUser }
+  );
+  const [creditsOverMessage, setCreditsOverMessage] = useState<string>();
+
   const [firebaseUserLoading, setFirebaseUserLoading] = useState(true);
   const [
     userData,
     setUserData,
     { loading: userDataLoading, updating: userDataUpdating },
   ] = useJsonData<UserData>("userData");
+  const currentExecuteCodeRef = useRef<React.MutableRefObject<() => void>>();
 
   useEffect(() => {
     return firebaseAuth.onAuthStateChanged(async (user) => {
@@ -61,7 +80,28 @@ export const useGlobalContextValue = () => {
       });
     }
   }, [firebaseUser, setUserData, token, userData, userDataLoading]);
-  const currentExecuteCodeRef = useRef<React.MutableRefObject<() => void>>();
+
+  const deductCredits = useCallback(async () => {
+    const deductCreditsResponse = await experimentsService.deductCredits();
+    if (!deductCreditsResponse.isAllowed) {
+      setCreditsOverMessage("No more credits left. Please buy new credits.");
+      return false;
+    }
+    return true;
+  }, []);
+
+  useEffect(() => {
+    if (!creditDetailsLoading) {
+      if (!creditDetails) {
+        // initialize credits
+        (async () => {
+          const result = await experimentsService.initializeCredits();
+          // console.log(result.value.balance);
+          refetchCreditDetails();
+        })();
+      }
+    }
+  }, [creditDetails, creditDetailsLoading, refetchCreditDetails]);
 
   return {
     token,
@@ -72,6 +112,10 @@ export const useGlobalContextValue = () => {
     userDataLoading,
     userDataUpdating,
     currentExecuteCodeRef,
+    creditDetails,
+    deductCredits,
+    creditsOverMessage,
+    setCreditsOverMessage,
   };
 };
 
