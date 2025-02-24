@@ -1,9 +1,10 @@
 import { CheckCheck, Copy } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "~/components/ui/button";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import { CreditDetails } from "~/lib/typesJsonData";
-import { Button } from "../ui/button";
 
 interface AdminHomePageProps {}
 const AdminHomePage: React.FC<AdminHomePageProps> = ({}) => {
@@ -32,13 +33,19 @@ const AdminHomePage: React.FC<AdminHomePageProps> = ({}) => {
         </span>
         Copy Token
       </Button>
-      {creditDetailsEntries?.map((creditDetails) => {
-        return (
-          <div key={creditDetails.id}>
-            {creditDetails.userEmail}: {creditDetails.balance}
-          </div>
-        );
-      })}
+      <div className="h-[30px]"></div>
+      <div className="space-y-2">
+        {creditDetailsEntries?.map((creditDetails) => {
+          return (
+            <div key={creditDetails.id} className="flex justify-between">
+              {creditDetails.userEmail}: {creditDetails.balance}
+              <Link to={`/admin/users/${creditDetails.userEmail}`}>
+                <Button>View</Button>
+              </Link>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

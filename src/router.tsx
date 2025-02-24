@@ -5,7 +5,8 @@ import {
 } from "react-router-dom";
 import App from "~/App";
 import Providers from "~/Providers";
-import AdminHomePage from "./components/AdminHomePage/AdminHomePage";
+import AdminHomePage from "./components/Admin/AdminHomePage/AdminHomePage";
+import AdminSingleUserPage from "./components/Admin/AdminSingleUserPage/AdminSingleUserPage";
 import AssistantsChatPage from "./components/AssistantsChatPage/AssistantsChatPage";
 import ChatPage from "./components/ChatPage/ChatPage";
 import EditPersonaPage from "./components/EditPersonaPage/EditPersonaPage";
@@ -45,6 +46,9 @@ const router = createBrowserRouter(
       </Route>
       <Route path="admin">
         <Route index element={<AdminHomePage />} />
+        <Route path="users">
+          <Route path=":userEmail" element={<AdminSingleUserPage />} />
+        </Route>
       </Route>
       <Route path="personas">
         <Route index element={<PersonasPage />} />
