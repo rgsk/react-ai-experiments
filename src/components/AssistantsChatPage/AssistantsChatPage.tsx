@@ -9,19 +9,31 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 } from "uuid";
 import useDropArea from "~/hooks/useDropArea";
 
-import { encodeQueryParams, extractTagContent } from "~/lib/utils";
-
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { Home } from "lucide-react";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import Container from "~/components/Shared/Container";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "~/components/ui/dropdown-menu";
 import useUserData from "~/hooks/auth/useUserData";
 import { useAssistantsChatSocketListeners } from "~/hooks/useAssistantsChatSocketListeners";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
+import authService from "~/lib/authService";
 import { uuidPlaceholder } from "~/lib/constants";
 import environmentVars from "~/lib/environmentVars";
 import { generateQuestionPrompt } from "~/lib/prompts";
 import { Conversation, Persona } from "~/lib/typesJsonData";
+import { encodeQueryParams, extractTagContent } from "~/lib/utils";
 import assistantsService, {
   getToolForFile,
   supportedExtensions,
@@ -315,7 +327,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
     );
 
   const conversation = conversations?.find((c) => c.threadId === threadId);
-
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(conversations || []);
   }, [conversations]);
@@ -379,7 +391,27 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
         </div>
         <div className="h-[20px]"></div>
         <div className="p-[16px]">
-          <ProfileInfo />
+          <DropdownMenu
+            open={profileDropdownOpen}
+            onOpenChange={(value) => setProfileDropdownOpen(value)}
+          >
+            <DropdownMenuTrigger asChild>
+              <button className="w-full"></button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent avoidCollisions align="start" side="top">
+              <DropdownMenuItem onClick={authService.logout}>
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              setProfileDropdownOpen(true);
+            }}
+          >
+            <ProfileInfo />
+          </div>
         </div>
       </div>
       <div
@@ -393,7 +425,13 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
       >
         {isDragging && <DraggingBackdrop />}
         <div className="border-b border-b-input p-4 flex justify-between items-center">
-          <span></span>
+          <span>
+            <Link to="/">
+              <Button variant="outline" size="icon">
+                <Home />
+              </Button>
+            </Link>
+          </span>
           <span>{conversation?.title ?? "New Chat"}</span>
           <ModeToggle />
         </div>
