@@ -1,33 +1,40 @@
-import { useNavigate } from "react-router-dom";
+import { Home } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import authService from "~/lib/authService";
 import ProfileInfo from "../ProfileInfo/ProfileInfo";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
+import { Button } from "../ui/button";
 
 interface LoginPageProps {}
 const LoginPage: React.FC<LoginPageProps> = ({}) => {
   const { firebaseUser, firebaseUserLoading } = useGlobalContext();
   const navigate = useNavigate();
   return (
-    <div className="bg-[#F3F4F6] w-screen h-screen flex items-center justify-center">
+    <div className="bg-background w-screen h-screen flex items-center justify-center">
       {firebaseUserLoading ? (
         <div>
           <LoadingSpinner />
         </div>
       ) : (
-        <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
+        <div className="border rounded-xl p-8 w-full max-w-md">
           {firebaseUser ? (
             <div>
-              <p className="text-sm">Signed in as:</p>
+              <p>Logged in as:</p>
               <div className="h-[10px]"></div>
               <ProfileInfo />
-              <div className="h-[10px]"></div>
-              <button
-                onClick={authService.logout}
-                className="border border-[#030A211A] rounded-[6px] px-[12px] py-[8px] text-[14px]"
-              >
-                Logout
-              </button>
+              <div className="h-[30px]"></div>
+              <div className="flex justify-between">
+                <Link to="/">
+                  <Button variant="outline">
+                    <Home />
+                    <span>Go to Home Page</span>
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={authService.logout}>
+                  Logout
+                </Button>
+              </div>
             </div>
           ) : (
             <div>
@@ -44,13 +51,14 @@ const LoginPage: React.FC<LoginPageProps> = ({}) => {
                 </h1>
               </div>
               <div className="h-[40px]"></div>
-              <button
+              <Button
+                variant="outline"
+                className="w-full h-[50px]"
                 onClick={async () => {
                   const userCredential = await authService.signInWithGoogle();
                   console.log({ userCredential });
                   navigate("/");
                 }}
-                className="flex justify-center font-semibold gap-3 items-center border border-gray-300 rounded-lg w-full py-3"
               >
                 <span>
                   <img
@@ -61,7 +69,7 @@ const LoginPage: React.FC<LoginPageProps> = ({}) => {
                   />
                 </span>
                 <span>Continue with Google</span>
-              </button>
+              </Button>
             </div>
           )}
         </div>

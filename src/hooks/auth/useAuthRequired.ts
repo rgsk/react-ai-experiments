@@ -1,16 +1,20 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useToken from "./useToken";
 
 const useAuthRequired = () => {
   const { token, tokenLoading } = useToken();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
   useEffect(() => {
-    if (!tokenLoading) {
-      if (!token) {
-        navigate("/login");
+    if (pathname !== "/login") {
+      if (!tokenLoading) {
+        if (!token) {
+          navigate("/login");
+        }
       }
     }
-  }, [navigate, token, tokenLoading]);
+  }, [navigate, pathname, token, tokenLoading]);
 };
 export default useAuthRequired;
