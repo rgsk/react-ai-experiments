@@ -16,11 +16,12 @@ import Container from "~/components/Shared/Container";
 import useUserData from "~/hooks/auth/useUserData";
 import { useAssistantsChatSocketListeners } from "~/hooks/useAssistantsChatSocketListeners";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
+import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import { uuidPlaceholder } from "~/lib/constants";
 import environmentVars from "~/lib/environmentVars";
 import { generateQuestionPrompt } from "~/lib/prompts";
-import { Conversation } from "~/lib/typesJsonData";
+import { Conversation, Persona } from "~/lib/typesJsonData";
 import assistantsService, {
   getToolForFile,
   supportedExtensions,
@@ -28,6 +29,7 @@ import assistantsService, {
 import experimentsService from "~/services/experimentsService";
 import jsonDataService from "~/services/jsonDataService";
 import NewChatIcon from "../Icons/NewChatIcon";
+import CentralLoader from "../Shared/CentralLoader";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";
@@ -96,6 +98,8 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
+
+  const [persona] = useJsonData<Persona>(`personas/${personaId}`);
 
   const { scrollToBottom } = useEnsureScrolledToBottom({
     scrollContainerRef: scrollContainerRef,
@@ -404,14 +408,33 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
               <>
                 <Container centerContent={true}>
                   <div className="w-[800px]">
-                    <h1 className="text-center text-4xl mb-[50px]">
-                      What can I help with?
-                    </h1>
-                    <MessageInputContainer>
-                      {renderMessageInput({ showFilesUploadedPreview: true })}
-                    </MessageInputContainer>
+                    {personaId && !persona ? (
+                      <CentralLoader />
+                    ) : (
+                      <>
+                        <div className="text-center">
+                          {persona ? (
+                            <div>
+                              <h1 className="text-3xl">{persona.name}</h1>
+                              <p>{persona.description}</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <h1 className="text-4xl">
+                                What can I help with?
+                              </h1>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </Container>
+                <MessageInputContainer>
+                  {renderMessageInput({
+                    showFilesUploadedPreview: true,
+                  })}
+                </MessageInputContainer>
               </>
             ) : (
               <>
