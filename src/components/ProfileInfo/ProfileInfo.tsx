@@ -1,9 +1,10 @@
 import useGlobalContext from "~/hooks/useGlobalContext";
+import { LoadingSpinner } from "../Shared/LoadingSpinner";
 
 interface ProfileInfoProps {}
 const ProfileInfo: React.FC<ProfileInfoProps> = ({}) => {
   const { userData } = useGlobalContext();
-  if (!userData) return null;
+  if (!userData) return <LoadingSpinner />;
   return (
     <div>
       <div className="border rounded-[6px] py-[8px] px-[12px] cursor-pointer">
