@@ -383,7 +383,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
 
           <div>
             {attachedFiles.length > 0 ? (
-              <div className="flex gap-[16px] pb-[24px] pt-[12px]">
+              <div className="flex gap-[16px] pb-[24px] pt-[12px] flex-wrap">
                 {attachedFiles.map((fileEntry) => {
                   const personaKnowledgeItem = personaKnowledgeItems.find(
                     (v) => v.url === fileEntry.s3Url?.split("?")[0]
