@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import jsonDataService from "~/services/jsonDataService";
 import usePrevious from "./usePrevious";
-import useWindowMessageAndBroadcastChannelState from "./useWindowMessageAndBroadcastChannelState";
 
 function useJsonData<T>(
   key: string,
@@ -14,9 +13,7 @@ function useJsonData<T>(
     migration?: (previousValue: any) => T;
   } = {}
 ) {
-  const [localValue, setLocalValue] = useWindowMessageAndBroadcastChannelState<
-    T | undefined
-  >(key);
+  const [localValue, setLocalValue] = useState<T | undefined>();
 
   const localValueRef = useRef(localValue);
   localValueRef.current = localValue;
