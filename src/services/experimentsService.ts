@@ -2,13 +2,14 @@ import axios from "axios";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
-import { getToken } from "~/hooks/auth/useToken";
+import { getToken } from "~/hooks/useGlobalContext";
 import environmentVars from "~/lib/environmentVars";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 export const axiosExperimentsInstance = axios.create({
   baseURL: environmentVars.NODE_EXPERIMENTS_SERVER_URL,
 });
+
 axiosExperimentsInstance.interceptors.request.use((config) => {
   const token = getToken();
   config.headers.Authorization = `Bearer ${token}`;

@@ -23,9 +23,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "~/components/ui/dropdown-menu";
-import useUserData from "~/hooks/auth/useUserData";
 import { useAssistantsChatSocketListeners } from "~/hooks/useAssistantsChatSocketListeners";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
+import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import authService from "~/lib/authService";
@@ -83,7 +83,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
-  const { userData } = useUserData();
+  const { userData } = useGlobalContext();
   const userId = userData?.id;
 
   const openNewThread = useCallback(async () => {

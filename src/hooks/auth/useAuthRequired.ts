@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import useToken from "./useToken";
+import useGlobalContext from "../useGlobalContext";
 
 const useAuthRequired = () => {
-  const { token, tokenLoading } = useToken();
+  const { token, tokenLoading } = useGlobalContext();
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;

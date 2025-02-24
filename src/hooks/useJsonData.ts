@@ -33,6 +33,32 @@ function useJsonData<T>(
   const lastFetchedValueRef = useRef<T | undefined>();
   const migrationRef = useRef(migration);
   migrationRef.current = migration;
+  const setSharedState = useCallback(
+    (
+      valueOrFunction:
+        | (T | undefined)
+        | ((prev: T | undefined) => T | undefined)
+    ) => {
+      // Allow value to be a function so we have same API as useState
+      const newState =
+        valueOrFunction instanceof Function
+          ? valueOrFunction(localValueRef.current)
+          : valueOrFunction;
+      setLocalValue(newState);
+      setUpdating(true);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      timerRef.current = setTimeout(async () => {
+        await jsonDataService.setKey({
+          key: keyRef.current,
+          value: newState,
+        });
+        setUpdating(false);
+      }, 1000);
+    },
+    [setLocalValue]
+  );
   const populateState = useCallback(async () => {
     if (!enabled) return;
     if (
@@ -68,7 +94,7 @@ function useJsonData<T>(
       setSharedState(finalInitialValue);
     }
     setLoading(false);
-  }, [enabled, key, setLocalValue]);
+  }, [enabled, key, setLocalValue, setSharedState]);
 
   useEffect(() => {
     void populateState();
@@ -87,33 +113,6 @@ function useJsonData<T>(
   }, []);
   const [updating, setUpdating] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
-
-  const setSharedState = useCallback(
-    (
-      valueOrFunction:
-        | (T | undefined)
-        | ((prev: T | undefined) => T | undefined)
-    ) => {
-      // Allow value to be a function so we have same API as useState
-      const newState =
-        valueOrFunction instanceof Function
-          ? valueOrFunction(localValueRef.current)
-          : valueOrFunction;
-      setLocalValue(newState);
-      setUpdating(true);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-      timerRef.current = setTimeout(async () => {
-        await jsonDataService.setKey({
-          key: keyRef.current,
-          value: newState,
-        });
-        setUpdating(false);
-      }, 1000);
-    },
-    [setLocalValue]
-  );
 
   return [
     localValue,
