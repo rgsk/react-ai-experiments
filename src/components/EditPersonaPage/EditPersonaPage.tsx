@@ -20,6 +20,7 @@ import FileUploadedPreview from "../AssistantsChatPage/Children/FileUploadedPrev
 import { FileEntry } from "../AssistantsChatPage/Children/MessageInput/MessageInput";
 import NewChatIcon from "../Icons/NewChatIcon";
 import CentralLoader from "../Shared/CentralLoader";
+import FileInputTrigger from "../Shared/FileInputTrigger";
 import IconButtonWithTooltip from "../Shared/IconButtonWithTooltip";
 import TargetBlankLink from "../Shared/TargetBlankLink";
 import { Textarea } from "../ui/textarea";
@@ -375,8 +376,9 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
 
         <div className="h-[30px]"></div>
         <div>
-          <div>
+          <div className="space-y-2">
             <Label>Uploaded Files</Label>
+            <p className="text-sm">Upload image/text/csv/pdf file</p>
           </div>
 
           <div>
@@ -456,11 +458,20 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
               </div>
             ) : (
               <p className="text-sm my-2">
-                No Uploaded Files, click the button below add files
+                No Uploaded Files, click the button below to add files
               </p>
             )}
           </div>
-          <Button variant="outline">Upload Files</Button>
+          <FileInputTrigger
+            handleFilesChange={handleFilesChange}
+            component={(onClick) => {
+              return (
+                <Button variant="outline" onClick={onClick}>
+                  Upload Files
+                </Button>
+              );
+            }}
+          />
         </div>
       </div>
     </div>
