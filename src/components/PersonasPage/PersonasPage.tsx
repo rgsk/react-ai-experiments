@@ -62,9 +62,9 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
         </Button>
       </div>{" "}
       <div className="h-[30px]"></div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4 items-stretch">
         {personas.map((persona) => (
-          <Card className="w-[350px]" key={persona.id}>
+          <Card className="w-[350px] flex flex-col" key={persona.id}>
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <p>{persona.name}</p>
@@ -76,11 +76,11 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
                 </Link>
               </CardTitle>
               <div className="h-[8px]"></div>
-              <CardDescription className={cn("min-h-[40px] line-clamp-2")}>
+              <CardDescription className={cn("line-clamp-2")}>
                 {persona.description}
               </CardDescription>
             </CardHeader>
-            {/* <CardContent></CardContent> */}
+            <div className="flex-1"></div>
             <CardFooter className="flex justify-between">
               <Link to={`/personas/edit/${persona.id}`}>
                 <Button variant={"outline"} className="flex gap-2 items-center">

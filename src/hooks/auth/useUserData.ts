@@ -17,12 +17,14 @@ const useUserData = () => {
       !userData &&
       firebaseUser &&
       firebaseUser.email &&
+      firebaseUser.photoURL &&
       firebaseUser.displayName
     ) {
       setUserData({
         id: v4(),
         email: firebaseUser.email,
         name: firebaseUser.displayName,
+        avatarUrl: firebaseUser.photoURL,
         createdAt: new Date().toISOString(),
       });
     }

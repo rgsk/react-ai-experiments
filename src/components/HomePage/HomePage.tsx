@@ -1,33 +1,40 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { v4 } from "uuid";
-import { Button } from "~/components/ui/button";
-import { ModeToggle } from "../Shared/ModeToggle";
-
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+const items = [
+  {
+    link: `/assistants/chat`,
+    title: "Assistants Chat",
+    description: "Chat with General Assistant",
+  },
+  {
+    link: `/personas`,
+    title: "Personas",
+    description: "Create AI Personas with Knowledge base and Chat with them",
+  },
+];
 interface HomePageProps {}
 const HomePage: React.FC<HomePageProps> = ({}) => {
-  const [count, setCount] = useState(1);
-
   return (
-    <div>
-      <div>
-        <p className="text-red-500 text-lg">Home Page</p>
-        <Link to="/practice">Go To Practice Page</Link>
-        <p>
-          <Link to={`/chat/${v4()}`}>Chat</Link>
-        </p>
-        <p>
-          <Link to={`/assistants/chat`}>Assistants Chat</Link>
-        </p>
+    <div className="p-[32px]">
+      <div className="flex gap-4 items-stretch">
+        {items.map((item) => {
+          return (
+            <Link to={item.link} key={item.link}>
+              <Card className="w-[350px] h-full">
+                <CardHeader>
+                  <CardTitle>{item.title}</CardTitle>
+                  <CardDescription>{item.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
-      <Button
-        onClick={() => {
-          setCount((prev) => prev + 1);
-        }}
-      >
-        Count: {count}
-      </Button>
-      <ModeToggle />
     </div>
   );
 };

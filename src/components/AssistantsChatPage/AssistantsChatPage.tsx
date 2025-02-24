@@ -29,6 +29,7 @@ import assistantsService, {
 import experimentsService from "~/services/experimentsService";
 import jsonDataService from "~/services/jsonDataService";
 import NewChatIcon from "../Icons/NewChatIcon";
+import ProfileInfo from "../ProfileInfo/ProfileInfo";
 import CentralLoader from "../Shared/CentralLoader";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { ModeToggle } from "../Shared/ModeToggle";
@@ -359,8 +360,8 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
 
   return (
     <div className="h-screen flex">
-      <div className="w-[260px] p-[16px] border-r border-r-input">
-        <div>
+      <div className="w-[260px] border-r border-r-input h-full flex flex-col">
+        <div className="p-[16px]">
           <Button
             onClick={() => {
               openNewChat();
@@ -370,12 +371,15 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
             <span>New Chat</span>
           </Button>
         </div>
-        <div className="mt-[30px]">
-          <div className="space-y-[20px]">
-            {historyBlocks.map(([date, items], i) => (
-              <HistoryBlock key={i} date={date} conversations={items} />
-            ))}
-          </div>
+        <div className="h-[20px]"></div>
+        <div className="flex-1 overflow-auto space-y-[20px] p-[16px]">
+          {[...historyBlocks, ...historyBlocks].map(([date, items], i) => (
+            <HistoryBlock key={i} date={date} conversations={items} />
+          ))}
+        </div>
+        <div className="h-[20px]"></div>
+        <div className="p-[16px]">
+          <ProfileInfo />
         </div>
       </div>
       <div

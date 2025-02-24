@@ -14,6 +14,7 @@ export type UserData = {
   id: string;
   name: string;
   email: string;
+  avatarUrl: string;
   createdAt: ISODateString;
 };
 export type Memory = {
