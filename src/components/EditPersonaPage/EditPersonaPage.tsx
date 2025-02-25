@@ -7,7 +7,7 @@ import experimentsService from "~/services/experimentsService";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Label } from "../ui/label";
 
-import { RotateCcw, Trash2 } from "lucide-react";
+import { Eye, RotateCcw, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -429,7 +429,21 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                             });
                           }
                         }}
-                      />
+                      >
+                        {fileEntry.s3Url && (
+                          <div>
+                            <TargetBlankLink
+                              href={`/pdf?url=${encodeURIComponent(
+                                fileEntry.s3Url
+                              )}`}
+                            >
+                              <Button variant="outline" size="icon">
+                                <Eye />
+                              </Button>
+                            </TargetBlankLink>
+                          </div>
+                        )}
+                      </FileUploadedPreview>
                       {!personaKnowledgeItem ? null : (
                         <div>
                           {!personaKnowledgeItem.embedded ? (

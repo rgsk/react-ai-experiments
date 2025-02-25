@@ -1,17 +1,17 @@
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 
 interface LoadingProgressProps {
-  progress: number;
+  percentage: number;
   size?: number;
 }
 const LoadingProgress: React.FC<LoadingProgressProps> = ({
-  progress,
+  percentage,
   size = 20,
 }) => {
   return (
     <div style={{ width: size }}>
       <CircularProgressbar
-        value={progress}
+        value={percentage}
         counterClockwise
         strokeWidth={10}
         styles={buildStyles({

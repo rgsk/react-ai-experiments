@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import useMeasure from "react-use-measure";
+import LoadingProgress from "../LoadingProgress";
 import { LoadingSpinner } from "../LoadingSpinner";
 const sampleS3Link =
   "https://c08a1eeb-cb81-4c3c-9a11-f616ffd8e042.s3.us-east-1.amazonaws.com/ddd9207b-333c-44c1-8393-b3cc5536f1c9.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIATG6MGJ76MFBVY4PW%2F20250225%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250225T155354Z&X-Amz-Expires=86400&X-Amz-Signature=16c32fc64549278b015309ade4230d185842c8e400139d07bd6670c9d1a78ccb&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject";
@@ -20,6 +21,8 @@ const PDFReader: React.FC<PDFReaderProps> = ({ pdfUrl }) => {
     </div>
   );
   const [divRef, divBounds] = useMeasure();
+  const [pdfProgressLoaded, setProgressPdfLoaded] = useState(0);
+  const [pdfProgressTotal, setProgressTotal] = useState(0);
 
   return (
     <div ref={divRef}>
@@ -28,7 +31,19 @@ const PDFReader: React.FC<PDFReaderProps> = ({ pdfUrl }) => {
         onLoadSuccess={({ numPages }) => {
           setNumPages(numPages);
         }}
-        loading={loadingElement}
+        loading={
+          <div className="h-[50vh] flex justify-center items-center">
+            {!!pdfProgressTotal && (
+              <LoadingProgress
+                percentage={(pdfProgressLoaded / pdfProgressTotal) * 100}
+              />
+            )}
+          </div>
+        }
+        onLoadProgress={({ loaded, total }) => {
+          setProgressPdfLoaded(loaded);
+          setProgressTotal(total);
+        }}
       >
         {Array.from({ length: numPages ?? 0 }, (_, index) => {
           const page = index + 1;

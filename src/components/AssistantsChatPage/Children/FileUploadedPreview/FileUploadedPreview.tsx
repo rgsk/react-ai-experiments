@@ -14,6 +14,7 @@ interface FileUploadedPreviewProps {
   destination: "s3" | "assistants";
   onFileObjectUpload?: (fileObject: FileObject) => void;
   onS3Upload?: (s3Url: string) => void;
+  children?: any;
 }
 
 const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
@@ -22,6 +23,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
   onFileObjectUpload,
   destination,
   onS3Upload,
+  children,
 }) => {
   const [loading, setLoading] = useState(false);
   const onFileObjectUploadRef = useRef(onFileObjectUpload);
@@ -79,7 +81,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
     return undefined;
   }, [file, s3Url]);
   const renderLoader = () => {
-    return <LoadingProgress progress={uploadProgress} size={18} />;
+    return <LoadingProgress percentage={uploadProgress} size={18} />;
   };
   const renderCloseButton = () => {
     return (
@@ -117,6 +119,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
       loader={renderLoader()}
     >
       {renderCloseButton()}
+      {children}
     </FilePreview>
   );
 };

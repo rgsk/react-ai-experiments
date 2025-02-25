@@ -13,6 +13,7 @@ import EditPersonaPage from "./components/EditPersonaPage/EditPersonaPage";
 import HomePage from "./components/HomePage/HomePage";
 import LoginPage from "./components/LoginPage/LoginPage";
 import OcrPage from "./components/OcrPage/OcrPage";
+import PDFPage from "./components/PDFPage/PDFPage";
 import PersonasPage from "./components/PersonasPage/PersonasPage";
 import PracticePage from "./components/PracticePage/PracticePage";
 import PreviewPage from "./components/PreviewPage/PreviewPage";
@@ -43,6 +44,9 @@ const router = createBrowserRouter(
       </Route>
       <Route path="assistants">
         <Route path="chat" element={<AssistantsChatPage />} />
+      </Route>
+      <Route path="pdf">
+        <Route index element={<PDFPage />} />
       </Route>
       <Route path="admin">
         <Route index element={<AdminHomePage />} />
