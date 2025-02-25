@@ -12,6 +12,7 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import useDropArea from "~/hooks/useDropArea";
+import { isPDFUrl } from "~/lib/pageUtils";
 import { Persona, PersonaKnowledgeItem } from "~/lib/typesJsonData";
 import { handleInputOnPaste } from "~/lib/utils";
 import { supportedExtensions } from "~/services/assistantsService";
@@ -326,14 +327,24 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                   );
                   const embeddingInProgress =
                     itemsEmbeddingInProgressIds.includes(w.id);
+                  const urlIsPdfUrl = isPDFUrl(w.url);
                   return (
                     <div
                       key={w.id}
-                      className="flex justify-between items-center"
+                      className="flex justify-between items-center gap-2"
                     >
                       <TargetBlankLink href={w.url}>
                         <span className="text-sm">{w.url}</span>
                       </TargetBlankLink>
+                      {urlIsPdfUrl && (
+                        <TargetBlankLink
+                          href={`/pdf?url=${encodeURIComponent(w.url)}`}
+                        >
+                          <Button variant="outline" size="icon">
+                            <Eye />
+                          </Button>
+                        </TargetBlankLink>
+                      )}
                       <span>
                         {!w.embedded ? (
                           <IconButtonWithTooltip
