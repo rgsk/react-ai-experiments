@@ -20,7 +20,7 @@ import {
   observeImageResizeClassname,
 } from "../../AssistantsChatPage";
 // import { SuperPowerPromptPrefix } from "../InputForm/InputForm";
-import { MarkdownRenderer } from "~/components/ChatPage/Children/MarkdownRenderer";
+import { MemoizedMarkdownRenderer } from "~/components/ChatPage/Children/MarkdownRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Skeleton } from "~/components/ui/skeleton";
 import { questionsCode } from "~/lib/prompts";
@@ -177,9 +177,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   <div className="w-full">
                     <div className="relative w-full">
                       <MessageContainer role="assistant">
-                        <MarkdownRenderer loading={assistantMessageLoading}>
+                        <MemoizedMarkdownRenderer
+                          loading={message.status === "in_progress"}
+                        >
                           {text}
-                        </MarkdownRenderer>
+                        </MemoizedMarkdownRenderer>
                       </MessageContainer>
                       {message.status !== "in_progress" && (
                         <div>
