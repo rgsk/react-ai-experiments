@@ -191,7 +191,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                                 icon={<ArrowRotateRight size={18} />}
                                 onClick={() => {
                                   // rerun the last user message
-                                  const lastUserMessage = [...messages]
+                                  const lastUserMessage = [
+                                    ...messages.slice(0, i),
+                                  ]
                                     .reverse()
                                     ?.find((m) => m.role === "user");
                                   if (lastUserMessage) {
