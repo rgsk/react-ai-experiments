@@ -251,11 +251,18 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
       } catch (err: any) {
         const error = err as AxiosError;
         const errorMessage = (error.response?.data as any)?.message;
-        console.log({ chatErrorMessage: errorMessage });
+        const errorCode = (error.response?.data as any)?.err?.code;
+        console.log({
+          chatErrorMessage: errorMessage,
+          chatErrorCode: errorCode,
+        });
+
         const userErrorMessage =
           environmentVars.APP_ENV === "production" || !errorMessage
-            ? "Something went wrong, please try again. If problem persists, continue conversation in a new thread."
-            : errorMessage;
+            ? errorCode
+              ? `Something went wrong (Error Code: ${errorCode}), please try again. If problem persists, continue conversation in a new thread.`
+              : `Something went wrong, please try again. If problem persists, continue conversation in a new thread.`
+            : `Error Code: ${errorCode}, Error Message: ${errorMessage}`;
         setMessages((prev) => {
           return [
             ...prev,
