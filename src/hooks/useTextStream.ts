@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Message } from "~/lib/typesJsonData";
-import { uint8ArrayToString } from "~/lib/utils";
 import experimentsService, { ToolCall } from "~/services/experimentsService";
 import useSocket from "./useSocket";
 
@@ -26,6 +25,9 @@ const useTextStream = ({
         setToolCalls(toolCallsToExecute);
         handleToolCallsRef.current(toolCallsToExecute);
       });
+      socket.on("chunk", (chunk) => {
+        setText((prev) => prev + chunk);
+      });
     }
   }, [socketRef]);
   const handleGenerate = useCallback(
@@ -42,33 +44,14 @@ const useTextStream = ({
       setLoading(true);
       setToolCalls([]);
       setText("");
-      const reader = await experimentsService.getTextStreamReader({
+      const result = await experimentsService.getText({
         messages,
         socketId: socketRef.current?.id,
       });
-
-      if (reader) {
-        readerRef.current = reader;
-        const readStream = () => {
-          reader.read().then(({ done, value: entireChunk }) => {
-            if (done) {
-              readerRef.current = undefined;
-              setLoading(false);
-              onComplete?.({ toolCalls: toolCallsRef.current });
-              return;
-            }
-            if (entireChunk) {
-              const stringValue = uint8ArrayToString(entireChunk);
-              setText((prev) => prev + stringValue);
-            }
-            readStream();
-          });
-        };
-
-        readStream();
-      }
+      setLoading(false);
+      onComplete?.({ toolCalls: toolCallsRef.current });
     },
-    []
+    [socketRef]
   );
   const reset = useCallback(() => {
     setText("");

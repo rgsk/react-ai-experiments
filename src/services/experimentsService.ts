@@ -57,7 +57,13 @@ const experimentsService = {
       },
     };
   },
-
+  getText: async (payload: { messages: Message[]; socketId?: string }) => {
+    const result = await axiosExperimentsInstance.post<{ message: string }>(
+      "/text",
+      payload
+    );
+    return result.data;
+  },
   getTextStreamReader: async (payload: {
     messages: Message[];
     socketId?: string;

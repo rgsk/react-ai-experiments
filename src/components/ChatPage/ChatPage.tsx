@@ -142,7 +142,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
-  console.log({ messages });
 
   const chatRef = useRef(chat);
   chatRef.current = chat;
