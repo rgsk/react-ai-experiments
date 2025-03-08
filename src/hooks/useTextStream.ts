@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from "react";
-import experimentsService, {
-  CompletionMessage,
-} from "~/services/experimentsService";
+import { Message } from "~/lib/typesJsonData";
+import experimentsService, { ToolCall } from "~/services/experimentsService";
 export function uint8ArrayToString(uint8Array: Uint8Array) {
   return new TextDecoder().decode(uint8Array);
 }
@@ -14,8 +13,8 @@ const useTextStream = () => {
       messages,
       onComplete,
     }: {
-      messages: CompletionMessage[];
-      onComplete?: () => void;
+      messages: Message[];
+      onComplete?: ({ toolCalls }: { toolCalls: ToolCall[] }) => void;
     }) => {
       if (readerRef.current) {
         await readerRef.current.cancel();
@@ -93,10 +92,9 @@ const useTextStream = () => {
                   toolCallAccumulators[idx]
                 );
               }
-              console.log({ savedToolCalls });
               readerRef.current = undefined;
               setLoading(false);
-              onComplete?.();
+              onComplete?.({ toolCalls: Object.values(savedToolCalls) });
               return;
             }
 
@@ -159,8 +157,3 @@ const useTextStream = () => {
   };
 };
 export default useTextStream;
-
-const v = {
-  stringValue:
-    '{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_fXslCxzAFC51hzn8iQDmfLbw","type":"function","function":{"name":"GOOGLESHEETS_GET_SPREADSHEET_INFO","arguments":""}}],"refusal":null}{"tool_calls":[{"index":0,"function":{"arguments":"{\\""}}]}',
-};

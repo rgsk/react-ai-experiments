@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
-import experimentsService, {
-  CompletionMessage,
-} from "~/services/experimentsService";
+import { Message } from "~/lib/typesJsonData";
+import experimentsService from "~/services/experimentsService";
 
 const OpenAIRealtimeWebRTC = ({
   initialMessages,
@@ -14,7 +13,7 @@ const OpenAIRealtimeWebRTC = ({
   onAssistantSpeechStopped,
   onDataChannelOpened,
 }: {
-  initialMessages: CompletionMessage[];
+  initialMessages: Message[];
   onUserTranscript?: (transcript: string) => void;
   onAssistantTranscript: (transcript: string) => void;
   onAssistantTranscriptDelta: (delta: string) => void;

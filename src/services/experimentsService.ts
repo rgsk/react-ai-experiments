@@ -4,7 +4,7 @@ import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/useGlobalContext";
 import environmentVars from "~/lib/environmentVars";
-import { CreditDetails } from "~/lib/typesJsonData";
+import { CreditDetails, Message } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 import { JsonData } from "./jsonDataService";
@@ -58,14 +58,7 @@ const experimentsService = {
     };
   },
 
-  getTextStreamReader: async ({
-    messages,
-  }: {
-    messages: {
-      role: "system" | "user" | "assistant";
-      content: string;
-    }[];
-  }) => {
+  getTextStreamReader: async ({ messages }: { messages: Message[] }) => {
     const url = `${environmentVars.NODE_EXPERIMENTS_SERVER_URL}/text`;
     const payload = {
       messages: messages,
@@ -156,6 +149,15 @@ const experimentsService = {
     );
     return result.data;
   },
+  executeTool: async (toolCall: ToolCall) => {
+    const result = await axiosExperimentsInstance.post<{ output: string }>(
+      `/execute-tool`,
+      {
+        toolCall,
+      }
+    );
+    return result.data;
+  },
   getYoutubeVideoTranscripts: ({ videoUrlOrId }: { videoUrlOrId: string }) => {
     const query = encodeQueryParams({ s: videoUrlOrId });
     return {
@@ -240,6 +242,15 @@ const experimentsService = {
   },
 };
 export default experimentsService;
+export type ToolCall = {
+  index: number;
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: any;
+  };
+};
 type UrlContentType =
   | "pdf"
   | "google_doc"

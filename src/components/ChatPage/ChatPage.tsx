@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
@@ -9,7 +9,7 @@ import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
 import { uuidPlaceholder } from "~/lib/constants";
 import { Chat, Message } from "~/lib/typesJsonData";
-import experimentsService from "~/services/experimentsService";
+import experimentsService, { ToolCall } from "~/services/experimentsService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Button } from "../ui/button";
@@ -19,7 +19,38 @@ export type HandleSend = ({ text }: { text: string }) => void;
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
+  const handleToolCalls = async (toolCalls: ToolCall[]) => {
+    console.log({ toolCalls });
+    await Promise.all(
+      toolCalls.map(async (toolCall) => {
+        const { output } = await experimentsService.executeTool(toolCall);
+        console.log("toolcall output", toolCall.id, output);
+        setMessages((prev) => {
+          if (prev) {
+            return [
+              ...prev,
+              {
+                role: "tool",
+                content: output,
+                tool_call_id: toolCall.id,
+              } as any,
+            ];
+          }
+          return prev;
+        });
+      })
+    );
+    setTimeout(() => {
+      handleGenerate({
+        messages: messagesRef.current ?? [],
+        onComplete: onGenerateComplete,
+      });
+    }, 100);
+  };
+  const handleToolCallsRef = useRef(handleToolCalls);
+  handleToolCallsRef.current = handleToolCalls;
   const { handleGenerate, loading: textStreamLoading, text } = useTextStream();
+
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [voiceModeLoading, setVoiceModeLoading] = useState(false);
   const handleMessageDelta = ({
@@ -109,6 +140,77 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       refetchChatHistory();
     }
   }, [chat?.title, chatUpdating, refetchChatHistory]);
+  const onGenerateComplete = useCallback(
+    async ({ toolCalls }: { toolCalls: ToolCall[] }) => {
+      setTimeout(() => {
+        setMessages(
+          produce((draft) => {
+            const stringifiedTC = toolCalls.map((tc) => ({
+              ...tc,
+              function: {
+                ...tc.function,
+                arguments: JSON.stringify(tc.function.arguments),
+              },
+            }));
+            if (draft && draft[draft.length - 1].role === "assistant") {
+              if (toolCalls.length > 0) {
+                (draft[draft.length - 1] as any).tool_calls = stringifiedTC;
+              }
+              draft[draft.length - 1].status = "completed";
+            } else {
+              if (toolCalls.length > 0) {
+                draft?.push({
+                  role: "assistant",
+                  status: "completed",
+                  tool_calls: stringifiedTC,
+                  id: v4(),
+                  content: `calling tools - ${toolCalls
+                    .map((tc) => tc.function.name)
+                    .join(", ")}`,
+                } as any);
+              }
+            }
+          })
+        );
+        if (toolCalls.length > 0) {
+          handleToolCallsRef.current(toolCalls);
+        }
+      }, 100);
+      if (!chatRef.current?.title) {
+        const currentMessages = messagesRef.current;
+        if (currentMessages) {
+          // set the title of chat based on current messages
+          const { content: title } = await experimentsService.getCompletion({
+            messages: [
+              {
+                role: "user",
+                content: `
+              generate a title for this chat
+              based on following conversation
+              only respond with the title
+              the title should max 50 characters
+              don't add double quotes at start and end
+              <currentMessages>${JSON.stringify(
+                currentMessages
+              )}</currentMessages>
+              `,
+              },
+            ],
+          });
+          setChat((prev) => {
+            if (prev) {
+              return {
+                ...prev,
+                title,
+              };
+            }
+            return prev;
+          });
+        }
+      }
+    },
+    [setChat, setMessages]
+  );
   useEffect(() => {
     if (voiceModeEnabled) return;
     if (messages) {
@@ -118,60 +220,24 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ) {
         handleGenerate({
           messages: messages,
-          onComplete: async () => {
-            setTimeout(() => {
-              setMessages(
-                produce((draft) => {
-                  if (draft && draft[draft.length - 1].role === "assistant") {
-                    draft[draft.length - 1].status = "completed";
-                  }
-                })
-              );
-            }, 100);
-            if (!chatRef.current?.title) {
-              const currentMessages = messagesRef.current;
-              if (currentMessages) {
-                // set the title of chat based on current messages
-                const { content: title } =
-                  await experimentsService.getCompletion({
-                    messages: [
-                      {
-                        role: "user",
-                        content: `
-                      generate a title for this chat
-                      based on following conversation
-                      only respond with the title
-                      the title should max 50 characters
-                      don't add double quotes at start and end
-                      <currentMessages>${JSON.stringify(
-                        currentMessages
-                      )}</currentMessages>
-                      `,
-                      },
-                    ],
-                  });
-                setChat((prev) => {
-                  if (prev) {
-                    return {
-                      ...prev,
-                      title,
-                    };
-                  }
-                  return prev;
-                });
-              }
-            }
-          },
+          onComplete: onGenerateComplete,
         });
       }
     }
-  }, [handleGenerate, messages, setChat, setMessages, voiceModeEnabled]);
+  }, [
+    handleGenerate,
+    messages,
+    onGenerateComplete,
+    setChat,
+    setMessages,
+    voiceModeEnabled,
+  ]);
   useEffect(() => {
     if (text) {
       setMessages(
         produce((draft) => {
           if (draft) {
-            if (draft[draft.length - 1].role === "user") {
+            if (draft[draft.length - 1].role !== "assistant") {
               draft.push({
                 id: v4(),
                 role: "assistant",
@@ -221,8 +287,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         </div>
         <div>
           <h1>{chat.title || "New Chat"}</h1>
-          {messages.map((message) => (
-            <div key={message.id}>
+          {messages.map((message, i) => (
+            <div key={i}>
               <p>{message.role}: </p>{" "}
               {/* IMPORTANT: using MemoizedMarkdownRenderer is essential here, to prevent rerenders */}
               <MemoizedMarkdownRenderer

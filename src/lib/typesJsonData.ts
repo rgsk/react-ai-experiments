@@ -1,7 +1,7 @@
 export type ISODateString = string;
 export type Message = {
   id: string;
-  role: "system" | "user" | "assistant";
+  role: "system" | "user" | "assistant" | "tool";
   content: string;
   status: "in_progress" | "incomplete" | "completed";
 };
