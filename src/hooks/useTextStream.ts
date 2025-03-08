@@ -5,8 +5,13 @@ import useSocket from "./useSocket";
 
 const useTextStream = ({
   handleToolCall,
+  handleToolCallOutput,
 }: {
   handleToolCall: (toolCall: ToolCall) => Promise<void>;
+  handleToolCallOutput: (entry: {
+    toolCall: ToolCall;
+    toolCallOutput: string;
+  }) => Promise<void>;
 }) => {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>(undefined);
   const [text, setText] = useState("");
@@ -14,11 +19,16 @@ const useTextStream = ({
   const { socketRef } = useSocket();
   const handleToolCallRef = useRef(handleToolCall);
   handleToolCallRef.current = handleToolCall;
+  const handleToolCallOutputRef = useRef(handleToolCallOutput);
+  handleToolCallOutputRef.current = handleToolCallOutput;
   useEffect(() => {
     const socket = socketRef.current;
     if (socket) {
       socket.on("toolCall", (toolCall) => {
         handleToolCallRef.current(toolCall);
+      });
+      socket.on("toolCallOutput", (entry) => {
+        handleToolCallOutputRef.current(entry);
       });
       socket.on("content", (content) => {
         setText((prev) => prev + content);

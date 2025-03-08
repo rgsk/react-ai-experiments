@@ -24,26 +24,33 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   >([]);
   const handleToolCall = async (toolCall: ToolCall) => {
     // console.log({ toolCall });
-    let output = "";
     if (toolCall.variant === "serverSideRequiresPermission") {
-      const permission = confirm(`should I execute ${toolCall.function.name}`);
+      let output = "";
+      const permission = confirm(
+        `should I execute ${toolCall.function.name}, with args ${JSON.stringify(
+          toolCall.function.arguments
+        )}`
+      );
       if (permission) {
         const res = await experimentsService.executeTool(toolCall);
         output = res.output;
       } else {
         output = "user did not grant permission to run this tool";
       }
+      handleToolCallOutput({ toolCall, toolCallOutput: output });
     }
-    setToolCallsAndOutputs((prev) => [
-      ...prev,
-      { toolCall, toolCallOutput: output },
-    ]);
+  };
+  const handleToolCallOutput = async (entry: {
+    toolCall: ToolCall;
+    toolCallOutput: string;
+  }) => {
+    setToolCallsAndOutputs((prev) => [...prev, entry]);
   };
   const {
     handleGenerate,
     loading: textStreamLoading,
     text,
-  } = useTextStream({ handleToolCall });
+  } = useTextStream({ handleToolCall, handleToolCallOutput });
 
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [voiceModeLoading, setVoiceModeLoading] = useState(false);
