@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Input } from "~/components/ui/input";
-import useTextStream from "~/hooks/useTextStream";
+import useTextStream from "~/hooks/useTextStreamHandleDelta";
 import { Button } from "../ui/button";
 
 interface SampleTextStreamProps {}

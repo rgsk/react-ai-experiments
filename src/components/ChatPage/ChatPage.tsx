@@ -21,6 +21,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
   const handleToolCalls = async (toolCalls: ToolCall[]) => {
     console.log({ toolCalls });
+    if (toolCalls.length === 0) return;
     await Promise.all(
       toolCalls.map(async (toolCall) => {
         const { output } = await experimentsService.executeTool(toolCall);
@@ -51,7 +52,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
   const handleToolCallsRef = useRef(handleToolCalls);
   handleToolCallsRef.current = handleToolCalls;
-  const { handleGenerate, loading: textStreamLoading, text } = useTextStream();
+  const {
+    handleGenerate,
+    loading: textStreamLoading,
+    text,
+  } = useTextStream({ handleToolCalls });
 
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [voiceModeLoading, setVoiceModeLoading] = useState(false);
@@ -137,6 +142,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+  console.log({ messages });
+
   const chatRef = useRef(chat);
   chatRef.current = chat;
   useEffect(() => {
@@ -169,9 +176,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             }
           })
         );
-        if (toolCalls.length > 0) {
-          handleToolCallsRef.current(toolCalls);
-        }
       }, 100);
       if (!chatRef.current?.title) {
         const currentMessages = messagesRef.current;

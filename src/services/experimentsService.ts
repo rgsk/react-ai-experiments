@@ -58,11 +58,12 @@ const experimentsService = {
     };
   },
 
-  getTextStreamReader: async ({ messages }: { messages: Message[] }) => {
+  getTextStreamReader: async (payload: {
+    messages: Message[];
+    socketId?: string;
+  }) => {
     const url = `${environmentVars.NODE_EXPERIMENTS_SERVER_URL}/text`;
-    const payload = {
-      messages: messages,
-    };
+
     const token = getToken();
     const response = await fetch(url, {
       method: "POST",

@@ -68,3 +68,6 @@ export const handleInputOnPaste = (
     onFilesChange(files);
   }
 };
+export function uint8ArrayToString(uint8Array: Uint8Array) {
+  return new TextDecoder().decode(uint8Array);
+}
