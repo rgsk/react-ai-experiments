@@ -33,7 +33,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 role: "tool",
                 content: output,
                 tool_call_id: toolCall.id,
-              } as any,
+                id: v4(),
+                status: "completed",
+              },
             ];
           }
           return prev;
@@ -68,7 +70,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         // Update the existing last message
         const updatedMessage = {
           ...lastMessage,
-          content: transcript ? transcript : lastMessage.content + delta,
+          content: transcript
+            ? transcript
+            : (lastMessage.content ?? "") + (delta ?? ""),
         };
         return [...prev!.slice(0, -1), updatedMessage];
       }
@@ -145,16 +149,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       setTimeout(() => {
         setMessages(
           produce((draft) => {
-            const stringifiedTC = toolCalls.map((tc) => ({
-              ...tc,
-              function: {
-                ...tc.function,
-                arguments: JSON.stringify(tc.function.arguments),
-              },
-            }));
             if (draft && draft[draft.length - 1].role === "assistant") {
               if (toolCalls.length > 0) {
-                (draft[draft.length - 1] as any).tool_calls = stringifiedTC;
+                draft[draft.length - 1].tool_calls = toolCalls;
               }
               draft[draft.length - 1].status = "completed";
             } else {
@@ -162,12 +159,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 draft?.push({
                   role: "assistant",
                   status: "completed",
-                  tool_calls: stringifiedTC,
+                  tool_calls: toolCalls,
                   id: v4(),
                   content: `calling tools - ${toolCalls
                     .map((tc) => tc.function.name)
                     .join(", ")}`,
-                } as any);
+                });
               }
             }
           })
@@ -288,13 +285,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         <div>
           <h1>{chat.title || "New Chat"}</h1>
           {messages.map((message, i) => (
-            <div key={i}>
+            <div key={`id: ${message.id}, index - ${i}`}>
               <p>{message.role}: </p>{" "}
               {/* IMPORTANT: using MemoizedMarkdownRenderer is essential here, to prevent rerenders */}
               <MemoizedMarkdownRenderer
                 loading={message.status === "in_progress"}
               >
-                {message.content}
+                {(message.content ?? "") as string}
               </MemoizedMarkdownRenderer>
             </div>
           ))}

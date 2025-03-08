@@ -1,10 +1,14 @@
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import { ToolCall } from "~/services/experimentsService";
+
 export type ISODateString = string;
-export type Message = {
+
+export type Message = ChatCompletionMessageParam & {
   id: string;
-  role: "system" | "user" | "assistant" | "tool";
-  content: string;
   status: "in_progress" | "incomplete" | "completed";
+  tool_calls?: ToolCall[];
 };
+type Role = Message["role"];
 export type Chat = {
   id: string | undefined;
   title: string;
