@@ -4,29 +4,24 @@ import experimentsService, { ToolCall } from "~/services/experimentsService";
 import useSocket from "./useSocket";
 
 const useTextStream = ({
-  handleToolCalls,
+  handleToolCall,
 }: {
-  handleToolCalls: (toolCalls: ToolCall[]) => Promise<void>;
+  handleToolCall: (toolCall: ToolCall) => Promise<void>;
 }) => {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>(undefined);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const { socketRef } = useSocket();
-  const handleToolCallsRef = useRef(handleToolCalls);
-  handleToolCallsRef.current = handleToolCalls;
-  const [toolCalls, setToolCalls] = useState([]);
-  const toolCallsRef = useRef(toolCalls);
-  toolCallsRef.current = toolCalls;
+  const handleToolCallRef = useRef(handleToolCall);
+  handleToolCallRef.current = handleToolCall;
   useEffect(() => {
     const socket = socketRef.current;
     if (socket) {
-      socket.on("toolCallsToExecute", (toolCallsToExecute) => {
-        console.log("toolCallsToExecute", toolCallsToExecute);
-        setToolCalls(toolCallsToExecute);
-        handleToolCallsRef.current(toolCallsToExecute);
+      socket.on("toolCall", (toolCall) => {
+        handleToolCallRef.current(toolCall);
       });
-      socket.on("chunk", (chunk) => {
-        setText((prev) => prev + chunk);
+      socket.on("content", (content) => {
+        setText((prev) => prev + content);
       });
     }
   }, [socketRef]);
@@ -42,14 +37,13 @@ const useTextStream = ({
         await readerRef.current.cancel();
       }
       setLoading(true);
-      setToolCalls([]);
       setText("");
       const result = await experimentsService.getText({
         messages,
         socketId: socketRef.current?.id,
       });
       setLoading(false);
-      onComplete?.({ toolCalls: toolCallsRef.current });
+      onComplete?.({ toolCalls: result.toolCalls });
     },
     [socketRef]
   );

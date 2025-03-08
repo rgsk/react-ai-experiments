@@ -58,10 +58,9 @@ const experimentsService = {
     };
   },
   getText: async (payload: { messages: Message[]; socketId?: string }) => {
-    const result = await axiosExperimentsInstance.post<{ message: string }>(
-      "/text",
-      payload
-    );
+    const result = await axiosExperimentsInstance.post<{
+      toolCalls: ToolCall[];
+    }>("/text", payload);
     return result.data;
   },
   getTextStreamReader: async (payload: {
@@ -257,6 +256,12 @@ export type ToolCall = {
     name: string;
     arguments: any;
   };
+
+  variant:
+    | "serverSide"
+    | "clientSide"
+    | "serverSideRequiresPermission"
+    | "clientSideRequiresPermission";
 };
 type UrlContentType =
   | "pdf"

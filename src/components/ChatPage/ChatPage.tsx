@@ -19,44 +19,31 @@ export type HandleSend = ({ text }: { text: string }) => void;
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
-  const handleToolCalls = async (toolCalls: ToolCall[]) => {
-    console.log({ toolCalls });
-    if (toolCalls.length === 0) return;
-    await Promise.all(
-      toolCalls.map(async (toolCall) => {
-        const { output } = await experimentsService.executeTool(toolCall);
-        console.log("toolcall output", toolCall.id, output);
-        setMessages((prev) => {
-          if (prev) {
-            return [
-              ...prev,
-              {
-                role: "tool",
-                content: output,
-                tool_call_id: toolCall.id,
-                id: v4(),
-                status: "completed",
-              },
-            ];
-          }
-          return prev;
-        });
-      })
-    );
-    setTimeout(() => {
-      handleGenerate({
-        messages: messagesRef.current ?? [],
-        onComplete: onGenerateComplete,
-      });
-    }, 100);
+  const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
+    { toolCall: ToolCall; toolCallOutput?: string }[]
+  >([]);
+  const handleToolCall = async (toolCall: ToolCall) => {
+    // console.log({ toolCall });
+    let output = "";
+    if (toolCall.variant === "serverSideRequiresPermission") {
+      const permission = confirm(`should I execute ${toolCall.function.name}`);
+      if (permission) {
+        const res = await experimentsService.executeTool(toolCall);
+        output = res.output;
+      } else {
+        output = "user did not grant permission to run this tool";
+      }
+    }
+    setToolCallsAndOutputs((prev) => [
+      ...prev,
+      { toolCall, toolCallOutput: output },
+    ]);
   };
-  const handleToolCallsRef = useRef(handleToolCalls);
-  handleToolCallsRef.current = handleToolCalls;
   const {
     handleGenerate,
     loading: textStreamLoading,
     text,
-  } = useTextStream({ handleToolCalls });
+  } = useTextStream({ handleToolCall });
 
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [voiceModeLoading, setVoiceModeLoading] = useState(false);
@@ -211,6 +198,48 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     [setChat, setMessages]
   );
+
+  useEffect(() => {
+    if (
+      messages &&
+      messages.length > 0 &&
+      messages[messages.length - 1].role === "assistant" &&
+      messages[messages.length - 1].status === "completed" &&
+      toolCallsAndOutputs.length > 0 &&
+      toolCallsAndOutputs.length ===
+        messages[messages.length - 1].tool_calls?.length
+    ) {
+      const toolsMessages: Message[] = toolCallsAndOutputs.map((tco) => {
+        return {
+          role: "tool" as const,
+          content: tco.toolCallOutput!,
+          tool_call_id: tco.toolCall.id,
+          id: v4(),
+          status: "completed",
+        };
+      });
+      setMessages((prev) => {
+        if (prev) {
+          return [...(prev ?? []), ...toolsMessages];
+        }
+        return prev;
+      });
+      setToolCallsAndOutputs([]);
+      setTimeout(() => {
+        handleGenerate({
+          messages: messagesRef.current ?? [],
+          onComplete: onGenerateComplete,
+        });
+      }, 100);
+    }
+  }, [
+    handleGenerate,
+    messages,
+    onGenerateComplete,
+    setMessages,
+    toolCallsAndOutputs,
+  ]);
+
   useEffect(() => {
     if (voiceModeEnabled) return;
     if (messages) {
