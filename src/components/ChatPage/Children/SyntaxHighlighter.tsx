@@ -1,18 +1,15 @@
 import Editor from "@monaco-editor/react";
-import { useMutation } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
 import { v4 } from "uuid";
-import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { useWindowSize } from "~/hooks/useWindowSize";
 import { cn } from "~/lib/utils";
-import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
 import JsxPreview from "./JsxPreview";
 import SingleGrid from "./SingleGrid";
@@ -43,22 +40,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
 
-  const executeCodeMutationResult = useMutation({
-    mutationFn: ({ code, language }: { code: string; language: string }) => {
-      return experimentsService.executeCode({
-        language,
-        code: code,
-      });
-    },
-  });
   const { currentExecuteCodeRef } = useGlobalContext();
 
   const executeCode = () => {
     if (code) {
-      executeCodeMutationResult.mutate({
-        code: code,
-        language,
-      });
     }
   };
   const executeCodeRef = useRef(executeCode);
@@ -262,7 +247,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           </div>
         </>
       )}
-      <div className="mt-[20px]">
+      {/* <div className="mt-[20px]">
         {executeCodeMutationResult.isPending && (
           <div>
             <LoadingSpinner />
@@ -277,7 +262,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             loading={loading}
           />
         )}
-      </div>
+      </div> */}
     </div>
   );
 };

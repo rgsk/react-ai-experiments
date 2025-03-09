@@ -1,10 +1,10 @@
-import SamplePyodideRunner from "../Sample/SamplePyodideRunner";
+import SamplePythonRunner from "../Sample/SamplePythonRunner";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SamplePyodideRunner />
+      <SamplePythonRunner />
     </div>
   );
 };
