@@ -53,10 +53,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const { copied, copy } = useCopyToClipboard();
 
   const { currentExecuteCodeRef } = useGlobalContext();
-
+  const codeExecutionAllowed = useMemo(
+    () => codeRunnerSupportedLanguages.includes(language as any),
+    [language]
+  );
   const executeCode = async () => {
     if (code) {
-      if (codeRunnerSupportedLanguages.includes(language as any)) {
+      if (codeExecutionAllowed) {
         setExecuteCodeDetails({ loading: true, output: "", error: "" });
         try {
           const output = await runCode({
@@ -139,12 +142,16 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                     </a>
                   </>
                 ) : (
-                  <button
-                    className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
-                    onClick={executeCode}
-                  >
-                    Run Code
-                  </button>
+                  <>
+                    {codeExecutionAllowed && (
+                      <button
+                        className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
+                        onClick={executeCode}
+                      >
+                        Run Code
+                      </button>
+                    )}
+                  </>
                 )}
 
                 {code !== initialCode && (

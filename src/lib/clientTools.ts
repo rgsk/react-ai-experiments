@@ -1,3 +1,4 @@
+import { codeRunnerSupportedLanguages } from "~/hooks/codeRunners/useCodeRunners";
 import { Tool, ToolSource, ToolVariant } from "~/services/experimentsService";
 
 const clientTools: Tool[] = [
@@ -23,17 +24,10 @@ const clientTools: Tool[] = [
           },
           language: {
             type: "string",
-            enum: [
-              "node",
-              "javascript",
-              "python",
-              "typescript",
-              "cpp",
-              "unknown",
-            ],
+            enum: [...codeRunnerSupportedLanguages],
             description: `programming language to use. If the user explicitly
       tells about which language to use, use that language. if it's not one of
-      known language pass the value "unknown", I will throw an error.`,
+      known language, then you can't execute code in that language.`,
           },
         },
         required: ["code", "language"],
