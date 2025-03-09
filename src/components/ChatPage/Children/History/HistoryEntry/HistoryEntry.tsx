@@ -13,7 +13,7 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({ chat }) => {
   }
   const active = chat.id === chatId;
   return (
-    <Link to={`/chat/${chatId}`}>
+    <Link to={`/chat/${chat.id}`}>
       <div
         className={cn(
           "px-[8px] py-[8px] overflow-hidden flex items-center relative rounded-lg",

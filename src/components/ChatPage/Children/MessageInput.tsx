@@ -1,3 +1,4 @@
+import { ArrowUp } from "iconsax-react";
 import { useMemo, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import useBreakpoints from "~/hooks/useBreakpoints";
@@ -9,6 +10,7 @@ interface MessageInputProps {
   loading: boolean;
   interrupt: () => void;
   placeholder: string;
+  disabled?: boolean;
   interruptEnabled: boolean;
 }
 const MessageInput: React.FC<MessageInputProps> = ({
@@ -16,8 +18,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
   loading,
   interrupt,
   placeholder,
+  disabled,
   interruptEnabled,
 }) => {
+  const [inputFocused, setInputFocused] = useState(false);
+
   const [text, setText] = useState("");
   const { md } = useBreakpoints();
   const canSend = useMemo(() => {
@@ -33,10 +38,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
   return (
     <div
       className={cn(
-        canSend
-          ? "border border-gslearnMockingbird"
-          : "border border-gslearnlightmodeGrey3",
-        "bg-white rounded-[12px] py-[16px] px-[16px]"
+        "border border-input",
+        inputFocused && "ring-1 ring-ring",
+        "bg-transparent rounded-lg py-[16px] px-[16px]",
+        disabled &&
+          "border-gslearnlightmodeGrey1 bg-gslearnlightmodeGrey6 cursor-not-allowed"
       )}
     >
       <form
@@ -52,6 +58,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
           onChange={(e) => {
             setText(e.target.value);
           }}
+          onFocus={() => {
+            setInputFocused(true);
+          }}
+          onBlur={() => {
+            setInputFocused(false);
+          }}
           autoFocus
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -61,8 +73,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
           }}
           placeholder={placeholder}
           className={cn(
-            `w-full resize-none text-gslearnMockingbird
-            placeholder:text-gs-light-mode-grey-1 text-[14px] md:text-[16px] focus:outline-none`
+            `w-full resize-none
+            placeholder:text-muted-foreground text-[14px] focus:outline-none bg-transparent`,
+            disabled && "cursor-not-allowed"
           )}
           style={{
             // 36 is size of button container
@@ -72,16 +85,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
         <div className="absolute bottom-1/2 translate-y-1/2 right-0">
           {loading && interruptEnabled ? (
             <ActionButton onClick={interrupt}>
-              <div className="h-[8px] w-[8px] md:h-[12px] md:w-[12px] rounded-[1px] md:rounded-[2px] bg-white"></div>
+              <div className="h-[8px] w-[8px] md:h-[12px] md:w-[12px] rounded-[1px] md:rounded-[2px] bg-background"></div>
             </ActionButton>
           ) : (
             <ActionButton onClick={handleSubmit} disabled={!canSend}>
-              <img
-                width={md ? 24 : 14}
-                height={md ? 24 : 14}
-                src="/send.svg"
-                alt="Send"
-              />
+              <ArrowUp className="text-background" size={18} />
             </ActionButton>
           )}
         </div>
@@ -106,7 +114,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     <button
       className={cn(
         "rounded-full w-[24px] h-[24px] md:w-[36px] md:h-[36px] flex justify-center items-center",
-        "bg-gslearnMockingbird disabled:bg-gslearnlightmodeGrey1"
+        "bg-foreground",
+        "disabled:opacity-50 disabled:cursor-not-allowed"
       )}
       onClick={onClick}
       disabled={disabled}

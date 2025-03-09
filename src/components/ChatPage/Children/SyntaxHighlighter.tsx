@@ -296,7 +296,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             language={language}
             codeProps={codeProps}
             isCodeOutput={true}
-            loading={loading}
+            loading={true} // temporarily so that we show prism for output
           />
         )}
         {executeCodeDetails.error && (

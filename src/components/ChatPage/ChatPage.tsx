@@ -7,6 +7,7 @@ import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import useDropArea from "~/hooks/useDropArea";
+import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useTextStream from "~/hooks/useTextStream";
@@ -39,6 +40,8 @@ import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 export type HandleSend = ({ text }: { text: string }) => void;
+export const observeImageResizeClassname = "observe-img-resize";
+
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
@@ -202,6 +205,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   >(`chats/${chatId}/messages`, []);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const { scrollToBottom } = useEnsureScrolledToBottom({
+    scrollContainerRef: scrollContainerRef,
+    observedImagesClassname: observeImageResizeClassname,
+    observerDeps: [(messages?.length ?? 0) > 0],
+    scrollBottomDeps: [messages],
+  });
 
   const chatRef = useRef(chat);
   chatRef.current = chat;
@@ -362,7 +373,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { dropAreaProps, isDragging } = useDropArea({
     onFilesChange: (files) => {},
   });
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   const handleSend: HandleSend = ({ text }) => {
     setMessages((prev) => [
@@ -403,20 +413,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             <span>New Chat</span>
           </Button>
         </div>
-        <div className="h-[20px]"></div>
-        <div className="flex-1 overflow-auto space-y-[20px] p-[16px]">
+        <div className="flex-1 overflow-auto space-y-[20px] px-[16px]">
           {historyBlocks.map(([date, items], i) => (
             <HistoryBlock key={i} date={date} chats={items} />
           ))}
         </div>
-        <div className="h-[20px]"></div>
         <div className="p-[16px]">
-          <DropdownMenu
-            open={profileDropdownOpen}
-            onOpenChange={(value) => setProfileDropdownOpen(value)}
-          >
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full"></button>
+              <span>
+                <ProfileInfo />
+              </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent avoidCollisions align="start" side="top">
               <DropdownMenuItem onClick={authService.logout}>
@@ -424,14 +431,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              setProfileDropdownOpen(true);
-            }}
-          >
-            <ProfileInfo />
-          </div>
         </div>
       </div>
       <div
@@ -470,7 +469,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               <>
                 <Container centerContent={true}>
                   <div className="w-[800px]">
-                    <div>
+                    <div className="flex justify-center">
                       <h1 className="text-4xl">What can I help with?</h1>
                     </div>
                   </div>
@@ -481,7 +480,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               </>
             ) : (
               <>
-                <Container>
+                <Container divRef={scrollContainerRef}>
                   <RenderMessages messages={messages} />
                 </Container>
                 <MessageInputContainer>
@@ -609,8 +608,6 @@ const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
   children,
 }) => {
   return (
-    <div className="m-auto max-w-[800px] pb-[28px] md:pb-[36px] px-[32px] w-full">
-      {children}
-    </div>
+    <div className="m-auto max-w-[800px] pb-[28px] w-full">{children}</div>
   );
 };
