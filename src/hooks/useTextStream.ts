@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Message } from "~/lib/typesJsonData";
-import experimentsService, { ToolCall } from "~/services/experimentsService";
+import experimentsService, {
+  Tool,
+  ToolCall,
+} from "~/services/experimentsService";
 import useSocket from "./useSocket";
 
 const useTextStream = ({
@@ -39,9 +42,11 @@ const useTextStream = ({
     async ({
       messages,
       onComplete,
+      tools,
     }: {
       messages: Message[];
       onComplete?: ({ toolCalls }: { toolCalls: ToolCall[] }) => void;
+      tools: Tool[];
     }) => {
       if (readerRef.current) {
         await readerRef.current.cancel();
@@ -51,6 +56,7 @@ const useTextStream = ({
       const result = await experimentsService.getText({
         messages,
         socketId: socketRef.current?.id,
+        tools: tools,
       });
       setLoading(false);
       onComplete?.({ toolCalls: result.toolCalls });

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { produce } from "immer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
@@ -7,9 +8,15 @@ import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
+import clientTools from "~/lib/clientTools";
 import { uuidPlaceholder } from "~/lib/constants";
 import { Chat, Message } from "~/lib/typesJsonData";
-import experimentsService, { ToolCall } from "~/services/experimentsService";
+import experimentsService, {
+  Tool,
+  ToolCall,
+  ToolSource,
+  ToolVariant,
+} from "~/services/experimentsService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Button } from "../ui/button";
@@ -20,10 +27,37 @@ interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
-    { toolCall: ToolCall; toolCallOutput?: string }[]
+    { toolCall: ToolCall; toolCallOutput?: string; isLoading: boolean }[]
   >([]);
+  const { data: serverTools, isLoading: toolsLoading } = useQuery({
+    queryKey: ["tools"],
+    queryFn: () => experimentsService.getTools(),
+  });
+  const [tools, setTools] = useState<Tool[]>([]);
+
+  useEffect(() => {
+    if (serverTools) {
+      setTools([
+        ...clientTools,
+        ...serverTools.mcpOpenAITools
+          .filter((t) => t.function.name !== "executeCode")
+          .map((t) => ({
+            ...t,
+            variant: ToolVariant.serverSide,
+            source: ToolSource.mcp,
+          })),
+        ...serverTools.composioTools.map((t) => ({
+          ...t,
+          variant: ToolVariant.serverSide,
+          source: ToolSource.composio,
+        })),
+      ]);
+    }
+  }, [serverTools]);
+
   const handleToolCall = async (toolCall: ToolCall) => {
     // console.log({ toolCall });
+    setToolCallsAndOutputs((prev) => [...prev, { toolCall, isLoading: true }]);
     if (toolCall.variant === "serverSideRequiresPermission") {
       let output = "";
       const permission = confirm(
@@ -44,7 +78,18 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     toolCall: ToolCall;
     toolCallOutput: string;
   }) => {
-    setToolCallsAndOutputs((prev) => [...prev, entry]);
+    setToolCallsAndOutputs((prev) =>
+      prev.map((e) => {
+        if (e.toolCall.id === entry.toolCall.id) {
+          return {
+            ...e,
+            toolCallOutput: entry.toolCallOutput,
+            isLoading: false,
+          };
+        }
+        return e;
+      })
+    );
   };
   const {
     handleGenerate,
@@ -213,6 +258,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       messages[messages.length - 1].role === "assistant" &&
       messages[messages.length - 1].status === "completed" &&
       toolCallsAndOutputs.length > 0 &&
+      toolCallsAndOutputs.every((e) => !e.isLoading) &&
       toolCallsAndOutputs.length ===
         messages[messages.length - 1].tool_calls?.length
     ) {
@@ -234,6 +280,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       setToolCallsAndOutputs([]);
       setTimeout(() => {
         handleGenerate({
+          tools: tools,
           messages: messagesRef.current ?? [],
           onComplete: onGenerateComplete,
         });
@@ -245,6 +292,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     onGenerateComplete,
     setMessages,
     toolCallsAndOutputs,
+    tools,
   ]);
 
   useEffect(() => {
@@ -256,6 +304,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ) {
         handleGenerate({
           messages: messages,
+          tools: tools,
           onComplete: onGenerateComplete,
         });
       }
@@ -266,6 +315,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     onGenerateComplete,
     setChat,
     setMessages,
+    tools,
     voiceModeEnabled,
   ]);
   useEffect(() => {

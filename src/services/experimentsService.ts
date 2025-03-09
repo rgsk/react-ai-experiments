@@ -57,10 +57,23 @@ const experimentsService = {
       },
     };
   },
-  getText: async (payload: { messages: Message[]; socketId?: string }) => {
+  getText: async (payload: {
+    messages: Message[];
+    socketId?: string;
+    tools: Tool[];
+  }) => {
+    console.log({ tools: payload.tools });
     const result = await axiosExperimentsInstance.post<{
       toolCalls: ToolCall[];
     }>("/text", payload);
+    return result.data;
+  },
+  getTools: async () => {
+    type ToolWithoutSourceAndVariant = Omit<Tool, "source" | "variant">;
+    const result = await axiosExperimentsInstance.get<{
+      composioTools: ToolWithoutSourceAndVariant[];
+      mcpOpenAITools: ToolWithoutSourceAndVariant[];
+    }>("/tools");
     return result.data;
   },
   getTextStreamReader: async (payload: {
@@ -248,6 +261,17 @@ const experimentsService = {
   },
 };
 export default experimentsService;
+export enum ToolVariant {
+  serverSide = "serverSide",
+  clientSide = "clientSide",
+  serverSideRequiresPermission = "serverSideRequiresPermission",
+  clientSideRequiresPermission = "clientSideRequiresPermission",
+}
+export enum ToolSource {
+  mcp = "mcp",
+  composio = "composio",
+  web = "web",
+}
 export type ToolCall = {
   index: number;
   id: string;
@@ -256,12 +280,28 @@ export type ToolCall = {
     name: string;
     arguments: any;
   };
+  source: ToolSource;
+  variant: ToolVariant;
+};
 
-  variant:
-    | "serverSide"
-    | "clientSide"
-    | "serverSideRequiresPermission"
-    | "clientSideRequiresPermission";
+export type Tool = {
+  type: "function";
+  variant: ToolVariant;
+  source: ToolSource;
+  function: {
+    name: string;
+    description: string;
+    parameters: {
+      type: "object";
+      properties: Record<
+        string,
+        { type: "string"; description?: string; enum?: string[] }
+      >;
+      required: string[];
+      additionalProperties: boolean;
+    };
+    strict: boolean;
+  };
 };
 type UrlContentType =
   | "pdf"
