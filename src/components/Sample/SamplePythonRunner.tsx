@@ -2,8 +2,7 @@ import { useState } from "react";
 import usePythonRunner from "~/hooks/codeRunners/usePythonRunner";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 const code = `
-import numpy as np
-np.arange(10)
+name = 32312 * 312312
 `;
 interface SamplePythonRunnerProps {}
 const SamplePythonRunner: React.FC<SamplePythonRunnerProps> = ({}) => {
@@ -30,7 +29,7 @@ const SamplePythonRunner: React.FC<SamplePythonRunnerProps> = ({}) => {
       {output && (
         <div>
           <p>Output:</p>
-          <p>{output}</p>
+          <pre>{output}</pre>
         </div>
       )}
       {error && (
