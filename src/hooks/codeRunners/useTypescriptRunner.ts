@@ -1,26 +1,19 @@
 /* eslint-disable no-useless-catch */
 import { useEffect, useState } from "react";
+import { loadTsCompilerSingleton } from "./singletons/loadTsCompilerSingleton";
 
 const useTypeScriptRunner = () => {
   const [tsCompiler, setTsCompiler] = useState<any>(null);
 
-  // Load the TypeScript compiler on component mount
+  // Load the TypeScript compiler using the singleton loader
   useEffect(() => {
-    const initiate = async () => {
-      if (!(window as any).ts) {
-        const script = document.createElement("script");
-        script.src =
-          "https://cdnjs.cloudflare.com/ajax/libs/typescript/4.9.5/typescript.min.js";
-        script.onload = () => {
-          setTsCompiler((window as any).ts);
-        };
-        document.body.appendChild(script);
-      } else {
-        setTsCompiler((window as any).ts);
-      }
-    };
-
-    initiate();
+    loadTsCompilerSingleton()
+      .then((ts) => {
+        setTsCompiler(ts);
+      })
+      .catch((error) => {
+        console.error("Failed to load TypeScript compiler:", error);
+      });
   }, []);
 
   // Run the TypeScript code: transpile it to JS, execute it, and capture stdout

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { loadPyodideSingleton } from "./singletons/loadPyodideSingleton";
 function wrapLastLineInPrint(codeStr: string): string {
   const lines = codeStr.split("\n");
   if (lines.length === 0) return codeStr;
@@ -50,38 +51,6 @@ sys.stdout = sys.__stdout__
 output.getvalue()
 `;
 };
-
-// loadPyodideSingleton.ts
-let pyodidePromise: Promise<any> | null = null;
-
-function loadPyodideSingleton(): Promise<any> {
-  if (pyodidePromise) {
-    return pyodidePromise;
-  }
-
-  pyodidePromise = new Promise((resolve, reject) => {
-    // Check if the script is already present in the DOM
-    if (!(window as any).loadPyodide) {
-      const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js";
-      script.onload = async () => {
-        try {
-          const pyodideModule = await (window as any).loadPyodide();
-          await pyodideModule.loadPackage(["numpy", "matplotlib"]);
-          resolve(pyodideModule);
-        } catch (e) {
-          reject(e);
-        }
-      };
-      script.onerror = (err) => {
-        reject(err);
-      };
-      document.body.appendChild(script);
-    }
-  });
-
-  return pyodidePromise;
-}
 
 const usePythonRunner = () => {
   const [pyodide, setPyodide] = useState<any>(null);
