@@ -23,6 +23,7 @@ const useCodeRunners = () => {
       code: string;
       language: CodeRunnerSupportedLanguages;
     }) => {
+      console.log({ code, language });
       if (loading) {
         throw new Error("code runners are loading");
       }

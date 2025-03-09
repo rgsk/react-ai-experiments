@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
+import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useTextStream from "~/hooks/useTextStream";
@@ -54,7 +55,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ]);
     }
   }, [serverTools]);
-
+  const { runCode } = useCodeRunners();
   const handleToolCall = async (toolCall: ToolCall) => {
     // console.log({ toolCall });
     setToolCallsAndOutputs((prev) => [...prev, { toolCall, isLoading: true }]);
@@ -72,6 +73,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         output = "user did not grant permission to run this tool";
       }
       handleToolCallOutput({ toolCall, toolCallOutput: output });
+    } else if (toolCall.variant === ToolVariant.clientSide) {
+      if (toolCall.function.name === "executeCode") {
+        const { code, language } = toolCall.function.arguments;
+        const output = await runCode({ code, language });
+        handleToolCallOutput({ toolCall, toolCallOutput: output });
+      }
     }
   };
   const handleToolCallOutput = async (entry: {
