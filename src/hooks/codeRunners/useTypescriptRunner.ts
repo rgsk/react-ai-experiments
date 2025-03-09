@@ -42,7 +42,8 @@ const useTypeScriptRunner = () => {
 
       let returnVal: any;
       try {
-        const runFn = new Function(jsCode);
+        const wrappedCode = wrapLastLineInConsoleLog(jsCode);
+        const runFn = new Function(wrappedCode);
         returnVal = runFn();
       } catch (error) {
         throw error;
@@ -67,3 +68,45 @@ const useTypeScriptRunner = () => {
 };
 
 export default useTypeScriptRunner;
+
+function wrapLastLineInConsoleLog(codeStr: string): string {
+  const lines = codeStr.split("\n");
+  if (lines.length === 0) return codeStr;
+
+  // Find the last non-empty line
+  let lastNonEmptyIndex = -1;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].trim() !== "") {
+      lastNonEmptyIndex = i;
+      break;
+    }
+  }
+
+  if (lastNonEmptyIndex === -1) return codeStr; // All lines are empty
+
+  const lastLine = lines[lastNonEmptyIndex];
+  let strippedLine = lastLine.trim();
+
+  // Skip if already a console.log statement or if it's an empty/comment line.
+  if (
+    strippedLine.startsWith("console.log(") ||
+    strippedLine === "" ||
+    strippedLine.startsWith("//") ||
+    strippedLine.startsWith("/*")
+  ) {
+    return codeStr;
+  }
+
+  // Remove trailing semicolon if present
+  if (strippedLine.endsWith(";")) {
+    strippedLine = strippedLine.slice(0, -1);
+  }
+
+  // Capture leading whitespace to preserve indentation.
+  const leadingWhitespace = lastLine.match(/^\s*/)?.[0] || "";
+
+  // Wrap the line in console.log() while preserving the original indentation.
+  lines[lastNonEmptyIndex] = `${leadingWhitespace}console.log(${strippedLine})`;
+
+  return lines.join("\n");
+}
