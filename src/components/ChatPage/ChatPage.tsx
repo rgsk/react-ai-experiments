@@ -43,7 +43,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           .filter((t) => t.function.name !== "executeCode")
           .map((t) => ({
             ...t,
-            variant: ToolVariant.serverSideRequiresPermission,
+            variant: ToolVariant.serverSide,
             source: ToolSource.mcp,
           })),
         ...serverTools.composioTools.map((t) => ({
