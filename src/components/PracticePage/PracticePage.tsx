@@ -1,5 +1,11 @@
+import SamplePyodideRunner from "../Sample/SamplePyodideRunner";
+
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
-  return <div>PracticePage</div>;
+  return (
+    <div>
+      <SamplePyodideRunner />
+    </div>
+  );
 };
 export default PracticePage;
