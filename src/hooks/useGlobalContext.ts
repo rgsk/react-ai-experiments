@@ -17,6 +17,7 @@ import useJsonData from "./useJsonData";
 import useLocalStorageState, {
   localStorageWithExpiry,
 } from "./useLocalStorageState";
+import useRunOnWindowFocus from "./useRunOnWindowFocus";
 export const getToken = () => {
   const token = localStorageWithExpiry.getItem<string>("token");
   if (!token) {
@@ -61,6 +62,9 @@ export const useGlobalContextValue = () => {
       setTokenLoading(false);
     });
   }, [setToken]);
+  useRunOnWindowFocus(() => {
+    firebaseAuth.currentUser?.getIdToken();
+  });
   useEffect(() => {
     if (
       !userDataLoading &&
