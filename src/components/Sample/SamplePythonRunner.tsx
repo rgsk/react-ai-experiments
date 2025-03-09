@@ -1,13 +1,13 @@
 import { useState } from "react";
-import usePythonRunner from "~/hooks/codeRunners/usePythonRunner";
+import useTypeScriptRunner from "~/hooks/codeRunners/useTypescriptRunner";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 const code = `
-name = 32312 * 312312
-name
+const name: string = 32312 * 312312
+console.log(name)
 `;
 interface SamplePythonRunnerProps {}
 const SamplePythonRunner: React.FC<SamplePythonRunnerProps> = ({}) => {
-  const { loading, runCode } = usePythonRunner();
+  const { loading, runCode } = useTypeScriptRunner();
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   if (loading) {
