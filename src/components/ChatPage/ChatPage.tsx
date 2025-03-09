@@ -451,7 +451,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               </Button>
             </Link>
           </span>
-          <span>{chat?.title ?? "New Chat"}</span>
+          <span>{chat?.title || "New Chat"}</span>
           <ModeToggle />
         </div>
         {messagesLoading ? (
@@ -469,7 +469,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               <>
                 <Container centerContent={true}>
                   <div className="w-[800px]">
-                    <div className="flex justify-center">
+                    <div className="flex w-full justify-center">
                       <h1 className="text-4xl">What can I help with?</h1>
                     </div>
                   </div>
