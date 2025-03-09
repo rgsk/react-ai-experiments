@@ -3,6 +3,7 @@ import usePythonRunner from "~/hooks/codeRunners/usePythonRunner";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 const code = `
 name = 32312 * 312312
+name
 `;
 interface SamplePythonRunnerProps {}
 const SamplePythonRunner: React.FC<SamplePythonRunnerProps> = ({}) => {

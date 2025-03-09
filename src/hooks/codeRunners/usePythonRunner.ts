@@ -51,29 +51,57 @@ output.getvalue()
 `;
 };
 
-const usePythonRunner = () => {
-  const [pyodide, setPyodide] = useState<any>(null);
+// loadPyodideSingleton.ts
+let pyodidePromise: Promise<any> | null = null;
 
-  // Load Pyodide on component mount
-  useEffect(() => {
-    const initiate = async () => {
-      const pyodideModule = await (window as any).loadPyodide();
-      await pyodideModule.loadPackage(["numpy", "matplotlib"]);
-      setPyodide(pyodideModule);
-    };
+function loadPyodideSingleton(): Promise<any> {
+  if (pyodidePromise) {
+    return pyodidePromise;
+  }
 
+  pyodidePromise = new Promise((resolve, reject) => {
+    // Check if the script is already present in the DOM
     if (!(window as any).loadPyodide) {
       const script = document.createElement("script");
       script.src = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js";
-      script.onload = initiate;
+      script.onload = async () => {
+        try {
+          const pyodideModule = await (window as any).loadPyodide();
+          await pyodideModule.loadPackage(["numpy", "matplotlib"]);
+          resolve(pyodideModule);
+        } catch (e) {
+          reject(e);
+        }
+      };
+      script.onerror = (err) => {
+        reject(err);
+      };
       document.body.appendChild(script);
-    } else {
-      initiate();
     }
+  });
+
+  return pyodidePromise;
+}
+
+const usePythonRunner = () => {
+  const [pyodide, setPyodide] = useState<any>(null);
+
+  useEffect(() => {
+    // Only call the singleton function
+    loadPyodideSingleton()
+      .then((pyodideModule) => {
+        setPyodide(pyodideModule);
+      })
+      .catch((error) => {
+        console.error("Failed to load Pyodide:", error);
+      });
   }, []);
 
   // Run the Python code
   const runCode = async (code: string) => {
+    if (!pyodide) {
+      throw new Error("Pyodide is not loaded yet.");
+    }
     const result = await pyodide.runPythonAsync(
       codeWrapper(wrapLastLineInPrint(code))
     );
