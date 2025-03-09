@@ -43,7 +43,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           .filter((t) => t.function.name !== "executeCode")
           .map((t) => ({
             ...t,
-            variant: ToolVariant.serverSide,
+            variant: ToolVariant.serverSideRequiresPermission,
             source: ToolSource.mcp,
           })),
         ...serverTools.composioTools.map((t) => ({
@@ -58,7 +58,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const handleToolCall = async (toolCall: ToolCall) => {
     // console.log({ toolCall });
     setToolCallsAndOutputs((prev) => [...prev, { toolCall, isLoading: true }]);
-    if (toolCall.variant === "serverSideRequiresPermission") {
+    if (toolCall.variant === ToolVariant.serverSideRequiresPermission) {
       let output = "";
       const permission = confirm(
         `should I execute ${toolCall.function.name}, with args ${JSON.stringify(
