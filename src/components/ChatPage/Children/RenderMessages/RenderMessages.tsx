@@ -7,7 +7,7 @@ interface RenderMessagesProps {
 }
 const RenderMessages: React.FC<RenderMessagesProps> = ({ messages }) => {
   return (
-    <div className="flex flex-col items-end">
+    <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => (
         <MessageContainer
           key={`id: ${message.id}, index - ${i}`}
