@@ -63,6 +63,7 @@ export const useGlobalContextValue = () => {
     });
   }, [setToken]);
   useRunOnWindowFocus(() => {
+    // this ensures token is refreshed if expired on window focus
     firebaseAuth.currentUser?.getIdToken();
   });
   useEffect(() => {
