@@ -1,13 +1,13 @@
 import { useState } from "react";
-import useTypeScriptRunner from "~/hooks/codeRunners/useTypescriptRunner";
+import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 const code = `
-const name: string = 32312 * 312312
-console.log(name)
+name = 32312 * 312312
+names
 `;
 interface SamplePythonRunnerProps {}
 const SamplePythonRunner: React.FC<SamplePythonRunnerProps> = ({}) => {
-  const { loading, runCode } = useTypeScriptRunner();
+  const { loading, runCode } = useCodeRunners();
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   if (loading) {
@@ -18,7 +18,7 @@ const SamplePythonRunner: React.FC<SamplePythonRunnerProps> = ({}) => {
       <button
         onClick={async () => {
           try {
-            const result = await runCode(code);
+            const result = await runCode({ language: "python", code });
             setOutput(result);
           } catch (err: any) {
             setError(err.message);

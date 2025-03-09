@@ -4,7 +4,12 @@ import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
 import { v4 } from "uuid";
+import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
+import useCodeRunners, {
+  CodeRunnerSupportedLanguages,
+  codeRunnerSupportedLanguages,
+} from "~/hooks/codeRunners/useCodeRunners";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
@@ -27,6 +32,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   codeProps,
   loading,
 }) => {
+  const { loading: codeRunnersLoading, runCode } = useCodeRunners();
+  const [executeCodeDetails, setExecuteCodeDetails] = useState({
+    loading: false,
+    output: "",
+    error: "",
+  });
+
   const windowSize = useWindowSize();
   const [divRef, divBounds] = useMeasure();
   const id = useMemo(() => v4(), []);
@@ -42,8 +54,26 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
 
   const { currentExecuteCodeRef } = useGlobalContext();
 
-  const executeCode = () => {
+  const executeCode = async () => {
     if (code) {
+      if (codeRunnerSupportedLanguages.includes(language as any)) {
+        setExecuteCodeDetails({ loading: true, output: "", error: "" });
+        try {
+          const output = await runCode({
+            code,
+            language: language as CodeRunnerSupportedLanguages,
+          });
+          setExecuteCodeDetails({ loading: false, output: output, error: "" });
+        } catch (err: any) {
+          setExecuteCodeDetails({
+            loading: false,
+            output: "",
+            error: err.message,
+          });
+        }
+      } else {
+        alert(`${language} isn't supported for code execution`);
+      }
     }
   };
   const executeCodeRef = useRef(executeCode);
@@ -247,22 +277,28 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           </div>
         </>
       )}
-      {/* <div className="mt-[20px]">
-        {executeCodeMutationResult.isPending && (
+      <div className="mt-[20px]">
+        {executeCodeDetails.loading && (
           <div>
             <LoadingSpinner />
           </div>
         )}
-        {executeCodeMutationResult.data?.output && (
+        {executeCodeDetails.output && (
           <SyntaxHighlighter
-            code={executeCodeMutationResult.data?.output}
+            code={executeCodeDetails.output}
             language={language}
             codeProps={codeProps}
             isCodeOutput={true}
             loading={loading}
           />
         )}
-      </div> */}
+        {executeCodeDetails.error && (
+          <div>
+            <p>Execute Code Error: </p>
+            <p>{executeCodeDetails.error}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

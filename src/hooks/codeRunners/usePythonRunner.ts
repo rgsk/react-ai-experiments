@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { loadPyodideSingleton } from "./singletons/loadPyodideSingleton";
 function wrapLastLineInPrint(codeStr: string): string {
   const lines = codeStr.split("\n");
@@ -67,15 +67,18 @@ const usePythonRunner = () => {
   }, []);
 
   // Run the Python code
-  const runCode = async (code: string) => {
-    if (!pyodide) {
-      throw new Error("Pyodide is not loaded yet.");
-    }
-    const result = await pyodide.runPythonAsync(
-      codeWrapper(wrapLastLineInPrint(code))
-    );
-    return result;
-  };
+  const runCode = useCallback(
+    async (code: string) => {
+      if (!pyodide) {
+        throw new Error("Pyodide is not loaded yet.");
+      }
+      const result = await pyodide.runPythonAsync(
+        codeWrapper(wrapLastLineInPrint(code))
+      );
+      return result;
+    },
+    [pyodide]
+  );
   return {
     loading: !pyodide,
     runCode,
