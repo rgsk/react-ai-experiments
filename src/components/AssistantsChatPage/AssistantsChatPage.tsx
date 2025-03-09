@@ -43,6 +43,7 @@ import jsonDataService from "~/services/jsonDataService";
 import NewChatIcon from "../Icons/NewChatIcon";
 import ProfileInfo from "../ProfileInfo/ProfileInfo";
 import CentralLoader from "../Shared/CentralLoader";
+import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";
@@ -520,20 +521,6 @@ const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
   return (
     <div className="m-auto max-w-[800px] pb-[28px] md:pb-[36px] px-[32px] w-full">
       {children}
-    </div>
-  );
-};
-
-interface DraggingBackdropProps {}
-export const DraggingBackdrop: React.FC<DraggingBackdropProps> = ({}) => {
-  return (
-    <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center">
-      <div className="text-gray-100 text-center">
-        <p className="text-[18px] font-bold">Add anything</p>
-        <p className="text-[14px]">
-          Drop any file here to add it to the conversation
-        </p>
-      </div>
     </div>
   );
 };

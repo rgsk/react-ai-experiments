@@ -1,4 +1,4 @@
-import { Conversation } from "~/lib/typesJsonData";
+import { Chat } from "~/lib/typesJsonData";
 
 const MONTHS: { [key: string]: string } & { [key: number]: string } = {
   "1": "January",
@@ -40,7 +40,7 @@ const categorizeDate = (createdAt: string): string => {
   }
 };
 
-export function getHistoryBlocks(entries: Conversation[]) {
+export function getHistoryBlocks(entries: Chat[]) {
   const blocks = entries.reduce((acc, entry) => {
     const category = categorizeDate(entry.createdAt);
     if (!acc.has(category)) {
@@ -48,7 +48,7 @@ export function getHistoryBlocks(entries: Conversation[]) {
     }
     acc.get(category)!.push(entry);
     return acc;
-  }, new Map<string, Conversation[]>());
+  }, new Map<string, Chat[]>());
 
   return Array.from(blocks.entries());
 }

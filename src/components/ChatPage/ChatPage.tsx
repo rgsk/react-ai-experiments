@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { produce } from "immer";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { Home } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
+import useDropArea from "~/hooks/useDropArea";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
+import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { uuidPlaceholder } from "~/lib/constants";
 import { Chat, Message } from "~/lib/typesJsonData";
@@ -18,11 +21,23 @@ import experimentsService, {
   ToolSource,
   ToolVariant,
 } from "~/services/experimentsService";
-import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
+import NewChatIcon from "../Icons/NewChatIcon";
+import ProfileInfo from "../ProfileInfo/ProfileInfo";
+import Container from "../Shared/Container";
+import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
+import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";
-import { MemoizedMarkdownRenderer } from "./Children/MarkdownRenderer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
+import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput from "./Children/MessageInput";
+import RenderMessages from "./Children/RenderMessages/RenderMessages";
 export type HandleSend = ({ text }: { text: string }) => void;
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
@@ -182,10 +197,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       createdAt: new Date().toISOString(),
     }
   );
-  const [messages, setMessages] = useJsonData<Message[]>(
-    `chats/${chatId}/messages`,
-    []
-  );
+  const [messages, setMessages, { loading: messagesLoading }] = useJsonData<
+    Message[]
+  >(`chats/${chatId}/messages`, []);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
 
@@ -345,119 +359,258 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       );
     }
   }, [setMessages, text]);
+  const { dropAreaProps, isDragging } = useDropArea({
+    onFilesChange: (files) => {},
+  });
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
   const handleSend: HandleSend = ({ text }) => {
     setMessages((prev) => [
       ...(prev ?? []),
       { id: v4(), role: "user", content: text, status: "completed" },
     ]);
   };
+  const openNewChat = () => {
+    navigate(`/chat/${v4()}`);
+  };
+  const historyBlocks = useMemo(() => {
+    return getHistoryBlocks(chatHistory || []);
+  }, [chatHistory]);
   if (!chat || !messages || !chatHistory) {
     return <div>Loading...</div>;
   }
+  const renderMessageInput = () => {
+    return (
+      <MessageInput
+        handleSend={handleSend}
+        loading={textStreamLoading}
+        interrupt={() => {}}
+        placeholder="Message"
+        interruptEnabled={false}
+      />
+    );
+  };
   return (
-    <div>
-      <Button
-        onClick={() => {
-          navigate(`/chat/${v4()}`);
-        }}
-      >
-        New Chat
-      </Button>
-      <div className="flex gap-8">
-        <div className="min-w-[500px]">
-          <div className="flex flex-col">
-            {chatHistory
-              .filter((c) => !!c.title)
-              .map((chat) => {
-                return (
-                  <div key={chat.id}>
-                    <p>{chat.id}</p>
-                    <NavLink to={`/chat/${chat.id}`}>{chat.title}</NavLink>
-                  </div>
-                );
-              })}
-          </div>
+    <div className="h-screen flex">
+      <div className="w-[260px] border-r border-r-input h-full flex flex-col">
+        <div className="p-[16px]">
+          <Button
+            onClick={() => {
+              openNewChat();
+            }}
+          >
+            <NewChatIcon />
+            <span>New Chat</span>
+          </Button>
         </div>
-        <div>
-          <h1>{chat.title || "New Chat"}</h1>
-          {messages.map((message, i) => (
-            <div key={`id: ${message.id}, index - ${i}`}>
-              <p>{message.role}: </p>{" "}
-              {/* IMPORTANT: using MemoizedMarkdownRenderer is essential here, to prevent rerenders */}
-              <MemoizedMarkdownRenderer
-                loading={message.status === "in_progress"}
-              >
-                {(message.content ?? "") as string}
-              </MemoizedMarkdownRenderer>
-            </div>
+        <div className="h-[20px]"></div>
+        <div className="flex-1 overflow-auto space-y-[20px] p-[16px]">
+          {historyBlocks.map(([date, items], i) => (
+            <HistoryBlock key={i} date={date} chats={items} />
           ))}
-
-          <MessageInput
-            handleSend={handleSend}
-            loading={textStreamLoading}
-            interrupt={() => {}}
-            placeholder="Message"
-            interruptEnabled={false}
-          />
-          {voiceModeLoading ? (
-            <div>
-              <p>Initialising Voice Mode...</p>
-              <LoadingSpinner />
-            </div>
-          ) : voiceModeEnabled ? (
-            <p>Voice Mode Running</p>
-          ) : null}
-          <div className="flex gap-2">
-            <div>
-              <Button
-                onClick={() => {
-                  setVoiceModeEnabled(true);
-                  setVoiceModeLoading(true);
-                }}
-                disabled={voiceModeEnabled}
-              >
-                Start
-              </Button>
-            </div>
-            <div>
-              <Button
-                onClick={() => {
-                  setVoiceModeEnabled(false);
-                  stopRecognition();
-                }}
-                disabled={!voiceModeEnabled}
-              >
-                Stop
-              </Button>
-            </div>
-          </div>
-          <OpenAIRealtimeWebRTC
-            onDataChannelOpened={() => {
-              setVoiceModeLoading(false);
-              startRecognition();
-            }}
-            onUserSpeechStarted={() => {
-              startRecognition();
-            }}
-            onUserSpeechStopped={() => {
-              stopRecognition();
-            }}
-            isEnabled={voiceModeEnabled}
-            onAssistantTranscript={() => {
-              markLastMessageAsComplete("assistant");
-            }}
-            onAssistantTranscriptDelta={(delta) => {
-              handleMessageDelta({ role: "assistant", delta: delta });
-            }}
-            onAssistantSpeechStopped={() => {
-              // assistant audio response is complete
-              startRecognition();
-            }}
-            initialMessages={messages}
-          />
         </div>
+        <div className="h-[20px]"></div>
+        <div className="p-[16px]">
+          <DropdownMenu
+            open={profileDropdownOpen}
+            onOpenChange={(value) => setProfileDropdownOpen(value)}
+          >
+            <DropdownMenuTrigger asChild>
+              <button className="w-full"></button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent avoidCollisions align="start" side="top">
+              <DropdownMenuItem onClick={authService.logout}>
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              setProfileDropdownOpen(true);
+            }}
+          >
+            <ProfileInfo />
+          </div>
+        </div>
+      </div>
+      <div
+        className="flex-1 h-full flex flex-col relative"
+        style={{
+          background: 'url("/images/ai-specialists/BG Textures-min.png")',
+          backgroundSize: "cover",
+          backgroundPosition: "top left",
+        }}
+        {...dropAreaProps}
+      >
+        {isDragging && <DraggingBackdrop />}
+        <div className="border-b border-b-input p-4 flex justify-between items-center">
+          <span>
+            <Link to="/">
+              <Button variant="outline" size="icon">
+                <Home />
+              </Button>
+            </Link>
+          </span>
+          <span>{chat?.title ?? "New Chat"}</span>
+          <ModeToggle />
+        </div>
+        {messagesLoading ? (
+          <>
+            <Container centerContent={true}>
+              <LoadingSpinner />
+            </Container>
+            <MessageInputContainer>
+              {renderMessageInput()}
+            </MessageInputContainer>
+          </>
+        ) : (
+          <>
+            {messages.length === 0 ? (
+              <>
+                <Container centerContent={true}>
+                  <div className="w-[800px]">
+                    <div>
+                      <h1 className="text-4xl">What can I help with?</h1>
+                    </div>
+                  </div>
+                </Container>
+                <MessageInputContainer>
+                  {renderMessageInput()}
+                </MessageInputContainer>
+              </>
+            ) : (
+              <>
+                <Container>
+                  <RenderMessages messages={messages} />
+                </Container>
+                <MessageInputContainer>
+                  {renderMessageInput()}
+                </MessageInputContainer>
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
+  // return (
+  //   <div>
+  //     <Button
+  //       onClick={() => {
+  //         navigate(`/chat/${v4()}`);
+  //       }}
+  //     >
+  //       New Chat
+  //     </Button>
+  //     <div className="flex gap-8">
+  //       <div className="min-w-[500px]">
+  //         <div className="flex flex-col">
+  //           {chatHistory
+  //             .filter((c) => !!c.title)
+  //             .map((chat) => {
+  //               return (
+  //                 <div key={chat.id}>
+  //                   <p>{chat.id}</p>
+  //                   <NavLink to={`/chat/${chat.id}`}>{chat.title}</NavLink>
+  //                 </div>
+  //               );
+  //             })}
+  //         </div>
+  //       </div>
+  //       <div>
+  //         <h1>{chat.title || "New Chat"}</h1>
+  //         {messages.map((message, i) => (
+  //           <div key={`id: ${message.id}, index - ${i}`}>
+  //             <p>{message.role}: </p>{" "}
+  //             {/* IMPORTANT: using MemoizedMarkdownRenderer is essential here, to prevent rerenders */}
+  //             <MemoizedMarkdownRenderer
+  //               loading={message.status === "in_progress"}
+  //             >
+  //               {(message.content ?? "") as string}
+  //             </MemoizedMarkdownRenderer>
+  //           </div>
+  //         ))}
+
+  //         <MessageInput
+  //           handleSend={handleSend}
+  //           loading={textStreamLoading}
+  //           interrupt={() => {}}
+  //           placeholder="Message"
+  //           interruptEnabled={false}
+  //         />
+  //         {voiceModeLoading ? (
+  //           <div>
+  //             <p>Initialising Voice Mode...</p>
+  //             <LoadingSpinner />
+  //           </div>
+  //         ) : voiceModeEnabled ? (
+  //           <p>Voice Mode Running</p>
+  //         ) : null}
+  //         <div className="flex gap-2">
+  //           <div>
+  //             <Button
+  //               onClick={() => {
+  //                 setVoiceModeEnabled(true);
+  //                 setVoiceModeLoading(true);
+  //               }}
+  //               disabled={voiceModeEnabled}
+  //             >
+  //               Start
+  //             </Button>
+  //           </div>
+  //           <div>
+  //             <Button
+  //               onClick={() => {
+  //                 setVoiceModeEnabled(false);
+  //                 stopRecognition();
+  //               }}
+  //               disabled={!voiceModeEnabled}
+  //             >
+  //               Stop
+  //             </Button>
+  //           </div>
+  //         </div>
+  //         <OpenAIRealtimeWebRTC
+  //           onDataChannelOpened={() => {
+  //             setVoiceModeLoading(false);
+  //             startRecognition();
+  //           }}
+  //           onUserSpeechStarted={() => {
+  //             startRecognition();
+  //           }}
+  //           onUserSpeechStopped={() => {
+  //             stopRecognition();
+  //           }}
+  //           isEnabled={voiceModeEnabled}
+  //           onAssistantTranscript={() => {
+  //             markLastMessageAsComplete("assistant");
+  //           }}
+  //           onAssistantTranscriptDelta={(delta) => {
+  //             handleMessageDelta({ role: "assistant", delta: delta });
+  //           }}
+  //           onAssistantSpeechStopped={() => {
+  //             // assistant audio response is complete
+  //             startRecognition();
+  //           }}
+  //           initialMessages={messages}
+  //         />
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 };
 export default ChatPage;
+
+interface MessageInputContainerProps {
+  children: any;
+}
+const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
+  children,
+}) => {
+  return (
+    <div className="m-auto max-w-[800px] pb-[28px] md:pb-[36px] px-[32px] w-full">
+      {children}
+    </div>
+  );
+};
