@@ -1,15 +1,14 @@
-import { useState } from "react";
-import SamplePythonRunner from "../Sample/SamplePythonRunner";
-import { Button } from "../ui/button";
+import { Maximize, RefreshCw, X } from "lucide-react";
+import OpenInNewTabIcon from "../Icons/OpenInNewTabIcon";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
-  const [show, setShow] = useState(false);
   return (
     <div>
-      <SamplePythonRunner />
-      <Button onClick={() => setShow(true)}>Show</Button>
-      {show && <SamplePythonRunner />}
+      <OpenInNewTabIcon size={20} />
+      <Maximize size={20} />
+      <X size={20} />
+      <RefreshCw size={20} />
     </div>
   );
 };

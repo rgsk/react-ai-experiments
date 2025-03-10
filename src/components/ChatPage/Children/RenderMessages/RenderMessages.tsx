@@ -105,17 +105,16 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 <div className="absolute top-0 left-0 -translate-x-full group-hover:opacity-100 opacity-0 transition-all">
                   <div className="p-4">
                     <ActionButton
-                      icon={
-                        copiedText === message.content && copied ? (
-                          <Check size={18} />
-                        ) : (
-                          <Copy size={18} />
-                        )
-                      }
                       onClick={() => {
                         copy(message.content as string);
                       }}
-                    ></ActionButton>
+                    >
+                      {copiedText === message.content && copied ? (
+                        <Check size={18} />
+                      ) : (
+                        <Copy size={18} />
+                      )}
+                    </ActionButton>
                   </div>
                 </div>
                 <MemoizedMarkdownRenderer

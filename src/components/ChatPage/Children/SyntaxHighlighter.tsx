@@ -1,9 +1,12 @@
 import Editor from "@monaco-editor/react";
+import { RefreshCw, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
 import { v4 } from "uuid";
+import OpenInNewTabIcon from "~/components/Icons/OpenInNewTabIcon";
+import PreviewIcon from "~/components/Icons/PreviewIcon";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import useCodeRunners, {
@@ -17,6 +20,7 @@ import { useWindowSize } from "~/hooks/useWindowSize";
 import { cn } from "~/lib/utils";
 import IFramePreview from "./IFramePreview";
 import JsxPreview from "./JsxPreview";
+import { ActionButton } from "./MessageActions/MessageActions";
 import SingleGrid from "./SingleGrid";
 interface SyntaxHighlighterProps {
   language: string;
@@ -235,54 +239,59 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       {previewLanguages.includes(language) && !showPreview ? (
         <div className="pt-[20px]">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => {
               setShowPreview(true);
             }}
           >
-            Show Preview
+            <PreviewIcon />
+            <span>Show Preview</span>
           </Button>
         </div>
       ) : null}
       {showPreview && (
         <>
           <div className="pt-[20px]" ref={previewRef}>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowIframe(false);
-                  setTimeout(() => {
-                    setShowIframe(true);
-                  });
-                }}
-              >
-                Reset
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowPreview(false);
-                }}
-              >
-                Close Preview
-              </Button>
-              <a href={iframePreviewLink} target="_blank">
-                <Button variant="outline">Open in New Tab</Button>
-              </a>
-            </div>
-            <div className="h-[20px]"></div>
             <SingleGrid
               gridWidth={divBounds.width}
-              gridHeight={windowSize.height / 2}
+              gridHeight={windowSize.height / 1.5}
             >
-              {showIframe &&
-                code &&
-                (language === "html" ? (
-                  <IFramePreview srcDoc={code} />
-                ) : (
-                  <JsxPreview code={code} />
-                ))}
+              <div className="h-full flex flex-col">
+                <div className="p-1 flex">
+                  <ActionButton
+                    onClick={() => {
+                      setShowIframe(false);
+                      setTimeout(() => {
+                        setShowIframe(true);
+                      });
+                    }}
+                  >
+                    <RefreshCw size={18} />
+                  </ActionButton>
+                  <div className="flex-1"></div>
+                  <a href={iframePreviewLink} target="_blank">
+                    <ActionButton>
+                      <OpenInNewTabIcon size={18} />
+                    </ActionButton>
+                  </a>
+                  <ActionButton
+                    onClick={() => {
+                      setShowPreview(false);
+                    }}
+                  >
+                    <X size={18} />
+                  </ActionButton>
+                </div>
+                <div className="flex-1">
+                  {showIframe &&
+                    code &&
+                    (language === "html" ? (
+                      <IFramePreview srcDoc={code} />
+                    ) : (
+                      <JsxPreview code={code} />
+                    ))}
+                </div>
+              </div>
             </SingleGrid>
           </div>
         </>

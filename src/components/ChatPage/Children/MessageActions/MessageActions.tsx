@@ -56,46 +56,44 @@ const MessageActions: React.FC<MessageActionsProps> = ({
     <div className="flex gap-[4px] rounded-sm">
       {" "}
       <ActionButton
-        icon={<ArrowRotateRight size={18} />}
         onClick={() => {
           // rerun the last user message
           handleSend({
             text: lastUserMessageText,
           });
         }}
-      ></ActionButton>
+      >
+        <ArrowRotateRight size={18} />
+      </ActionButton>
       <ActionButton
-        icon={
-          copiedText === currentText && copied ? (
-            <Check size={18} />
-          ) : (
-            <Copy size={18} />
-          )
-        }
         onClick={() => {
           copy(currentText);
         }}
-      ></ActionButton>
+      >
+        {copiedText === currentText && copied ? (
+          <Check size={18} />
+        ) : (
+          <Copy size={18} />
+        )}
+      </ActionButton>
       <ActionButton
-        icon={
-          feedback?.type === "like" ? <LikeFilledIcon /> : <Like1 size={18} />
-        }
         onClick={() => {
           onLikeDislike({ type: "like" });
         }}
-      ></ActionButton>
+      >
+        {feedback?.type === "like" ? <LikeFilledIcon /> : <Like1 size={18} />}
+      </ActionButton>
       <ActionButton
-        icon={
-          feedback?.type === "dislike" ? (
-            <DislikeFilledIcon />
-          ) : (
-            <Dislike size={18} />
-          )
-        }
         onClick={() => {
           onLikeDislike({ type: "dislike" });
         }}
-      ></ActionButton>
+      >
+        {feedback?.type === "dislike" ? (
+          <DislikeFilledIcon />
+        ) : (
+          <Dislike size={18} />
+        )}
+      </ActionButton>
     </div>
   );
 };
@@ -103,15 +101,15 @@ export default MessageActions;
 
 interface ActionButtonProps {
   onClick?: () => void;
-  icon: any;
+  children: any;
 }
 export const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
-  icon,
+  children,
 }) => {
   return (
     <button onClick={onClick} className="hover:bg-accent rounded-[4px] p-1.5">
-      {icon}
+      {children}
     </button>
   );
 };

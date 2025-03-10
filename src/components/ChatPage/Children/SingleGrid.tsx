@@ -26,7 +26,10 @@ const SingleGrid: React.FC<SingleGridProps> = ({
         width={gridWidth}
         margin={[0, 0]}
       >
-        <div key="b" className="border border-black rounded-lg overflow-hidden">
+        <div
+          key="b"
+          className="border border-muted-foreground rounded-lg overflow-hidden"
+        >
           {children}
         </div>
       </ReactGridLayout>
