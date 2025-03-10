@@ -80,6 +80,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({
         <ArrowRotateRight size={18} />
       </ActionButton>
       <ActionButton
+        disabled={feedback?.type === "like"}
         tooltip="Like"
         onClick={() => {
           onLikeDislike({ type: "like" });
@@ -88,6 +89,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({
         {feedback?.type === "like" ? <LikeFilledIcon /> : <Like1 size={18} />}
       </ActionButton>
       <ActionButton
+        disabled={feedback?.type === "dislike"}
         tooltip="Dislike"
         onClick={() => {
           onLikeDislike({ type: "dislike" });

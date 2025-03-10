@@ -9,15 +9,21 @@ interface ActionButtonProps {
   onClick?: () => void;
   children: any;
   tooltip?: string;
+  disabled?: boolean;
 }
 export const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
   children,
   tooltip,
+  disabled,
 }) => {
   const renderButton = () => {
     return (
-      <button onClick={onClick} className="hover:bg-accent rounded-[4px] p-1.5">
+      <button
+        disabled={disabled}
+        onClick={onClick}
+        className="hover:bg-accent rounded-[4px] p-1.5"
+      >
         {children}
       </button>
     );
