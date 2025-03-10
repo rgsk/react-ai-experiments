@@ -492,7 +492,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             ) : (
               <>
                 <Container divRef={scrollContainerRef}>
-                  <RenderMessages messages={messages} />
+                  <RenderMessages messages={messages} handleSend={handleSend} />
                 </Container>
                 <MessageInputContainer>
                   {renderMessageInput()}

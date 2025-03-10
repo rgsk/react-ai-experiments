@@ -9,11 +9,17 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Message } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
+import { HandleSend } from "../../ChatPage";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
+import MessageActions from "../MessageActions/MessageActions";
 interface RenderMessagesProps {
   messages: Message[];
+  handleSend: HandleSend;
 }
-const RenderMessages: React.FC<RenderMessagesProps> = ({ messages }) => {
+const RenderMessages: React.FC<RenderMessagesProps> = ({
+  messages,
+  handleSend,
+}) => {
   return (
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
@@ -56,7 +62,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({ messages }) => {
               >
                 {(message.content ?? "") as string}
               </MemoizedMarkdownRenderer>
-
+              {message.status !== "in_progress" && (
+                <MessageActions
+                  handleSend={handleSend}
+                  messages={messages}
+                  index={i}
+                />
+              )}
               {message.tool_calls && (
                 <div className="px-4">
                   <CollapsibleWrapper heading="Tool Calls">
