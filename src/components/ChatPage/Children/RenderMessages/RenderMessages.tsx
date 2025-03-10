@@ -1,3 +1,4 @@
+import { Copy, TickSquare } from "iconsax-react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
@@ -8,11 +9,12 @@ import {
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
 import { Separator } from "~/components/ui/separator";
+import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { Message } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
-import MessageActions from "../MessageActions/MessageActions";
+import MessageActions, { ActionButton } from "../MessageActions/MessageActions";
 interface RenderMessagesProps {
   messages: Message[];
   handleSend: HandleSend;
@@ -21,6 +23,8 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
   messages,
   handleSend,
 }) => {
+  const { copy, copied, copiedText } = useCopyToClipboard();
+
   const loading =
     messages.length > 0 &&
     !(messages[messages.length - 1].role === "assistant") &&
@@ -95,9 +99,25 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             <div
               key={key}
               className={cn(
-                "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto max-w-[640px]"
+                "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto max-w-[640px] relative group"
               )}
             >
+              <div className="absolute top-0 left-0 -translate-x-full group-hover:opacity-100 opacity-0 transition-all">
+                <div className="p-4">
+                  <ActionButton
+                    icon={
+                      copiedText === message.content && copied ? (
+                        <TickSquare size={18} />
+                      ) : (
+                        <Copy size={18} />
+                      )
+                    }
+                    onClick={() => {
+                      copy(message.content as string);
+                    }}
+                  ></ActionButton>
+                </div>
+              </div>
               <MemoizedMarkdownRenderer
                 loading={message.status === "in_progress"}
               >

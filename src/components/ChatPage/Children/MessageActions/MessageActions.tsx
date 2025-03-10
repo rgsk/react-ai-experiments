@@ -115,7 +115,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
 }) => {
   return (
-    <button onClick={onClick} className="hover:bg-accent rounded-[4px] p-1">
+    <button onClick={onClick} className="hover:bg-accent rounded-[4px] p-1.5">
       {icon}
     </button>
   );
