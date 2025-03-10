@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import DislikeFilledIcon from "~/components/Icons/DislikeFilledIcon";
 import LikeFilledIcon from "~/components/Icons/LikeFilledIcon";
+import ActionButton from "~/components/Shared/ActionButton";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { Message, MessageFeedback } from "~/lib/typesJsonData";
 import jsonDataService from "~/services/jsonDataService";
@@ -98,18 +99,3 @@ const MessageActions: React.FC<MessageActionsProps> = ({
   );
 };
 export default MessageActions;
-
-interface ActionButtonProps {
-  onClick?: () => void;
-  children: any;
-}
-export const ActionButton: React.FC<ActionButtonProps> = ({
-  onClick,
-  children,
-}) => {
-  return (
-    <button onClick={onClick} className="hover:bg-accent rounded-[4px] p-1.5">
-      {children}
-    </button>
-  );
-};
