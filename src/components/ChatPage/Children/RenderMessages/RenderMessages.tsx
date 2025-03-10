@@ -130,43 +130,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             </div>
           );
         } else if (message.role === "assistant") {
-          // pick messages upto last assistant message
-          const count = messages
-            .slice(0, i)
-            .reverse()
-            .findIndex((m) => m.role === "assistant");
-          const messagesUptoLastAssistant = messages.slice(i - count, i);
-          const imageUrls: string[] = [];
-          for (const message of messagesUptoLastAssistant) {
-            if (message.role === "tool") {
-              (message.content as string).split("\n").forEach((line) => {
-                if (
-                  line.startsWith(
-                    "https://c08a1eeb-cb81-4c3c-9a11-f616ffd8e042.s3.us-east-1.amazonaws.com"
-                  )
-                ) {
-                  imageUrls.push(line);
-                }
-              });
-            }
-          }
           return (
             <div key={key} className="w-full relative">
-              <div>
-                {imageUrls.map((url) => {
-                  return (
-                    <div key={url} className="flex justify-start">
-                      <img
-                        src={url}
-                        alt={url}
-                        className="w-[100%]"
-                        onLoad={scrollToBottom}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              <div key={key} className={cn("w-full break-words")}>
+              <div className={cn("w-full break-words")}>
                 <AIAvatar />
 
                 <MemoizedMarkdownRenderer
