@@ -403,13 +403,51 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     onFilesChange: handleFilesChange,
   });
 
-  const handleSend: HandleSend = ({ text }) => {
-    // process attached files
+  const handleSend: HandleSend = async ({ text }) => {
     setAttachedFiles([]);
     setMessages((prev) => [
       ...(prev ?? []),
       { id: v4(), role: "user", content: text, status: "completed" },
     ]);
+    // process attached files
+    await Promise.all(
+      attachedFiles.map(async (fileEntry) => {
+        const { url: signedUrl } = await experimentsService
+          .getAWSDownloadUrl({ url: fileEntry.s3Url! })
+          .fn();
+        const isImage = fileEntry.file!.type.startsWith("image/");
+        if (isImage) {
+          const message: Message = {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `![${fileEntry.file!.name}](${signedUrl})`,
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: signedUrl,
+                },
+              },
+            ],
+            id: v4(),
+            status: "completed",
+          };
+          setMessages((prev) => {
+            if (prev) {
+              return [...prev, message];
+            }
+            return prev;
+          });
+        } else {
+          const result = await experimentsService
+            .getUrlContent({ url: signedUrl })
+            .fn();
+          return result;
+        }
+      })
+    );
     setTimeout(() => {
       handleGenerate({
         messages: messagesRef.current ?? [],
