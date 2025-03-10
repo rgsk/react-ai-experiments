@@ -14,6 +14,7 @@ const SampleImageUpload: React.FC<SampleImageUploadProps> = ({}) => {
     const { url: uploadUrl } = await experimentsService
       .getAWSUploadUrl({
         key: key,
+        access: "private",
       })
       .fn();
     await axios.put(uploadUrl, file);

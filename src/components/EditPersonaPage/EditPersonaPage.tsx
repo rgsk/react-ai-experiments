@@ -33,18 +33,15 @@ const getContent = async (item: PersonaKnowledgeItem) => {
       .fn();
     return content;
   } else if (item.type === "file") {
-    const { url: signedUrl } = await experimentsService
-      .getAWSDownloadUrl({ url: item.url })
-      .fn();
     const isImage = item.metadata.filetype.startsWith("image/");
     if (isImage) {
       const result = await experimentsService
-        .getUrlContent({ url: signedUrl, type: "image" })
+        .getUrlContent({ url: item.url, type: "image" })
         .fn();
       return result;
     } else {
       const result = await experimentsService
-        .getUrlContent({ url: signedUrl })
+        .getUrlContent({ url: item.url })
         .fn();
       return result;
     }

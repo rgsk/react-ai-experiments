@@ -128,8 +128,14 @@ const experimentsService = {
     >("/session");
     return result.data;
   },
-  getAWSUploadUrl: ({ key }: { key: string }) => {
-    const query = encodeQueryParams({ key });
+  getAWSUploadUrl: ({
+    key,
+    access,
+  }: {
+    key: string;
+    access: "public" | "private";
+  }) => {
+    const query = encodeQueryParams({ key, access });
     return {
       key: ["aws", "upload-url", query],
       fn: async () => {
@@ -235,6 +241,7 @@ const experimentsService = {
     const { url: uploadUrl } = await experimentsService
       .getAWSUploadUrl({
         key: key,
+        access: "public",
       })
       .fn();
     await axios.put(uploadUrl, file, {

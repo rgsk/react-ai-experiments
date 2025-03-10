@@ -117,10 +117,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             if (line.startsWith("data:image/png;base64,")) {
               const file = dataURLtoFile(line, "image.png");
               const result = await experimentsService.uploadFileToS3(file);
-              const { url: signedUrl } = await experimentsService
-                .getAWSDownloadUrl({ url: result })
-                .fn();
-              return signedUrl;
+              return result;
             }
             return line;
           })
@@ -439,9 +436,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     const messageIndexTracker: any = {};
     await Promise.all(
       attachedFiles.map(async (fileEntry, index) => {
-        const { url: signedUrl } = await experimentsService
-          .getAWSDownloadUrl({ url: fileEntry.s3Url! })
-          .fn();
         const isImage = fileEntry.file!.type.startsWith("image/");
         const messageId = v4();
         messageIndexTracker[messageId] = index;
@@ -460,7 +454,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 {
                   type: "image_url",
                   image_url: {
-                    url: signedUrl,
+                    url: fileEntry.s3Url!,
                   },
                 },
               ],
@@ -470,13 +464,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             };
           } else {
             const result = await experimentsService
-              .getUrlContent({ url: signedUrl })
+              .getUrlContent({ url: fileEntry.s3Url! })
               .fn();
             message = {
               role: "user",
               content: JSON.stringify({
                 fileName: fileEntry.file!.name,
-                url: signedUrl,
+                url: fileEntry.s3Url!,
                 content: result,
               }),
               id: messageId,
@@ -511,10 +505,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             return prev;
           });
         } else {
-          const result = await experimentsService
-            .getUrlContent({ url: signedUrl })
-            .fn();
-          return result;
+          // const result = await experimentsService
+          //   .getUrlContent({ url: signedUrl })
+          //   .fn();
+          // return result;
         }
       })
     );
