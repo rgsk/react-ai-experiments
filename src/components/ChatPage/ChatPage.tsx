@@ -76,18 +76,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     if (serverTools) {
       setTools([
         ...clientTools,
-        ...serverTools.mcpOpenAITools
-          .filter((t) => t.function.name !== "executeCode")
-          .map((t) => ({
-            ...t,
-            variant: ToolVariant.serverSide,
-            source: ToolSource.mcp,
-          })),
-        ...serverTools.composioTools.map((t) => ({
+        ...serverTools.mcpOpenAITools.map((t) => ({
           ...t,
           variant: ToolVariant.serverSide,
-          source: ToolSource.composio,
+          source: ToolSource.mcp,
         })),
+        // ...serverTools.composioTools.map((t) => ({
+        //   ...t,
+        //   variant: ToolVariant.serverSide,
+        //   source: ToolSource.composio,
+        // })),
       ]);
     }
   }, [serverTools]);
