@@ -8,7 +8,13 @@ export type Message = ChatCompletionMessageParam & {
   status: "in_progress" | "incomplete" | "completed";
   tool_calls?: ToolCall[];
 };
-type Role = Message["role"];
+export type Role = Message["role"];
+export type MessageFeedback = {
+  id: string;
+  type: "like" | "dislike";
+  text?: string;
+  createdAt: ISODateString;
+};
 export type Chat = {
   id: string | undefined;
   title: string;

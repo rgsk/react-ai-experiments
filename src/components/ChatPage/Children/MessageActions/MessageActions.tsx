@@ -5,8 +5,12 @@ import {
   Like1,
   TickSquare,
 } from "iconsax-react";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { v4 } from "uuid";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
-import { Message } from "~/lib/typesJsonData";
+import { Message, MessageFeedback } from "~/lib/typesJsonData";
+import jsonDataService from "~/services/jsonDataService";
 import { HandleSend } from "../../ChatPage";
 
 interface MessageActionsProps {
@@ -25,7 +29,32 @@ const MessageActions: React.FC<MessageActionsProps> = ({
     .reverse()
     .find((m) => m.role === "user");
   const lastUserMessageText = (lastUserMessage?.content ?? "") as string;
-  const currentText = messages[index].content;
+  const message = messages[index];
+  const currentText = message.content as string;
+  const { id: chatId } = useParams<{ id: string }>();
+  const [feedback, setFeedback] = useState<{
+    type: MessageFeedback["type"];
+    text?: string;
+  }>();
+  const onLikeDislike = async ({
+    type,
+    text,
+  }: {
+    type: MessageFeedback["type"];
+    text?: string;
+  }) => {
+    setFeedback({ type, text });
+    const feedbackId = v4();
+    await jsonDataService.setKey<MessageFeedback>({
+      key: `chats/${chatId}/messages/${message.id}/feedback/${feedbackId}`,
+      value: {
+        createdAt: new Date().toISOString(),
+        type: type,
+        text: text,
+        id: feedbackId,
+      },
+    });
+  };
   return (
     <div className="flex">
       <div className="flex gap-[4px] rounded-sm p-[6px]">
@@ -48,16 +77,32 @@ const MessageActions: React.FC<MessageActionsProps> = ({
             )
           }
           onClick={() => {
-            copy(currentText as string);
+            copy(currentText);
           }}
         ></ActionButton>
         <ActionButton
-          icon={<Like1 size={18} />}
-          onClick={() => {}}
+          icon={
+            feedback?.type === "like" ? (
+              <Like1 size={18} className="fill-foreground" />
+            ) : (
+              <Like1 size={18} />
+            )
+          }
+          onClick={() => {
+            onLikeDislike({ type: "like" });
+          }}
         ></ActionButton>
         <ActionButton
-          icon={<Dislike size={18} />}
-          onClick={() => {}}
+          icon={
+            feedback?.type === "dislike" ? (
+              <Dislike size={18} className="fill-foreground" />
+            ) : (
+              <Dislike size={18} />
+            )
+          }
+          onClick={() => {
+            onLikeDislike({ type: "dislike" });
+          }}
         ></ActionButton>
       </div>
     </div>
