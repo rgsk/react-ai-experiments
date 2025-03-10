@@ -235,6 +235,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
       {previewLanguages.includes(language) && !showPreview ? (
         <div className="pt-[20px]">
           <Button
+            variant="outline"
             onClick={() => {
               setShowPreview(true);
             }}
@@ -248,6 +249,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           <div className="pt-[20px]" ref={previewRef}>
             <div className="flex gap-2">
               <Button
+                variant="outline"
                 onClick={() => {
                   setShowIframe(false);
                   setTimeout(() => {
@@ -258,6 +260,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 Reset
               </Button>
               <Button
+                variant="outline"
                 onClick={() => {
                   setShowPreview(false);
                 }}
@@ -265,7 +268,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 Close Preview
               </Button>
               <a href={iframePreviewLink} target="_blank">
-                <Button>Open in New Tab</Button>
+                <Button variant="outline">Open in New Tab</Button>
               </a>
             </div>
             <div className="h-[20px]"></div>
