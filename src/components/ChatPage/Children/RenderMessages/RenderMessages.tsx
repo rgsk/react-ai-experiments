@@ -34,7 +34,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({ messages }) => {
                   <p className="whitespace-pre-wrap">
                     {JSON.stringify(toolCall, null, 4)}
                   </p>
-                  <Separator className="my-4" />
+                  <Separator className="my-4 h-[2px]" />
                   <div className="my-4">
                     <p>Output:</p>
                   </div>
@@ -112,7 +112,9 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
         </Button>
       </CollapsibleTrigger>
       <div className="h-4"></div>
-      <CollapsibleContent>{children}</CollapsibleContent>
+      <CollapsibleContent>
+        <div className="border-l-2 pl-4">{children}</div>
+      </CollapsibleContent>
     </Collapsible>
   );
 };
