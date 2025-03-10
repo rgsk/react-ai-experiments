@@ -22,7 +22,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
   handleSend,
 }) => {
   const loading =
-    messages.length > 0 && messages[messages.length - 1].role === "user";
+    messages.length > 0 &&
+    !(messages[messages.length - 1].role === "assistant") &&
+    messages.every((m) => m.status === "completed");
   return (
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
