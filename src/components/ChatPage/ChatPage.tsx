@@ -41,7 +41,15 @@ import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
-
+export type FileEntry = {
+  id: string;
+  file?: File;
+  fileMetadata?: {
+    name: string;
+    type: string;
+  };
+  s3Url?: string;
+};
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
@@ -206,6 +214,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [attachedFiles, setAttachedFiles] = useState<FileEntry[]>([]);
 
   const { scrollToBottom } = useEnsureScrolledToBottom({
     scrollContainerRef: scrollContainerRef,
@@ -282,6 +291,33 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     [setChat, setMessages]
   );
+  const handleFilesChange = async (files: File[]) => {
+    if (files) {
+      const supportedFiles: File[] = [];
+      const unsupportedFiles: File[] = [];
+      for (const file of files) {
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        // if (ext && supportedExtensions.includes(ext)) {
+        supportedFiles.push(file);
+        // } else {
+        //   unsupportedFiles.push(file);
+        // }
+      }
+      setAttachedFiles((prev) => [
+        ...prev,
+        ...supportedFiles.map((file) => ({ id: v4(), file })),
+      ]);
+      if (unsupportedFiles.length > 0) {
+        setTimeout(() => {
+          alert(
+            `Some of the files you have added are not supported: ${unsupportedFiles
+              .map((file) => file.name)
+              .join(", ")}`
+          );
+        }, 500);
+      }
+    }
+  };
   const hasAssistantMessageForCurrentToolCalls = toolCallsAndOutputs.some(
     (tco) =>
       messages
@@ -364,10 +400,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     }
   }, [setMessages, text]);
   const { dropAreaProps, isDragging } = useDropArea({
-    onFilesChange: (files) => {},
+    onFilesChange: handleFilesChange,
   });
 
   const handleSend: HandleSend = ({ text }) => {
+    // process attached files
+    setAttachedFiles([]);
     setMessages((prev) => [
       ...(prev ?? []),
       { id: v4(), role: "user", content: text, status: "completed" },
@@ -394,6 +432,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         interrupt={() => {}}
         placeholder="Message"
         interruptEnabled={false}
+        handleFilesChange={handleFilesChange}
+        attachedFiles={attachedFiles}
+        setAttachedFiles={setAttachedFiles}
       />
     );
   };

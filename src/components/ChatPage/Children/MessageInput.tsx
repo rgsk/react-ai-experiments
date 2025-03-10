@@ -1,9 +1,11 @@
-import { ArrowUp } from "iconsax-react";
-import { useMemo, useState } from "react";
+import { ArrowUp, Paperclip2 } from "iconsax-react";
+import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import useBreakpoints from "~/hooks/useBreakpoints";
 import { cn } from "~/lib/utils";
-import { HandleSend } from "../ChatPage";
+import experimentsService from "~/services/experimentsService";
+import { FileEntry, HandleSend } from "../ChatPage";
+import FileUploadedPreview from "./FileUploadedPreview/FileUploadedPreview";
 
 interface MessageInputProps {
   handleSend: HandleSend;
@@ -12,6 +14,9 @@ interface MessageInputProps {
   placeholder: string;
   disabled?: boolean;
   interruptEnabled: boolean;
+  handleFilesChange: (files: File[]) => void;
+  attachedFiles: FileEntry[];
+  setAttachedFiles: Dispatch<SetStateAction<FileEntry[]>>;
 }
 const MessageInput: React.FC<MessageInputProps> = ({
   handleSend,
@@ -20,9 +25,17 @@ const MessageInput: React.FC<MessageInputProps> = ({
   placeholder,
   disabled,
   interruptEnabled,
+  handleFilesChange,
+  attachedFiles,
+  setAttachedFiles,
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [inputFocused, setInputFocused] = useState(false);
-
+  const handleFileInputClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Trigger the file input click
+    }
+  };
   const [text, setText] = useState("");
   const { md } = useBreakpoints();
   const canSend = useMemo(() => {
@@ -45,12 +58,59 @@ const MessageInput: React.FC<MessageInputProps> = ({
           "border-gslearnlightmodeGrey1 bg-gslearnlightmodeGrey6 cursor-not-allowed"
       )}
     >
+      {attachedFiles.length > 0 && (
+        <div className="flex gap-[16px] pb-[24px] pt-[12px]">
+          {attachedFiles.map((fileEntry) => (
+            <FileUploadedPreview
+              key={fileEntry.id}
+              fileEntry={fileEntry}
+              onRemove={() => {
+                if (fileEntry.s3Url) {
+                  experimentsService.deleteFileFromS3(fileEntry.s3Url);
+                }
+
+                setAttachedFiles((prev) =>
+                  prev.filter((entry) => entry.id !== fileEntry.id)
+                );
+              }}
+              onS3Upload={(s3Url) => {
+                setAttachedFiles((prev) =>
+                  prev.map((entry) =>
+                    entry.id === fileEntry.id ? { ...entry, s3Url } : entry
+                  )
+                );
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       <form
         className="relative flex"
         onSubmit={(e) => {
           e.preventDefault();
         }}
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={(ev) => {
+            const files = ev.target.files;
+            if (files) {
+              handleFilesChange(Array.from(files));
+            }
+          }}
+          multiple
+          className="hidden"
+          onClick={(event: any) => {
+            // Reset the value so that the same file/files can be selected again
+            event.target.value = null;
+          }}
+        />
+        <button onClick={handleFileInputClick}>
+          <Paperclip2 size={20} />
+        </button>
+        <div className="w-[8px]"></div>
         <TextareaAutosize
           minRows={1}
           maxRows={6}
