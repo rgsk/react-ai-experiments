@@ -1,4 +1,10 @@
-import { DependencyList, useCallback, useEffect } from "react";
+import {
+  DependencyList,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 const useEnsureScrolledToBottom = ({
   scrollContainerRef,
@@ -11,14 +17,43 @@ const useEnsureScrolledToBottom = ({
   observerDeps?: DependencyList;
   scrollBottomDeps?: DependencyList;
 }) => {
-  const scrollToBottom = useCallback(() => {
+  const [autoScrollDisabled, setAutoScrollDisabled] = useState(false);
+  const autoScrollDisabledRef = useRef(autoScrollDisabled);
+  autoScrollDisabledRef.current = autoScrollDisabled;
+  useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
-      scrollContainer.scrollTo({
-        top: scrollContainer.scrollHeight - scrollContainer.clientHeight,
-      });
+      const updateAutoScroll = () => {
+        const maxScrollTop =
+          scrollContainer.scrollHeight - scrollContainer.clientHeight;
+        const threshold = 200;
+        setAutoScrollDisabled(
+          maxScrollTop - scrollContainer.scrollTop > threshold
+        );
+      };
+      scrollContainer.addEventListener("scroll", updateAutoScroll);
+      return () => {
+        scrollContainer.removeEventListener("scroll", updateAutoScroll);
+      };
     }
-  }, [scrollContainerRef]);
+  }, [
+    scrollContainerRef,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    ...(observerDeps ?? []),
+  ]);
+
+  const scrollToBottom = useCallback(
+    (mandatory?: boolean) => {
+      if (autoScrollDisabledRef.current && !mandatory) return;
+      const scrollContainer = scrollContainerRef.current;
+      if (scrollContainer) {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight - scrollContainer.clientHeight,
+        });
+      }
+    },
+    [scrollContainerRef]
+  );
   useEffect(() => {
     scrollToBottom();
   }, [
@@ -66,6 +101,6 @@ const useEnsureScrolledToBottom = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     ...(observerDeps ?? []),
   ]);
-  return { scrollToBottom };
+  return { scrollToBottom, autoScrollDisabled };
 };
 export default useEnsureScrolledToBottom;

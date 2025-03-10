@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { produce } from "immer";
-import { Home } from "lucide-react";
+import { ArrowDown, Home } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
@@ -16,6 +16,7 @@ import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
 import { Chat, Message } from "~/lib/typesJsonData";
+import { cn } from "~/lib/utils";
 import experimentsService, {
   Tool,
   ToolCall,
@@ -225,7 +226,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [attachedFiles, setAttachedFiles] = useState<FileEntry[]>([]);
 
-  const { scrollToBottom } = useEnsureScrolledToBottom({
+  const { scrollToBottom, autoScrollDisabled } = useEnsureScrolledToBottom({
     scrollContainerRef: scrollContainerRef,
     observedImagesClassname: observeImageResizeClassname,
     observerDeps: [(messages?.length ?? 0) > 0],
@@ -514,6 +515,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       status: "completed",
     };
     setMessages((prev) => [...(prev ?? []), userMessage]);
+    setTimeout(() => {
+      scrollToBottom(true);
+    }, 100);
     // process attached files
     await processAttachedFiles(userMessage);
     setTimeout(() => {
@@ -632,6 +636,28 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                     handleSend={handleSend}
                   />
                 </Container>
+                <div className="relative">
+                  <div className="absolute right-1/2 -translate-x-1/2 translate-y-[-60px]">
+                    <div
+                      className={cn(
+                        "transition-opacity",
+                        autoScrollDisabled ? "opacity-100" : "opacity-0"
+                      )}
+                    >
+                      <Button
+                        onClick={() => {
+                          scrollToBottom(true);
+                        }}
+                        variant="outline"
+                        size="icon"
+                        className="rounded-full"
+                      >
+                        <ArrowDown />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
                 <MessageInputContainer>
                   {renderMessageInput()}
                 </MessageInputContainer>
