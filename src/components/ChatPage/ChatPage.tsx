@@ -478,7 +478,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               type: "image_ocr",
             };
           }
-
+          await new Promise((resolve) => setTimeout(resolve, index * 100));
+          // artificial delay to ensure setMessages is called sequentialy and not in parallel
           setMessages((prev) => {
             if (prev) {
               const fileRelatedMessages = [
