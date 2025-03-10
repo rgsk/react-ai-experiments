@@ -261,6 +261,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               <div className="h-full flex flex-col">
                 <div className="p-1 flex">
                   <ActionButton
+                    tooltip="Refresh"
                     onClick={() => {
                       setShowIframe(false);
                       setTimeout(() => {
@@ -272,11 +273,12 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                   </ActionButton>
                   <div className="flex-1"></div>
                   <a href={iframePreviewLink} target="_blank">
-                    <ActionButton>
+                    <ActionButton tooltip="Open in New Tab">
                       <OpenInNewTabIcon size={18} />
                     </ActionButton>
                   </a>
                   <ActionButton
+                    tooltip="Close"
                     onClick={() => {
                       setShowPreview(false);
                     }}

@@ -57,16 +57,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({
     <div className="flex gap-[4px] rounded-sm">
       {" "}
       <ActionButton
-        onClick={() => {
-          // rerun the last user message
-          handleSend({
-            text: lastUserMessageText,
-          });
-        }}
-      >
-        <ArrowRotateRight size={18} />
-      </ActionButton>
-      <ActionButton
+        tooltip="Copy"
         onClick={() => {
           copy(currentText);
         }}
@@ -78,6 +69,18 @@ const MessageActions: React.FC<MessageActionsProps> = ({
         )}
       </ActionButton>
       <ActionButton
+        tooltip="Regenerate"
+        onClick={() => {
+          // rerun the last user message
+          handleSend({
+            text: lastUserMessageText,
+          });
+        }}
+      >
+        <ArrowRotateRight size={18} />
+      </ActionButton>
+      <ActionButton
+        tooltip="Like"
         onClick={() => {
           onLikeDislike({ type: "like" });
         }}
@@ -85,6 +88,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({
         {feedback?.type === "like" ? <LikeFilledIcon /> : <Like1 size={18} />}
       </ActionButton>
       <ActionButton
+        tooltip="Dislike"
         onClick={() => {
           onLikeDislike({ type: "dislike" });
         }}
