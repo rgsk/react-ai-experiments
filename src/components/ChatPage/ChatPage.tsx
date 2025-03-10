@@ -627,6 +627,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               <>
                 <Container divRef={scrollContainerRef}>
                   <RenderMessages
+                    scrollToBottom={scrollToBottom}
                     messages={messages ?? []}
                     handleSend={handleSend}
                   />

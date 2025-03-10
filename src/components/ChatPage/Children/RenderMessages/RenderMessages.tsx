@@ -19,10 +19,12 @@ import MessageActions from "../MessageActions/MessageActions";
 interface RenderMessagesProps {
   messages: Message[];
   handleSend: HandleSend;
+  scrollToBottom: () => void;
 }
 const RenderMessages: React.FC<RenderMessagesProps> = ({
   messages,
   handleSend,
+  scrollToBottom,
 }) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
 
@@ -42,7 +44,12 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           return (
             <div key={key} className="w-full">
               <div className="flex justify-end">
-                <img src={url} alt={url} className="w-[50%]" />
+                <img
+                  src={url}
+                  alt={url}
+                  className="w-[50%]"
+                  onLoad={scrollToBottom}
+                />
               </div>
             </div>
           );
@@ -58,7 +65,12 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           return (
             <div key={key} className="w-full">
               <div className="flex justify-end">
-                <img src={url} alt={url} className="w-[50%]" />
+                <img
+                  src={url}
+                  alt={url}
+                  className="w-[50%]"
+                  onLoad={scrollToBottom}
+                />
               </div>
               <div className="h-4"></div>
               <div className="flex justify-end">
