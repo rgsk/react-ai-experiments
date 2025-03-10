@@ -284,39 +284,50 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
 
   useEffect(() => {
-    if (
-      messages &&
-      messages.length > 0 &&
-      messages[messages.length - 1].role === "assistant" &&
-      messages[messages.length - 1].status === "completed" &&
-      toolCallsAndOutputs.length > 0 &&
-      toolCallsAndOutputs.every((e) => !e.isLoading) &&
-      toolCallsAndOutputs.length ===
-        messages[messages.length - 1].tool_calls?.length
-    ) {
-      const toolsMessages: Message[] = toolCallsAndOutputs.map((tco) => {
-        return {
-          role: "tool" as const,
-          content: tco.toolCallOutput!,
-          tool_call_id: tco.toolCall.id,
-          id: v4(),
-          status: "completed",
-        };
-      });
-      setMessages((prev) => {
-        if (prev) {
-          return [...(prev ?? []), ...toolsMessages];
-        }
-        return prev;
-      });
-      setToolCallsAndOutputs([]);
-      setTimeout(() => {
-        handleGenerate({
-          tools: tools,
-          messages: messagesRef.current ?? [],
-          onComplete: onGenerateComplete,
+    const lastAssistantMessage = messages
+      ?.slice()
+      ?.reverse()
+      .find((m) => m.role === "assistant" && m.status === "completed");
+    if (messages && lastAssistantMessage) {
+      const toolsMessages: Message[] = toolCallsAndOutputs
+        .filter(
+          (tc) =>
+            !tc.isLoading &&
+            !messages.some(
+              (m) => m.role === "tool" && m.tool_call_id === tc.toolCall.id
+            )
+        )
+        .map((tco) => {
+          return {
+            role: "tool" as const,
+            content: tco.toolCallOutput!,
+            tool_call_id: tco.toolCall.id,
+            id: v4(),
+            status: "completed",
+          };
         });
-      }, 100);
+      if (toolsMessages.length > 0) {
+        setMessages((prev) => {
+          if (prev) {
+            return [...(prev ?? []), ...toolsMessages];
+          }
+          return prev;
+        });
+
+        if (
+          toolCallsAndOutputs.filter((tco) => !tco.isLoading).length ===
+          lastAssistantMessage.tool_calls?.length
+        ) {
+          setToolCallsAndOutputs([]);
+          setTimeout(() => {
+            handleGenerate({
+              tools: tools,
+              messages: messagesRef.current ?? [],
+              onComplete: onGenerateComplete,
+            });
+          }, 100);
+        }
+      }
     }
   }, [
     handleGenerate,

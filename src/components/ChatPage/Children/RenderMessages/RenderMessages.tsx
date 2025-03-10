@@ -6,6 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
+import { Separator } from "~/components/ui/separator";
 import { Message } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
@@ -16,32 +17,72 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({ messages }) => {
   return (
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
-        return (
-          <div
-            key={`id: ${message.id}, index - ${i}`}
-            className={cn(
-              "rounded-lg break-words",
-              message.role === "assistant"
-                ? "bg-transparent w-full"
-                : "bg-gray-100 dark:bg-gray-800 mx-4",
-              message.role === "user" ? "ml-auto text-right max-w-[80%]" : ""
-            )}
-          >
-            <MemoizedMarkdownRenderer
-              loading={message.status === "in_progress"}
-            >
-              {(message.content ?? "") as string}
-            </MemoizedMarkdownRenderer>
-
-            {message.tool_calls && (
-              <div className="p-4">
-                <CollapsibleWrapper heading="Tool Calls">
-                  <pre>{JSON.stringify(message.tool_calls, null, 2)}</pre>
+        const key = `id: ${message.id}, index - ${i}`;
+        if (message.role === "tool") {
+          const toolCall = messages
+            .slice(0, i)
+            .reverse()
+            .find((m) => m.role === "assistant")
+            ?.tool_calls?.find((tc) => tc.id === message.tool_call_id);
+          if (!toolCall) return null;
+          return (
+            <div key={key} className="px-4 w-full">
+              <div>
+                <CollapsibleWrapper
+                  heading={`Tool Call - ${toolCall.function.name}`}
+                >
+                  <p className="whitespace-pre-wrap">
+                    {JSON.stringify(toolCall, null, 4)}
+                  </p>
+                  <Separator className="my-4" />
+                  <div className="my-4">
+                    <p>Output:</p>
+                  </div>
+                  <p className="whitespace-pre-wrap">
+                    {message.content as string}
+                  </p>
                 </CollapsibleWrapper>
               </div>
-            )}
-          </div>
-        );
+            </div>
+          );
+        } else if (message.role === "assistant") {
+          return (
+            <div key={key} className={cn("w-full break-words")}>
+              <MemoizedMarkdownRenderer
+                loading={message.status === "in_progress"}
+              >
+                {(message.content ?? "") as string}
+              </MemoizedMarkdownRenderer>
+
+              {message.tool_calls && (
+                <div className="px-4">
+                  <CollapsibleWrapper heading="Tool Calls">
+                    <p className="whitespace-pre-wrap">
+                      {JSON.stringify(message.tool_calls, null, 4)}
+                    </p>
+                  </CollapsibleWrapper>
+                </div>
+              )}
+            </div>
+          );
+        } else if (message.role === "user") {
+          return (
+            <div
+              key={key}
+              className={cn(
+                "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto text-right max-w-[80%]"
+              )}
+            >
+              <MemoizedMarkdownRenderer
+                loading={message.status === "in_progress"}
+              >
+                {(message.content ?? "") as string}
+              </MemoizedMarkdownRenderer>
+            </div>
+          );
+        } else {
+          return null;
+        }
       })}
     </div>
   );
