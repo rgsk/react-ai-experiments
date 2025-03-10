@@ -1,10 +1,5 @@
-import {
-  ArrowRotateRight,
-  Copy,
-  Dislike,
-  Like1,
-  TickSquare,
-} from "iconsax-react";
+import { ArrowRotateRight, Copy, Dislike, Like1 } from "iconsax-react";
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 } from "uuid";
@@ -72,7 +67,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({
       <ActionButton
         icon={
           copiedText === currentText && copied ? (
-            <TickSquare size={18} />
+            <Check size={18} />
           ) : (
             <Copy size={18} />
           )

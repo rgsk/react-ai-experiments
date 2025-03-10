@@ -1,5 +1,5 @@
-import { Copy, TickSquare } from "iconsax-react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Copy } from "iconsax-react";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
@@ -107,7 +107,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     <ActionButton
                       icon={
                         copiedText === message.content && copied ? (
-                          <TickSquare size={18} />
+                          <Check size={18} />
                         ) : (
                           <Copy size={18} />
                         )
