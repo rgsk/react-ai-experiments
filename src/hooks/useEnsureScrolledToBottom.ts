@@ -20,17 +20,20 @@ const useEnsureScrolledToBottom = ({
   const [autoScrollDisabled, setAutoScrollDisabled] = useState(false);
   const autoScrollDisabledRef = useRef(autoScrollDisabled);
   autoScrollDisabledRef.current = autoScrollDisabled;
+  const updateAutoScroll = useCallback(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      const maxScrollTop =
+        scrollContainer.scrollHeight - scrollContainer.clientHeight;
+      const threshold = 200;
+      setAutoScrollDisabled(
+        maxScrollTop - scrollContainer.scrollTop > threshold
+      );
+    }
+  }, [scrollContainerRef]);
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
-      const updateAutoScroll = () => {
-        const maxScrollTop =
-          scrollContainer.scrollHeight - scrollContainer.clientHeight;
-        const threshold = 200;
-        setAutoScrollDisabled(
-          maxScrollTop - scrollContainer.scrollTop > threshold
-        );
-      };
       scrollContainer.addEventListener("scroll", updateAutoScroll);
       return () => {
         scrollContainer.removeEventListener("scroll", updateAutoScroll);
@@ -38,6 +41,7 @@ const useEnsureScrolledToBottom = ({
     }
   }, [
     scrollContainerRef,
+    updateAutoScroll,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     ...(observerDeps ?? []),
   ]);
@@ -55,8 +59,10 @@ const useEnsureScrolledToBottom = ({
     [scrollContainerRef]
   );
   useEffect(() => {
+    updateAutoScroll();
     scrollToBottom();
   }, [
+    updateAutoScroll,
     scrollToBottom,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     ...(scrollBottomDeps ?? []),
