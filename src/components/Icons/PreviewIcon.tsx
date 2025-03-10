@@ -1,12 +1,14 @@
-interface PreviewIconProps {}
-const PreviewIcon: React.FC<PreviewIconProps> = ({}) => {
+interface PreviewIconProps {
+  size?: number;
+}
+const PreviewIcon: React.FC<PreviewIconProps> = ({ size = 16 }) => {
   return (
     <svg
       data-testid="geist-icon"
-      height="16"
+      height={size}
       stroke-linejoin="round"
       viewBox="0 0 16 16"
-      width="16"
+      width={size}
       style={{ color: "currentcolor" }}
     >
       <path

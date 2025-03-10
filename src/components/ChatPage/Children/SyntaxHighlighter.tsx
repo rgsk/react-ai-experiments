@@ -1,5 +1,6 @@
 import Editor from "@monaco-editor/react";
-import { RefreshCw, X } from "lucide-react";
+import { Copy } from "iconsax-react";
+import { Check, RefreshCw, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -108,41 +109,44 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             <span className="text-white text-xs">{language}</span>
           )}
           <div className="flex gap-3">
-            <button
-              className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
+            <CodeButton
               onClick={() => {
                 if (code) {
                   copy(code);
                 }
               }}
             >
-              {copied ? "Copied!" : "Copy"}
-            </button>
+              {copied ? <Check size={12} /> : <Copy size={12} />}
+              <span>{copied ? "Copied!" : "Copy"}</span>
+            </CodeButton>
             {isCodeOutput ? (
               <></>
             ) : (
               <>
                 {previewLanguages.includes(language) ? (
                   <>
-                    <button
-                      className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
-                      onClick={() => {
-                        if (showPreview) {
-                          setShowPreview(false);
-                        } else {
-                          setShowPreview(true);
-                          setTimeout(() => {
-                            previewRef.current?.scrollIntoView();
-                          });
-                        }
-                      }}
-                    >
-                      {showPreview ? "Hide" : "Show"} Inline Preview
-                    </button>
+                    {!showPreview && (
+                      <CodeButton
+                        onClick={() => {
+                          if (showPreview) {
+                            setShowPreview(false);
+                          } else {
+                            setShowPreview(true);
+                            setTimeout(() => {
+                              previewRef.current?.scrollIntoView();
+                            });
+                          }
+                        }}
+                      >
+                        <PreviewIcon size={12} />
+                        <span>Preview</span>
+                      </CodeButton>
+                    )}
                     <a href={iframePreviewLink} target="_blank">
-                      <button className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]">
-                        Open Preview in New Tab
-                      </button>
+                      <CodeButton>
+                        <OpenInNewTabIcon size={12} />
+                        <span>Open in New Tab</span>
+                      </CodeButton>
                     </a>
                   </>
                 ) : (
@@ -322,3 +326,18 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   );
 };
 export default SyntaxHighlighter;
+
+interface CodeButtonProps {
+  onClick?: () => void;
+  children: any;
+}
+const CodeButton: React.FC<CodeButtonProps> = ({ onClick, children }) => {
+  return (
+    <button
+      className="text-white text-xs border border-white rounded-md px-2 flex items-center gap-2 py-1"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+};
