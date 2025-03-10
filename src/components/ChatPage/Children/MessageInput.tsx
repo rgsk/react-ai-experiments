@@ -1,7 +1,7 @@
 import { ArrowUp, Paperclip2 } from "iconsax-react";
 import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
-import { cn } from "~/lib/utils";
+import { cn, handleInputOnPaste } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import { FileEntry, HandleSend } from "../ChatPage";
 import FileUploadedPreview from "./FileUploadedPreview/FileUploadedPreview";
@@ -133,6 +133,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
               e.preventDefault();
               handleSubmit();
             }
+          }}
+          onPaste={(event) => {
+            handleInputOnPaste(event, handleFilesChange);
           }}
           placeholder={placeholder}
           className={cn(
