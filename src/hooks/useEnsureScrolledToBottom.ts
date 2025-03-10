@@ -25,7 +25,7 @@ const useEnsureScrolledToBottom = ({
     if (scrollContainer) {
       const maxScrollTop =
         scrollContainer.scrollHeight - scrollContainer.clientHeight;
-      const threshold = 200;
+      const threshold = 1;
       setAutoScrollDisabled(
         maxScrollTop - scrollContainer.scrollTop > threshold
       );
