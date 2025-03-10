@@ -96,33 +96,34 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           );
         } else if (message.role === "user") {
           return (
-            <div
-              key={key}
-              className={cn(
-                "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto max-w-[640px] relative group"
-              )}
-            >
-              <div className="absolute top-0 left-0 -translate-x-full group-hover:opacity-100 opacity-0 transition-all">
-                <div className="p-4">
-                  <ActionButton
-                    icon={
-                      copiedText === message.content && copied ? (
-                        <TickSquare size={18} />
-                      ) : (
-                        <Copy size={18} />
-                      )
-                    }
-                    onClick={() => {
-                      copy(message.content as string);
-                    }}
-                  ></ActionButton>
-                </div>
-              </div>
-              <MemoizedMarkdownRenderer
-                loading={message.status === "in_progress"}
+            <div key={key} className="w-full flex group">
+              <div
+                className={cn(
+                  "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto max-w-[640px] relative"
+                )}
               >
-                {(message.content ?? "") as string}
-              </MemoizedMarkdownRenderer>
+                <div className="absolute top-0 left-0 -translate-x-full group-hover:opacity-100 opacity-0 transition-all">
+                  <div className="p-4">
+                    <ActionButton
+                      icon={
+                        copiedText === message.content && copied ? (
+                          <TickSquare size={18} />
+                        ) : (
+                          <Copy size={18} />
+                        )
+                      }
+                      onClick={() => {
+                        copy(message.content as string);
+                      }}
+                    ></ActionButton>
+                  </div>
+                </div>
+                <MemoizedMarkdownRenderer
+                  loading={message.status === "in_progress"}
+                >
+                  {(message.content ?? "") as string}
+                </MemoizedMarkdownRenderer>
+              </div>
             </div>
           );
         } else {
