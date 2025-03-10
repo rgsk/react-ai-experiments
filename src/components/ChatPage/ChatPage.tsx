@@ -14,7 +14,7 @@ import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
 import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
-import { uuidPlaceholder } from "~/lib/constants";
+import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
 import { Chat, Message } from "~/lib/typesJsonData";
 import experimentsService, {
   Tool,
@@ -50,9 +50,18 @@ export type FileEntry = {
   };
   s3Url?: string;
 };
+
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { id: chatId } = useParams<{ id: string }>();
+  const modelQuery = useMemo(() => {
+    return experimentsService.getModel();
+  }, []);
+  const { data: { model } = {} } = useQuery({
+    queryKey: modelQuery.key,
+    queryFn: modelQuery.fn,
+  });
+
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
     { toolCall: ToolCall; toolCallOutput?: string; isLoading: boolean }[]
   >([]);
@@ -404,6 +413,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   });
 
   const processAttachedFiles = async (userMessage: Message) => {
+    if (!model) {
+      alert("Please select a model first");
+      return;
+    }
+    if (!Object.keys(modelsUsed).includes(model)) {
+      alert("Model not specified");
+      return;
+    }
     const messageIndexTracker: any = {};
     await Promise.all(
       attachedFiles.map(async (fileEntry, index) => {
@@ -414,24 +431,45 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         const messageId = v4();
         messageIndexTracker[messageId] = index;
         if (isImage) {
-          const message: Message = {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: fileEntry.file!.name,
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: signedUrl,
+          const imageSupport =
+            modelsUsed[model as keyof typeof modelsUsed].imageSupport;
+          let message: Message;
+          if (imageSupport) {
+            message = {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: fileEntry.file!.name,
                 },
-              },
-            ],
-            id: messageId,
-            status: "completed",
-            type: "image",
-          };
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: signedUrl,
+                  },
+                },
+              ],
+              id: messageId,
+              status: "completed",
+              type: "image_url",
+            };
+          } else {
+            const result = await experimentsService
+              .getUrlContent({ url: signedUrl })
+              .fn();
+            message = {
+              role: "user",
+              content: JSON.stringify({
+                fileName: fileEntry.file!.name,
+                url: signedUrl,
+                content: result,
+              }),
+              id: messageId,
+              status: "completed",
+              type: "image_ocr",
+            };
+          }
+
           setMessages((prev) => {
             if (prev) {
               const fileRelatedMessages = [
@@ -498,6 +536,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         handleSend={handleSend}
         loading={textStreamLoading}
         interrupt={() => {}}
+        disabled={!model}
         placeholder="Message"
         interruptEnabled={false}
         handleFilesChange={handleFilesChange}

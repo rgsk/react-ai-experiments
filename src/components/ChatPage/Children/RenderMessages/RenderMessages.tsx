@@ -36,13 +36,48 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
         const key = `id: ${message.id}, index - ${i}`;
         if (!message.content) {
           return null;
-        } else if (message.type === "image") {
+        } else if (message.type === "image_url") {
           const fileName = (message as any).content[0].text;
           const url = (message as any).content[1].image_url.url;
           return (
             <div key={key} className="w-full">
               <div className="flex justify-end">
                 <img src={url} alt={url} className="w-[50%]" />
+              </div>
+            </div>
+          );
+        } else if (message.type === "image_ocr") {
+          const { fileName, url, content } = JSON.parse(
+            message.content as string
+          ) as {
+            fileName: string;
+            url: string;
+            content: string;
+          };
+          const { imageModelOutput, imageOCROutput } = content as any;
+          return (
+            <div key={key} className="w-full">
+              <div className="flex justify-end">
+                <img src={url} alt={url} className="w-[50%]" />
+              </div>
+              <div className="h-4"></div>
+              <div className="flex justify-end">
+                <div className="max-w-[640px]">
+                  <CollapsibleWrapper
+                    heading={`Image Parsing Result - ${fileName}`}
+                    type="right"
+                  >
+                    <div className="pr-4">
+                      <p>Image Model Output:</p>
+                      <p>{imageModelOutput}</p>
+                    </div>
+                    <Separator className="my-4 h-[2px]" />
+                    <div className="pr-4">
+                      <p>Image OCR Output:</p>
+                      <p>{imageOCROutput}</p>
+                    </div>
+                  </CollapsibleWrapper>
+                </div>
               </div>
             </div>
           );
@@ -60,20 +95,24 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   heading={`Tool Call - ${toolCall.function.name}`}
                   loading={message.status === "in_progress"}
                 >
-                  <p className="whitespace-pre-wrap">
-                    {JSON.stringify(toolCall, null, 4)}
-                  </p>
-                  <Separator className="my-4 h-[2px]" />
-                  <div className="my-4">
-                    <p>Output:</p>
-                  </div>
-                  {message.status === "in_progress" ? (
-                    <LoadingSpinner size={20} />
-                  ) : (
+                  <div className="pl-4">
                     <p className="whitespace-pre-wrap">
-                      {message.content as string}
+                      {JSON.stringify(toolCall, null, 4)}
                     </p>
-                  )}
+                  </div>
+                  <Separator className="my-4 h-[2px]" />
+                  <div className="pl-4">
+                    <div className="my-4">
+                      <p>Output:</p>
+                    </div>
+                    {message.status === "in_progress" ? (
+                      <LoadingSpinner size={20} />
+                    ) : (
+                      <p className="whitespace-pre-wrap">
+                        {message.content as string}
+                      </p>
+                    )}
+                  </div>
                 </CollapsibleWrapper>
               </div>
             </div>
@@ -166,33 +205,39 @@ interface CollapsibleWrapperProps {
   heading: string;
   children: any;
   loading?: boolean;
+  type?: "left" | "right";
 }
 const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   heading,
   children,
   loading,
+  type = "left",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <div className="flex items-center gap-4">
-          <Button variant="secondary" size="sm">
-            <span className="text-sm">{heading}</span>
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </Button>
-          {loading && <LoadingSpinner size={18} />}
-        </div>
-      </CollapsibleTrigger>
-      <div className="h-4"></div>
-      <CollapsibleContent>
-        <div className="border-l-2 pl-4">{children}</div>
-      </CollapsibleContent>
+      <div className={cn("flex flex-col", type === "right" && "items-end")}>
+        <CollapsibleTrigger asChild>
+          <div className="flex items-center gap-4">
+            <Button variant="secondary" size="sm">
+              <span className="text-sm">{heading}</span>
+              {isOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+            {loading && <LoadingSpinner size={18} />}
+          </div>
+        </CollapsibleTrigger>
+        <div className="h-4"></div>
+        <CollapsibleContent>
+          <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
+            {children}
+          </div>
+        </CollapsibleContent>
+      </div>
     </Collapsible>
   );
 };

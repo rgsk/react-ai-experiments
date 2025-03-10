@@ -7,3 +7,15 @@ export const fileIcons = {
 
 export const uuidPlaceholder = "________-____-____-____-____________";
 export const openaiIdPlaceholder = "_____________________________";
+
+export const modelsUsed = {
+  "deepseek/deepseek-chat": {
+    imageSupport: false,
+  },
+  "openai/gpt-4o": {
+    imageSupport: false,
+  },
+  "openai/gpt-4o-mini": {
+    imageSupport: false,
+  },
+};

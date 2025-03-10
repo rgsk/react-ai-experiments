@@ -7,7 +7,7 @@ export type Message = ChatCompletionMessageParam & {
   id: string;
   status: "in_progress" | "incomplete" | "completed";
   tool_calls?: ToolCall[];
-  type?: "image";
+  type?: "image_url" | "image_ocr";
 };
 export type Role = Message["role"];
 export type MessageFeedback = {

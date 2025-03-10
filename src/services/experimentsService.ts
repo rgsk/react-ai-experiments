@@ -152,6 +152,17 @@ const experimentsService = {
       },
     };
   },
+  getModel: () => {
+    return {
+      key: ["model"],
+      fn: async () => {
+        const response = await axiosExperimentsInstance.get<{ model: string }>(
+          `/model`
+        );
+        return response.data;
+      },
+    };
+  },
   executeCode: async ({
     code,
     language,
