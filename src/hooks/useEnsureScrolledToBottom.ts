@@ -76,9 +76,7 @@ const useEnsureScrolledToBottom = ({
       });
       // Function to observe new images
       const observeImages = () => {
-        const images = scrollContainer.querySelectorAll(
-          `img.${observedImagesClassname}`
-        );
+        const images = scrollContainer.querySelectorAll(`img`);
         images.forEach((image) => resizeObserver.observe(image));
       };
 
