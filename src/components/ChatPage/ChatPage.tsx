@@ -403,22 +403,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     onFilesChange: handleFilesChange,
   });
 
-  const handleSend: HandleSend = async ({ text }) => {
-    setAttachedFiles([]);
-    const userMessage: Message = {
-      id: v4(),
-      role: "user",
-      content: text,
-      status: "completed",
-    };
-    setMessages((prev) => [...(prev ?? []), userMessage]);
-    // process attached files
+  const processAttachedFiles = async (userMessage: Message) => {
+    const messageIndexTracker: any = {};
     await Promise.all(
-      attachedFiles.map(async (fileEntry) => {
+      attachedFiles.map(async (fileEntry, index) => {
         const { url: signedUrl } = await experimentsService
           .getAWSDownloadUrl({ url: fileEntry.s3Url! })
           .fn();
         const isImage = fileEntry.file!.type.startsWith("image/");
+        const messageId = v4();
+        messageIndexTracker[messageId] = index;
         if (isImage) {
           const message: Message = {
             role: "user",
@@ -434,15 +428,30 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 },
               },
             ],
-            id: v4(),
+            id: messageId,
             status: "completed",
             type: "image",
           };
           setMessages((prev) => {
             if (prev) {
-              return [
-                ...prev.filter((m) => m.id !== userMessage.id),
+              const fileRelatedMessages = [
+                ...prev.filter((m) =>
+                  Object.keys(messageIndexTracker).includes(m.id)
+                ),
                 message,
+              ];
+              fileRelatedMessages.sort((a, b) => {
+                return messageIndexTracker[a.id] - messageIndexTracker[b.id];
+              });
+              return [
+                ...prev.filter(
+                  (m) =>
+                    ![
+                      userMessage.id,
+                      ...Object.keys(messageIndexTracker),
+                    ].includes(m.id)
+                ),
+                ...fileRelatedMessages,
                 userMessage,
               ];
             }
@@ -456,6 +465,19 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         }
       })
     );
+  };
+
+  const handleSend: HandleSend = async ({ text }) => {
+    setAttachedFiles([]);
+    const userMessage: Message = {
+      id: v4(),
+      role: "user",
+      content: text,
+      status: "completed",
+    };
+    setMessages((prev) => [...(prev ?? []), userMessage]);
+    // process attached files
+    await processAttachedFiles(userMessage);
     setTimeout(() => {
       handleGenerate({
         messages: messagesRef.current ?? [],

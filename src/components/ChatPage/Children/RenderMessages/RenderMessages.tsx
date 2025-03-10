@@ -39,7 +39,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           const url = (message as any).content[1].image_url.url;
           return (
             <div key={key} className="w-full">
-              <img src={url} alt={url} className="w-full" />
+              <div className="flex justify-end">
+                <img src={url} alt={url} className="w-[50%]" />
+              </div>
             </div>
           );
         } else if (message.role === "tool") {
