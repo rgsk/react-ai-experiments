@@ -92,16 +92,13 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
       (async () => {
         const attachmentEntries = await Promise.all(
           fileItems.map(async (f) => {
-            const signedS3Url = (
-              await experimentsService.getAWSDownloadUrl({ url: f.url }).fn()
-            ).url;
             return {
               id: f.id,
               fileMetadata: {
                 name: f.metadata.filename,
                 type: f.metadata.filetype,
               },
-              s3Url: signedS3Url,
+              s3Url: f.url,
             };
           })
         );
