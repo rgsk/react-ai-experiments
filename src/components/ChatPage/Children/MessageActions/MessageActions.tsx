@@ -8,6 +8,8 @@ import {
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 } from "uuid";
+import DislikeFilledIcon from "~/components/Icons/DislikeFilledIcon";
+import LikeFilledIcon from "~/components/Icons/LikeFilledIcon";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { Message, MessageFeedback } from "~/lib/typesJsonData";
 import jsonDataService from "~/services/jsonDataService";
@@ -81,11 +83,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({
       ></ActionButton>
       <ActionButton
         icon={
-          feedback?.type === "like" ? (
-            <Like1 size={18} className="fill-foreground" />
-          ) : (
-            <Like1 size={18} />
-          )
+          feedback?.type === "like" ? <LikeFilledIcon /> : <Like1 size={18} />
         }
         onClick={() => {
           onLikeDislike({ type: "like" });
@@ -94,7 +92,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({
       <ActionButton
         icon={
           feedback?.type === "dislike" ? (
-            <Dislike size={18} className="fill-foreground" />
+            <DislikeFilledIcon />
           ) : (
             <Dislike size={18} />
           )
