@@ -90,7 +90,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const previewLanguages = ["html", "jsx"];
   return (
     <div>
-      <div className="rounded-[12px] overflow-hidden">
+      <div className="rounded-[12px] overflow-hidden min-w-[608px]">
         <div
           className={cn(
             "bg-[#50505a] w-full",

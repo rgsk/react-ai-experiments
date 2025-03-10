@@ -95,7 +95,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             <div
               key={key}
               className={cn(
-                "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto max-w-[80%]"
+                "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto max-w-[640px]"
               )}
             >
               <MemoizedMarkdownRenderer
