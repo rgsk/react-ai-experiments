@@ -1,6 +1,6 @@
 import Editor from "@monaco-editor/react";
 import { Copy } from "iconsax-react";
-import { Check, RefreshCw, X } from "lucide-react";
+import { Check, Play, RefreshCw, RotateCcw, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -152,25 +152,23 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 ) : (
                   <>
                     {codeExecutionAllowed && (
-                      <button
-                        className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
-                        onClick={executeCode}
-                      >
-                        Run Code
-                      </button>
+                      <CodeButton onClick={executeCode}>
+                        <Play size={12} />
+                        <span>Run</span>
+                      </CodeButton>
                     )}
                   </>
                 )}
 
                 {code !== initialCode && (
-                  <button
-                    className="text-white text-xs border border-w rounded-md px-2 pt-[3px] pb-[1px]"
+                  <CodeButton
                     onClick={() => {
                       setCode(initialCode);
                     }}
                   >
-                    Reset Code
-                  </button>
+                    <RotateCcw size={12} />
+                    <span>Reset</span>
+                  </CodeButton>
                 )}
               </>
             )}
@@ -309,7 +307,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         {executeCodeDetails.output && (
           <SyntaxHighlighter
             code={executeCodeDetails.output}
-            language={language}
+            language={"output"}
             codeProps={codeProps}
             isCodeOutput={true}
             loading={true} // temporarily so that we show prism for output
