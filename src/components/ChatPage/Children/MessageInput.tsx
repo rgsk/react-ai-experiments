@@ -1,7 +1,6 @@
 import { ArrowUp, Paperclip2 } from "iconsax-react";
 import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
-import useBreakpoints from "~/hooks/useBreakpoints";
 import { cn } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import { FileEntry, HandleSend } from "../ChatPage";
@@ -37,10 +36,14 @@ const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
   const [text, setText] = useState("");
-  const { md } = useBreakpoints();
   const canSend = useMemo(() => {
-    return !loading && !!text;
-  }, [loading, text]);
+    return (
+      !loading &&
+      !disabled &&
+      (!!text || !!attachedFiles.length) &&
+      attachedFiles.every((fe) => !!fe.s3Url)
+    );
+  }, [attachedFiles, disabled, loading, text]);
   const handleSubmit = () => {
     if (!canSend) return;
 

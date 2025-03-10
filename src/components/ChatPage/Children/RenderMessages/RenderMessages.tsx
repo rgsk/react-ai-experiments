@@ -34,7 +34,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
         const key = `id: ${message.id}, index - ${i}`;
-        if (message.type === "image") {
+        if (!message.content) {
+          return null;
+        } else if (message.type === "image") {
           const fileName = (message as any).content[0].text;
           const url = (message as any).content[1].image_url.url;
           return (
