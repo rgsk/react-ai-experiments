@@ -288,7 +288,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ?.slice()
       ?.reverse()
       .find((m) => m.role === "assistant" && m.status === "completed");
-    if (messages && lastAssistantMessage) {
+    if (
+      messages &&
+      lastAssistantMessage?.tool_calls?.some((tc) =>
+        toolCallsAndOutputs.some((tco) => tco.toolCall.id === tc.id)
+      )
+    ) {
       const toolsMessages: Message[] = toolCallsAndOutputs
         .filter(
           (tc) =>
@@ -339,29 +344,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   ]);
 
   useEffect(() => {
-    if (voiceModeEnabled) return;
-    if (messages) {
-      if (
-        messages.length > 0 &&
-        messages[messages.length - 1].role === "user"
-      ) {
-        handleGenerate({
-          messages: messages,
-          tools: tools,
-          onComplete: onGenerateComplete,
-        });
-      }
-    }
-  }, [
-    handleGenerate,
-    messages,
-    onGenerateComplete,
-    setChat,
-    setMessages,
-    tools,
-    voiceModeEnabled,
-  ]);
-  useEffect(() => {
     if (text) {
       setMessages(
         produce((draft) => {
@@ -390,6 +372,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ...(prev ?? []),
       { id: v4(), role: "user", content: text, status: "completed" },
     ]);
+    setTimeout(() => {
+      handleGenerate({
+        messages: messagesRef.current ?? [],
+        tools: tools,
+        onComplete: onGenerateComplete,
+      });
+    }, 100);
   };
   const openNewChat = () => {
     navigate(`/chat/${v4()}`);
