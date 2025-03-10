@@ -307,14 +307,27 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           </div>
         )}
         {executeCodeDetails.output && (
-          <SyntaxHighlighter
-            code={executeCodeDetails.output}
-            language={"output"}
-            codeProps={codeProps}
-            isCodeOutput={true}
-            loading={true} // temporarily so that we show prism for output
-          />
+          <>
+            {executeCodeDetails.output.split("\n").map((line, index) => {
+              if (!line) return;
+              if (line.startsWith("data:image/png;base64,")) {
+                return <img key={index} src={line} />;
+              } else {
+                return (
+                  <SyntaxHighlighter
+                    key={index}
+                    code={line}
+                    language={"output"}
+                    codeProps={codeProps}
+                    isCodeOutput={true}
+                    loading={true} // temporarily so that we show prism for output
+                  />
+                );
+              }
+            })}
+          </>
         )}
+
         {executeCodeDetails.error && (
           <div>
             <p>Execute Code Error: </p>

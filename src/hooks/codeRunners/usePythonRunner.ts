@@ -1,5 +1,32 @@
 import { useCallback, useEffect, useState } from "react";
 import { loadPyodideSingleton } from "./singletons/loadPyodideSingleton";
+
+const renderImageCode = `
+import io
+import base64
+# Save the plot to a BytesIO buffer as a PNG image
+buffer = io.BytesIO()
+plt.savefig(buffer, format='png')
+plt.close()  # Close the figure to free memory
+buffer.seek(0)
+
+# Encode the image in base64
+img_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+img_src = f"data:image/png;base64,{img_base64}"
+print(img_src)
+`;
+
+function replacePltShowWithRenderImageCode(codeStr: string): string {
+  const lines = codeStr.split("\n");
+  // Replace any line containing "plt.show()" with renderImageCode (trimmed to remove leading/trailing empty lines)
+  const replacedLines = lines.map((line) => {
+    if (line.includes("plt.show()")) {
+      return renderImageCode.trim();
+    }
+    return line;
+  });
+  return replacedLines.join("\n");
+}
 function wrapLastLineInPrint(codeStr: string): string {
   const lines = codeStr.split("\n");
   if (lines.length === 0) return codeStr;
@@ -73,7 +100,9 @@ const usePythonRunner = () => {
         throw new Error("Pyodide is not loaded yet.");
       }
       const result = await pyodide.runPythonAsync(
-        codeWrapper(wrapLastLineInPrint(code))
+        codeWrapper(
+          wrapLastLineInPrint(replacePltShowWithRenderImageCode(code))
+        )
       );
       return result;
     },

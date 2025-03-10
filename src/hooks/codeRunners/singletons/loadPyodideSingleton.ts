@@ -1,6 +1,6 @@
 // loadPyodideSingleton.ts
 let pyodidePromise: Promise<any> | null = null;
-
+const packages = ["numpy", "matplotlib", "scipy", "scikit-learn"];
 export function loadPyodideSingleton(): Promise<any> {
   if (pyodidePromise) {
     return pyodidePromise;
@@ -14,7 +14,7 @@ export function loadPyodideSingleton(): Promise<any> {
       script.onload = async () => {
         try {
           const pyodideModule = await (window as any).loadPyodide();
-          await pyodideModule.loadPackage(["numpy", "matplotlib"]);
+          await pyodideModule.loadPackage(packages);
           resolve(pyodideModule);
         } catch (e) {
           reject(e);
@@ -29,7 +29,7 @@ export function loadPyodideSingleton(): Promise<any> {
       (window as any)
         .loadPyodide()
         .then(async (pyodideModule: any) => {
-          await pyodideModule.loadPackage(["numpy", "matplotlib"]);
+          await pyodideModule.loadPackage(packages);
           resolve(pyodideModule);
         })
         .catch(reject);
