@@ -63,11 +63,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 {(message.content ?? "") as string}
               </MemoizedMarkdownRenderer>
               {message.status !== "in_progress" && (
-                <MessageActions
-                  handleSend={handleSend}
-                  messages={messages}
-                  index={i}
-                />
+                <div className="m-4">
+                  <MessageActions
+                    handleSend={handleSend}
+                    messages={messages}
+                    index={i}
+                  />
+                </div>
               )}
               {message.tool_calls && (
                 <div className="px-4">

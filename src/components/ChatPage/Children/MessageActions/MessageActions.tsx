@@ -56,55 +56,53 @@ const MessageActions: React.FC<MessageActionsProps> = ({
     });
   };
   return (
-    <div className="flex">
-      <div className="flex gap-[4px] rounded-sm p-[6px]">
-        {" "}
-        <ActionButton
-          icon={<ArrowRotateRight size={18} />}
-          onClick={() => {
-            // rerun the last user message
-            handleSend({
-              text: lastUserMessageText,
-            });
-          }}
-        ></ActionButton>
-        <ActionButton
-          icon={
-            copiedText === currentText && copied ? (
-              <TickSquare size={18} />
-            ) : (
-              <Copy size={18} />
-            )
-          }
-          onClick={() => {
-            copy(currentText);
-          }}
-        ></ActionButton>
-        <ActionButton
-          icon={
-            feedback?.type === "like" ? (
-              <Like1 size={18} className="fill-foreground" />
-            ) : (
-              <Like1 size={18} />
-            )
-          }
-          onClick={() => {
-            onLikeDislike({ type: "like" });
-          }}
-        ></ActionButton>
-        <ActionButton
-          icon={
-            feedback?.type === "dislike" ? (
-              <Dislike size={18} className="fill-foreground" />
-            ) : (
-              <Dislike size={18} />
-            )
-          }
-          onClick={() => {
-            onLikeDislike({ type: "dislike" });
-          }}
-        ></ActionButton>
-      </div>
+    <div className="flex gap-[4px] rounded-sm">
+      {" "}
+      <ActionButton
+        icon={<ArrowRotateRight size={18} />}
+        onClick={() => {
+          // rerun the last user message
+          handleSend({
+            text: lastUserMessageText,
+          });
+        }}
+      ></ActionButton>
+      <ActionButton
+        icon={
+          copiedText === currentText && copied ? (
+            <TickSquare size={18} />
+          ) : (
+            <Copy size={18} />
+          )
+        }
+        onClick={() => {
+          copy(currentText);
+        }}
+      ></ActionButton>
+      <ActionButton
+        icon={
+          feedback?.type === "like" ? (
+            <Like1 size={18} className="fill-foreground" />
+          ) : (
+            <Like1 size={18} />
+          )
+        }
+        onClick={() => {
+          onLikeDislike({ type: "like" });
+        }}
+      ></ActionButton>
+      <ActionButton
+        icon={
+          feedback?.type === "dislike" ? (
+            <Dislike size={18} className="fill-foreground" />
+          ) : (
+            <Dislike size={18} />
+          )
+        }
+        onClick={() => {
+          onLikeDislike({ type: "dislike" });
+        }}
+      ></ActionButton>
     </div>
   );
 };
