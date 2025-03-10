@@ -643,6 +643,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                     scrollToBottom={scrollToBottom}
                     messages={messages ?? []}
                     handleSend={handleSend}
+                    hadPendingToolCalls={toolCallsAndOutputs.length > 0}
                   />
                 </Container>
                 <div className="relative">

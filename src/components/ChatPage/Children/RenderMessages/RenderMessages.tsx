@@ -20,18 +20,21 @@ interface RenderMessagesProps {
   messages: Message[];
   handleSend: HandleSend;
   scrollToBottom: () => void;
+  hadPendingToolCalls: boolean;
 }
 const RenderMessages: React.FC<RenderMessagesProps> = ({
   messages,
   handleSend,
   scrollToBottom,
+  hadPendingToolCalls,
 }) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
 
   const loading =
-    messages.length > 0 &&
-    !(messages[messages.length - 1].role === "assistant") &&
-    messages.every((m) => m.status === "completed");
+    (messages.length > 0 &&
+      messages[messages.length - 1].role !== "assistant" &&
+      messages.every((m) => m.status === "completed")) ||
+    hadPendingToolCalls;
   return (
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
