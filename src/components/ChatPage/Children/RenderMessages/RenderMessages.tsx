@@ -33,9 +33,16 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
   return (
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
-        if (typeof message.content !== "string") return null;
         const key = `id: ${message.id}, index - ${i}`;
-        if (message.role === "tool") {
+        if (message.type === "image") {
+          const fileName = (message as any).content[0].text;
+          const url = (message as any).content[1].image_url.url;
+          return (
+            <div key={key} className="w-full">
+              <img src={url} alt={url} className="w-full" />
+            </div>
+          );
+        } else if (message.role === "tool") {
           const toolCall = messages
             .slice(0, i)
             .reverse()

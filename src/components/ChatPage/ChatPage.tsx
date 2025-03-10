@@ -405,10 +405,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
 
   const handleSend: HandleSend = async ({ text }) => {
     setAttachedFiles([]);
-    setMessages((prev) => [
-      ...(prev ?? []),
-      { id: v4(), role: "user", content: text, status: "completed" },
-    ]);
+    const userMessage: Message = {
+      id: v4(),
+      role: "user",
+      content: text,
+      status: "completed",
+    };
+    setMessages((prev) => [...(prev ?? []), userMessage]);
     // process attached files
     await Promise.all(
       attachedFiles.map(async (fileEntry) => {
@@ -422,7 +425,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             content: [
               {
                 type: "text",
-                text: `![${fileEntry.file!.name}](${signedUrl})`,
+                text: fileEntry.file!.name,
               },
               {
                 type: "image_url",
@@ -433,10 +436,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             ],
             id: v4(),
             status: "completed",
+            type: "image",
           };
           setMessages((prev) => {
             if (prev) {
-              return [...prev, message];
+              return [
+                ...prev.filter((m) => m.id !== userMessage.id),
+                message,
+                userMessage,
+              ];
             }
             return prev;
           });
