@@ -30,6 +30,8 @@ export const useGlobalContextValue = () => {
   const [token, setToken] = useLocalStorageState<string>("token");
   const [tokenLoading, setTokenLoading] = useState(true);
   const [firebaseUser, setFirebaseUser] = useState<User>();
+  const [isFirstHistoryRender, setIsFirstHistoryRender] = useState(true);
+
   const [
     creditDetails,
     ,
@@ -121,6 +123,8 @@ export const useGlobalContextValue = () => {
     deductCredits,
     creditsOverMessage,
     setCreditsOverMessage,
+    isFirstHistoryRender,
+    setIsFirstHistoryRender,
   };
 };
 

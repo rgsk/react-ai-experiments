@@ -386,9 +386,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(chatHistory || []);
   }, [chatHistory]);
-  if (!chat || !messages || !chatHistory) {
-    return <div>Loading...</div>;
-  }
   const renderMessageInput = () => {
     return (
       <MessageInput
@@ -465,7 +462,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           </>
         ) : (
           <>
-            {messages.length === 0 ? (
+            {messages?.length === 0 ? (
               <>
                 <Container centerContent={true}>
                   <div className="w-[800px]">
@@ -481,7 +478,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             ) : (
               <>
                 <Container divRef={scrollContainerRef}>
-                  <RenderMessages messages={messages} handleSend={handleSend} />
+                  <RenderMessages
+                    messages={messages ?? []}
+                    handleSend={handleSend}
+                  />
                 </Container>
                 <MessageInputContainer>
                   {renderMessageInput()}
