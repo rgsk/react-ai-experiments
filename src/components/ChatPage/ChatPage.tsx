@@ -16,7 +16,7 @@ import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
 import { Chat, Message } from "~/lib/typesJsonData";
-import { cn } from "~/lib/utils";
+import { cn, dataURLtoFile } from "~/lib/utils";
 import experimentsService, {
   Tool,
   ToolCall,
@@ -113,7 +113,23 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       if (toolCall.function.name === "executeCode") {
         const { code, language } = toolCall.function.arguments;
         const output = await runCode({ code, language });
-        handleToolCallOutput({ toolCall, toolCallOutput: output });
+        const lines = output.split("\n") as string[];
+        const newLines = await Promise.all(
+          lines.map(async (line) => {
+            if (line.startsWith("data:image/png;base64,")) {
+              const file = dataURLtoFile(line, "image.png");
+              const result = await experimentsService.uploadFileToS3(file);
+              const { url: signedUrl } = await experimentsService
+                .getAWSDownloadUrl({ url: result })
+                .fn();
+              return signedUrl;
+            }
+            return line;
+          })
+        );
+        const finalOutput = newLines.join("\n");
+        // console.log({ finalOutput });
+        handleToolCallOutput({ toolCall, toolCallOutput: finalOutput });
       }
     }
   };
