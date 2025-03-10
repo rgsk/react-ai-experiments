@@ -39,6 +39,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               <div>
                 <CollapsibleWrapper
                   heading={`Tool Call - ${toolCall.function.name}`}
+                  loading={message.status === "in_progress"}
                 >
                   <p className="whitespace-pre-wrap">
                     {JSON.stringify(toolCall, null, 4)}
@@ -47,9 +48,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   <div className="my-4">
                     <p>Output:</p>
                   </div>
-                  <p className="whitespace-pre-wrap">
-                    {message.content as string}
-                  </p>
+                  {message.status === "in_progress" ? (
+                    <LoadingSpinner size={20} />
+                  ) : (
+                    <p className="whitespace-pre-wrap">
+                      {message.content as string}
+                    </p>
+                  )}
                 </CollapsibleWrapper>
               </div>
             </div>
@@ -125,24 +130,29 @@ const AIAvatar: React.FC<AIAvatarProps> = ({}) => {
 interface CollapsibleWrapperProps {
   heading: string;
   children: any;
+  loading?: boolean;
 }
 const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   heading,
   children,
+  loading,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <Button variant="secondary" size="sm">
-          <span className="text-sm">{heading}</span>
-          {isOpen ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="secondary" size="sm">
+            <span className="text-sm">{heading}</span>
+            {isOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+          {loading && <LoadingSpinner size={18} />}
+        </div>
       </CollapsibleTrigger>
       <div className="h-4"></div>
       <CollapsibleContent>

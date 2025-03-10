@@ -282,61 +282,61 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     [setChat, setMessages]
   );
-
+  const hasAssistantMessageForCurrentToolCalls = toolCallsAndOutputs.some(
+    (tco) =>
+      messages
+        ?.slice()
+        .reverse()
+        .find((m) => m.role === "assistant")
+        ?.tool_calls?.some((tc) => tc.id === tco.toolCall.id)
+  );
   useEffect(() => {
-    const lastAssistantMessage = messages
-      ?.slice()
-      ?.reverse()
-      .find((m) => m.role === "assistant" && m.status === "completed");
-    if (
-      messages &&
-      lastAssistantMessage?.tool_calls?.some((tc) =>
-        toolCallsAndOutputs.some((tco) => tco.toolCall.id === tc.id)
-      )
-    ) {
-      const toolsMessages: Message[] = toolCallsAndOutputs
-        .filter(
-          (tc) =>
-            !tc.isLoading &&
-            !messages.some(
-              (m) => m.role === "tool" && m.tool_call_id === tc.toolCall.id
-            )
-        )
-        .map((tco) => {
-          return {
-            role: "tool" as const,
-            content: tco.toolCallOutput!,
-            tool_call_id: tco.toolCall.id,
-            id: v4(),
-            status: "completed",
-          };
-        });
-      if (toolsMessages.length > 0) {
-        setMessages((prev) => {
-          if (prev) {
-            return [...(prev ?? []), ...toolsMessages];
-          }
-          return prev;
-        });
-
-        if (
-          toolCallsAndOutputs.filter((tco) => !tco.isLoading).length ===
-          lastAssistantMessage.tool_calls?.length
-        ) {
-          setToolCallsAndOutputs([]);
-          setTimeout(() => {
-            handleGenerate({
-              tools: tools,
-              messages: messagesRef.current ?? [],
-              onComplete: onGenerateComplete,
-            });
-          }, 100);
+    const toolsMessages: Message[] = toolCallsAndOutputs.map((tco) => {
+      return {
+        role: "tool" as const,
+        content: tco.toolCallOutput ?? "",
+        tool_call_id: tco.toolCall.id,
+        id: v4(),
+        status: tco.isLoading ? "in_progress" : "completed",
+      };
+    });
+    if (toolsMessages.length > 0) {
+      setMessages((prev) => {
+        if (prev) {
+          return [
+            ...(prev ?? []).filter(
+              (m) =>
+                !(
+                  m.role === "tool" &&
+                  toolsMessages.some(
+                    (tm) =>
+                      tm.role === "tool" && tm.tool_call_id === m.tool_call_id
+                  )
+                )
+            ),
+            ...toolsMessages,
+          ];
         }
+        return prev;
+      });
+
+      if (
+        toolCallsAndOutputs.every((tco) => !tco.isLoading) &&
+        hasAssistantMessageForCurrentToolCalls
+      ) {
+        setToolCallsAndOutputs([]);
+        setTimeout(() => {
+          handleGenerate({
+            tools: tools,
+            messages: messagesRef.current ?? [],
+            onComplete: onGenerateComplete,
+          });
+        }, 100);
       }
     }
   }, [
     handleGenerate,
-    messages,
+    hasAssistantMessageForCurrentToolCalls,
     onGenerateComplete,
     setMessages,
     toolCallsAndOutputs,
