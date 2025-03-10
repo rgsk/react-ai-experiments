@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import {
   Collapsible,
@@ -20,6 +21,8 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
   messages,
   handleSend,
 }) => {
+  const loading =
+    messages.length > 0 && messages[messages.length - 1].role === "user";
   return (
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
@@ -54,9 +57,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
         } else if (message.role === "assistant") {
           return (
             <div key={key} className={cn("w-full break-words relative")}>
-              <div className="absolute top-0 left-0 -translate-x-full translate-y-1/2">
-                <img src="/ai-avatar.svg" className="w-[24px]" />
-              </div>
+              <AIAvatar />
               <MemoizedMarkdownRenderer
                 loading={message.status === "in_progress"}
               >
@@ -101,10 +102,25 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           return null;
         }
       })}
+      {loading && (
+        <div className="relative w-full p-4">
+          <AIAvatar />
+          <LoadingSpinner size={20} />
+        </div>
+      )}
     </div>
   );
 };
 export default RenderMessages;
+
+interface AIAvatarProps {}
+const AIAvatar: React.FC<AIAvatarProps> = ({}) => {
+  return (
+    <div className="absolute top-0 left-0 -translate-x-full translate-y-1/2">
+      <img src="/ai-avatar.svg" className="w-[24px]" />
+    </div>
+  );
+};
 
 interface CollapsibleWrapperProps {
   heading: string;
