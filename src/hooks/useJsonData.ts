@@ -116,11 +116,19 @@ function useJsonData<T>(
   }, []);
   const [updating, setUpdating] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
-
+  const refetch = useCallback(async () => {
+    const result = await jsonDataService.getKey<T>({
+      key,
+    });
+    const value = result?.value;
+    if (value !== undefined) {
+      setLocalValue(value);
+    }
+  }, [key]);
   return [
     localValue,
     setSharedState,
-    { loading, refetch: populateState, updating },
+    { loading, refetch: refetch, updating },
   ] as const;
 }
 export default useJsonData;

@@ -8,6 +8,7 @@ import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
+import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useTextStream from "~/hooks/useTextStream";
@@ -15,8 +16,8 @@ import useWebSTT from "~/hooks/useWebSTT";
 import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
-import { Chat, Message } from "~/lib/typesJsonData";
-import { cn, dataURLtoFile } from "~/lib/utils";
+import { Chat, Memory, Message } from "~/lib/typesJsonData";
+import { cn, dataURLtoFile, html } from "~/lib/utils";
 import experimentsService, {
   Tool,
   ToolCall,
@@ -62,7 +63,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     queryKey: modelQuery.key,
     queryFn: modelQuery.fn,
   });
-
+  const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
     { toolCall: ToolCall; toolCallOutput?: string; isLoading: boolean }[]
   >([]);
@@ -70,6 +71,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     queryKey: ["tools"],
     queryFn: () => experimentsService.getTools(),
   });
+  const [memories, setMemories, { refetch: refetchMemories }] = useJsonData<
+    Memory[]
+  >("memories", []);
+
+  // useEffect(() => {
+  //   console.log({ memories });
+  // }, [memories]);
+
   const [tools, setTools] = useState<Tool[]>([]);
 
   useEffect(() => {
@@ -92,6 +101,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { runCode } = useCodeRunners();
   const handleToolCall = async (toolCall: ToolCall) => {
     // console.log({ toolCall });
+
     setToolCallsAndOutputs((prev) => [...prev, { toolCall, isLoading: true }]);
     if (toolCall.variant === ToolVariant.serverSideRequiresPermission) {
       let output = "";
@@ -132,6 +142,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     toolCall: ToolCall;
     toolCallOutput: string;
   }) => {
+    if (entry.toolCall.function.name === "saveUserInfoToMemory") {
+      refetchMemories();
+    }
     setToolCallsAndOutputs((prev) =>
       prev.map((e) => {
         if (e.toolCall.id === entry.toolCall.id) {
@@ -347,6 +360,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         .find((m) => m.role === "assistant")
         ?.tool_calls?.some((tc) => tc.id === tco.toolCall.id)
   );
+
   useEffect(() => {
     const toolsMessages: Message[] = toolCallsAndOutputs.map((tco) => {
       return {
@@ -385,7 +399,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         setTimeout(() => {
           handleGenerate({
             tools: tools,
-            messages: messagesRef.current ?? [],
+            messages: getCurrentMessagesRef.current(),
             onComplete: onGenerateComplete,
           });
         }, 100);
@@ -515,6 +529,37 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     );
   };
 
+  const getCurrentMessages = () => {
+    if (!memories) {
+      alert("memories not loaded");
+      return [];
+    }
+    const userInstruction = html`
+      you are currently interacting with following user -
+      <userData>${JSON.stringify(userData)}</userData>
+    `;
+    const memoryInstruction = html`
+      Following memory statements are gathered from previous conversations with
+      the user, try to incorporate them into the conversation context to provide
+      a more personalized response.
+      <statements> ${memories.map((m) => m.statement).join(", ")} </statements>
+
+      additionally, if user has revealed something new about himself in the
+      conversation so far, save that statement in the memory using the tool
+      saveUserInfoToMemory
+    `;
+    const systemInstruction = [userInstruction, memoryInstruction].join("\n");
+    const systemMessage: Message = {
+      id: v4(),
+      status: "completed",
+      role: "system",
+      content: systemInstruction,
+    };
+    return [systemMessage, ...(messages ?? [])];
+  };
+  const getCurrentMessagesRef = useRef(getCurrentMessages);
+  getCurrentMessagesRef.current = getCurrentMessages;
+
   const handleSend: HandleSend = async ({ text }) => {
     setAttachedFiles([]);
     const userMessage: Message = {
@@ -531,7 +576,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     await processAttachedFiles(userMessage);
     setTimeout(() => {
       handleGenerate({
-        messages: messagesRef.current ?? [],
+        messages: getCurrentMessagesRef.current(),
         tools: tools,
         onComplete: onGenerateComplete,
       });
