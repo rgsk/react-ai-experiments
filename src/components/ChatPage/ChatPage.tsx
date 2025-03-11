@@ -2,7 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { produce } from "immer";
 import { ArrowDown, Home } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
@@ -16,7 +21,7 @@ import useWebSTT from "~/hooks/useWebSTT";
 import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
-import { Chat, Memory, Message } from "~/lib/typesJsonData";
+import { Chat, Memory, Message, Persona } from "~/lib/typesJsonData";
 import { cn, dataURLtoFile, html } from "~/lib/utils";
 import experimentsService, {
   Tool,
@@ -26,6 +31,7 @@ import experimentsService, {
 } from "~/services/experimentsService";
 import NewChatIcon from "../Icons/NewChatIcon";
 import ProfileInfo from "../ProfileInfo/ProfileInfo";
+import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
@@ -230,12 +236,25 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       handleMessageDelta({ role: "user", transcript: transcript });
     },
   });
+  const [searchParams] = useSearchParams();
+
+  const personaId = searchParams?.get("personaId") ?? undefined;
+  const attachPersonaPrefixIfPresent = (key: string) => {
+    if (personaId) {
+      return `personas/${personaId}/${key}`;
+    }
+    return key;
+  };
   const { data: chatHistory, refetch: refetchChatHistory } =
-    useJsonDataKeysLike<Chat>(`chats/${uuidPlaceholder}`);
+    useJsonDataKeysLike<Chat>(
+      attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`)
+    );
+  const [persona] = useJsonData<Persona>(`personas/${personaId}`);
+
   const navigate = useNavigate();
   useAuthRequired();
   const [chat, setChat, { updating: chatUpdating }] = useJsonData<Chat>(
-    `chats/${chatId}`,
+    attachPersonaPrefixIfPresent(`chats/${chatId}`),
     {
       id: chatId,
       title: "",
@@ -244,7 +263,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
   const [messages, setMessages, { loading: messagesLoading }] = useJsonData<
     Message[]
-  >(`chats/${chatId}/messages`, []);
+  >(attachPersonaPrefixIfPresent(`chats/${chatId}/messages`), []);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -583,7 +602,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     }, 100);
   };
   const openNewChat = () => {
-    navigate(`/chat/${v4()}`);
+    if (personaId) {
+      navigate(`/chat/${v4()}?personaId=${personaId}`);
+    } else {
+      navigate(`/chat/${v4()}`);
+    }
   };
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(chatHistory || []);
@@ -672,9 +695,26 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               <>
                 <Container centerContent={true}>
                   <div className="w-[800px]">
-                    <div className="flex w-full justify-center">
-                      <h1 className="text-4xl">What can I help with?</h1>
-                    </div>
+                    {personaId && !persona ? (
+                      <CentralLoader />
+                    ) : (
+                      <>
+                        <div className="text-center">
+                          {persona ? (
+                            <div>
+                              <h1 className="text-3xl">{persona.name}</h1>
+                              <p>{persona.description}</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <h1 className="text-4xl">
+                                What can I help with?
+                              </h1>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </Container>
                 <MessageInputContainer>

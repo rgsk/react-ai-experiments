@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { Chat } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
@@ -9,6 +9,9 @@ interface HistoryEntryProps {
 
 const HistoryEntry: React.FC<HistoryEntryProps> = ({ chat }) => {
   const { id: chatId } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+
+  const personaId = searchParams?.get("personaId") ?? undefined;
   const active = chat.id === chatId;
 
   const entryRef = useRef<HTMLDivElement>(null);
@@ -23,7 +26,13 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({ chat }) => {
     return null;
   }
   return (
-    <Link to={`/chat/${chat.id}`}>
+    <Link
+      to={
+        personaId
+          ? `/chat/${chat.id}?personaId=${personaId}`
+          : `/chat/${chat.id}`
+      }
+    >
       <div
         ref={entryRef}
         className={cn(

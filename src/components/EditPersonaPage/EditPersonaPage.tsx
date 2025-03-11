@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useJsonData from "~/hooks/useJsonData";
@@ -229,6 +229,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
     setItemsDeleteInProgressIds((prev) => prev.filter((v) => v !== item.id));
     setPersonaKnowledgeItems((prev) => prev?.filter((p) => p.id !== item.id));
   };
+  const newChatId = useMemo(() => v4(), []);
   if (!persona || !personaKnowledgeItems) {
     return <CentralLoader />;
   }
@@ -239,7 +240,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
         <h1 className="text-3xl">Persona: {persona.name}</h1>
         <div className="h-[30px]"></div>
         <div>
-          <Link to={`/assistants/chat?personaId=${personaId}`}>
+          <Link to={`/chat/${newChatId}?personaId=${personaId}`}>
             <Button>
               <NewChatIcon />
               <span>Chat with me</span>

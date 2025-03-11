@@ -1,5 +1,5 @@
 import { Edit, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { v4 } from "uuid";
 import {
@@ -27,6 +27,7 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
   const navigate = useNavigate();
   const [personasDeleteInProgressIds, setPersonasDeleteInProgressIds] =
     useState<string[]>([]);
+  const newChatId = useMemo(() => v4(), []);
   const handlePersonaDelete = async (persona: Persona) => {
     setPersonasDeleteInProgressIds((prev) => [...prev, persona.id]);
     await ragService.deleteCollection({
@@ -68,7 +69,7 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <p>{persona.name}</p>
-                <Link to={`/assistants/chat?personaId=${persona.id}`}>
+                <Link to={`/chat/${newChatId}?personaId=${persona.id}`}>
                   <Button variant="outline">
                     <NewChatIcon />
                     <span>Chat</span>
