@@ -83,3 +83,34 @@ export function dataURLtoFile(dataUrl: string, filename: string) {
   }
   return new File([u8arr], filename, { type: mime });
 }
+
+/**
+ * Recursively attempts to parse JSON strings.
+ * @param data - The input data to process.
+ * @returns The recursively parsed JSON object or original data if not parseable.
+ */
+export function recursiveParseJson(data: any): any {
+  if (typeof data === "string") {
+    try {
+      // Attempt to parse the string.
+      const parsed = JSON.parse(data);
+      // If parsed, recursively process the parsed result.
+      return recursiveParseJson(parsed);
+    } catch (err) {
+      // If parsing fails, return the original string.
+      return data;
+    }
+  } else if (Array.isArray(data)) {
+    // Recursively process each element in the array.
+    return data.map((item) => recursiveParseJson(item));
+  } else if (data !== null && typeof data === "object") {
+    // Recursively process each key in the object.
+    const result: Record<string, any> = {};
+    for (const key in data) {
+      result[key] = recursiveParseJson(data[key]);
+    }
+    return result;
+  }
+  // Return non-string primitives (number, boolean, etc.) as-is.
+  return data;
+}

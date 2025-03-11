@@ -12,7 +12,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { Message } from "~/lib/typesJsonData";
-import { cn } from "~/lib/utils";
+import { cn, recursiveParseJson } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
@@ -103,6 +103,10 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             .find((m) => m.role === "assistant")
             ?.tool_calls?.find((tc) => tc.id === message.tool_call_id);
           if (!toolCall) return null;
+          let parsedJsonContent = undefined;
+          try {
+            parsedJsonContent = recursiveParseJson(message.content as any);
+          } catch (err) {}
           return (
             <div key={key} className="px-4 w-full">
               <div>
@@ -124,7 +128,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                       <LoadingSpinner size={20} />
                     ) : (
                       <p className="whitespace-pre-wrap">
-                        {message.content as string}
+                        {JSON.stringify(parsedJsonContent, null, 4)}
                       </p>
                     )}
                   </div>

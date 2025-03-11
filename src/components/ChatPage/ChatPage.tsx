@@ -567,7 +567,25 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       conversation so far, save that statement in the memory using the tool
       saveUserInfoToMemory
     `;
-    const systemInstruction = [userInstruction, memoryInstruction].join("\n");
+    const personaInstruction =
+      persona &&
+      html`
+        you are persona with following personality
+        <persona>${JSON.stringify(persona)}</persona>
+        you have to respond on persona's behalf additionally since, user is
+        interacting with this persona, retrieveRelevantDocs tool becomes
+        important use this collectionName - ${persona.collectionName} so make
+        sure to pass user query to that tool and fetch the relevant docs and
+        respond accordingly persona has data from various sources like websites,
+        pdfs, and it needs to answer based on that information
+      `;
+    const systemInstruction = [
+      userInstruction,
+      memoryInstruction,
+      personaInstruction,
+    ]
+      .filter(Boolean)
+      .join("\n");
     const systemMessage: Message = {
       id: v4(),
       status: "completed",
