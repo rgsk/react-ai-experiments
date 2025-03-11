@@ -13,8 +13,8 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import { openaiIdPlaceholder, uuidPlaceholder } from "~/lib/constants";
 import { Persona } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
-import aiService from "~/services/aiService";
 import jsonDataService from "~/services/jsonDataService";
+import ragService from "~/services/ragService";
 import NewChatIcon from "../Icons/NewChatIcon";
 import CentralLoader from "../Shared/CentralLoader";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
@@ -29,7 +29,7 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
     useState<string[]>([]);
   const handlePersonaDelete = async (persona: Persona) => {
     setPersonasDeleteInProgressIds((prev) => [...prev, persona.id]);
-    await aiService.deleteCollection({
+    await ragService.deleteCollection({
       collectionName: persona.collectionName,
     });
     await jsonDataService.deleteKeysLike({

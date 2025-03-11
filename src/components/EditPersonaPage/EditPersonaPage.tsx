@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useJsonData from "~/hooks/useJsonData";
-import aiService from "~/services/aiService";
 import experimentsService from "~/services/experimentsService";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Label } from "../ui/label";
@@ -16,6 +15,7 @@ import { isPDFUrl } from "~/lib/pageUtils";
 import { Persona, PersonaKnowledgeItem } from "~/lib/typesJsonData";
 import { handleInputOnPaste } from "~/lib/utils";
 import { supportedExtensions } from "~/services/assistantsService";
+import ragService from "~/services/ragService";
 import FileUploadedPreview from "../AssistantsChatPage/Children/FileUploadedPreview/FileUploadedPreview";
 import { FileEntry } from "../AssistantsChatPage/Children/MessageInput/MessageInput";
 import NewChatIcon from "../Icons/NewChatIcon";
@@ -193,10 +193,16 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
       setItemsEmbeddingInProgressIds((prev) => [...prev, item.id]);
       const content = await getContent(item);
       console.log({ content });
-      const result = await aiService.saveText({
-        collectionName: persona.collectionName,
-        content: content,
-        source: item.source,
+      const result = await ragService.embedContent({
+        data: {
+          collectionName: persona.collectionName,
+          content: content,
+          source: item.source,
+        },
+        config: {
+          chunkLength: 250,
+          overlapLength: 0,
+        },
       });
       console.log(result);
       setPersonaKnowledgeItems((prev) =>
@@ -216,7 +222,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
   const onDeletePersonaKnowledgeItem = async (item: PersonaKnowledgeItem) => {
     if (!persona || !personaKnowledgeItems) return;
     setItemsDeleteInProgressIds((prev) => [...prev, item.id]);
-    await aiService.deleteText({
+    await ragService.deleteSource({
       collectionName: persona.collectionName,
       source: item.source,
     });
