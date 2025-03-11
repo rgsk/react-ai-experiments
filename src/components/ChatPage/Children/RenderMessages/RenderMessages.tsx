@@ -13,7 +13,8 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { Message } from "~/lib/typesJsonData";
 import { cn, recursiveParseJson } from "~/lib/utils";
-import { HandleSend } from "../../ChatPage";
+import { FileEntry, HandleSend } from "../../ChatPage";
+import FileUploadedPreview from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
 interface RenderMessagesProps {
@@ -41,6 +42,37 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
         const key = `id: ${message.id}, index - ${i}`;
         if (!message.content) {
           return null;
+        } else if (message.type === "file") {
+          const { fileEntry, content } = JSON.parse(
+            message.content as string
+          ) as {
+            fileEntry: FileEntry;
+            content: string;
+            instruction: string;
+          };
+          return (
+            <div key={key} className="w-full">
+              <div className="flex justify-end">
+                <FileUploadedPreview fileEntry={fileEntry} />
+              </div>
+              <div className="h-4"></div>
+              <div className="flex justify-end">
+                <div className="max-w-[640px]">
+                  <CollapsibleWrapper
+                    heading={`File Parsing Result - ${
+                      fileEntry.fileMetadata!.name
+                    }`}
+                    type="right"
+                    loading={message.status === "in_progress"}
+                  >
+                    <div className="pr-4">
+                      <p>{content}</p>
+                    </div>
+                  </CollapsibleWrapper>
+                </div>
+              </div>
+            </div>
+          );
         } else if (message.type === "image_url") {
           const fileName = (message as any).content[0].text;
           const url = (message as any).content[1].image_url.url;
@@ -81,6 +113,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   <CollapsibleWrapper
                     heading={`Image Parsing Result - ${fileName}`}
                     type="right"
+                    loading={message.status === "in_progress"}
                   >
                     <div className="pr-4">
                       <p>Image Model Output:</p>
@@ -241,7 +274,12 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className={cn("flex flex-col", type === "right" && "items-end")}>
         <CollapsibleTrigger asChild>
-          <div className="flex items-center gap-4">
+          <div
+            className={cn(
+              "flex items-center gap-4",
+              type === "right" && "flex-row-reverse"
+            )}
+          >
             <Button variant="secondary" size="sm">
               <span className="text-sm">{heading}</span>
               {isOpen ? (

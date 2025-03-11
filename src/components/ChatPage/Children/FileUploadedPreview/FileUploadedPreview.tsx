@@ -8,7 +8,7 @@ import { FileEntry } from "../../ChatPage";
 
 interface FileUploadedPreviewProps {
   fileEntry: FileEntry;
-  onRemove: () => void;
+  onRemove?: () => void;
   onS3Upload?: (s3Url: string) => void;
   children?: any;
 }
@@ -57,16 +57,19 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
     return <LoadingProgress percentage={uploadProgress} size={18} />;
   };
   const renderCloseButton = () => {
-    return (
-      <div className="absolute top-0 right-0 translate-x-[10px] -translate-y-1/2">
-        <button
-          onClick={onRemove}
-          className="bg-foreground text-background rounded-full w-[18px] h-[18px] flex justify-center items-center"
-        >
-          <XIcon size={14} />
-        </button>
-      </div>
-    );
+    if (onRemove) {
+      return (
+        <div className="absolute top-0 right-0 translate-x-[10px] -translate-y-1/2">
+          <button
+            onClick={onRemove}
+            className="bg-foreground text-background rounded-full w-[18px] h-[18px] flex justify-center items-center"
+          >
+            <XIcon size={14} />
+          </button>
+        </div>
+      );
+    }
+    return null;
   };
   if (isImage) {
     return (

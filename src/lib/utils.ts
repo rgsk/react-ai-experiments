@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import environmentVars from "./environmentVars";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -114,3 +115,13 @@ export function recursiveParseJson(data: any): any {
   // Return non-string primitives (number, boolean, etc.) as-is.
   return data;
 }
+
+export const safeSleep = (ms: number, allowInNonDevelopment = false) => {
+  if (environmentVars.APP_ENV !== "development" && !allowInNonDevelopment) {
+    alert(
+      "this sleep call is left for environment other than development, if this is deliberate please mark it as allowed for non-development environments"
+    );
+    return;
+  }
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

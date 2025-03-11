@@ -398,7 +398,7 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
               <div className="flex gap-[16px] pb-[24px] pt-[12px] flex-wrap">
                 {attachedFiles.map((fileEntry) => {
                   const personaKnowledgeItem = personaKnowledgeItems.find(
-                    (v) => v.url === fileEntry.s3Url?.split("?")[0]
+                    (v) => v.url === fileEntry.s3Url
                   );
                   const embeddingInProgress = personaKnowledgeItem
                     ? itemsEmbeddingInProgressIds.includes(

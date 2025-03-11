@@ -220,6 +220,7 @@ const experimentsService = {
   },
   getUrlContent: ({ url, type }: { url: string; type?: UrlContentType }) => {
     const query = encodeQueryParams({ url, type });
+
     return {
       key: ["url-content", query],
       fn: async () => {

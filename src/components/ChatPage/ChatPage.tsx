@@ -22,7 +22,7 @@ import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
 import { Chat, Memory, Message, Persona } from "~/lib/typesJsonData";
-import { cn, dataURLtoFile, html } from "~/lib/utils";
+import { cn, dataURLtoFile, html, safeSleep } from "~/lib/utils";
 import experimentsService, {
   Tool,
   ToolCall,
@@ -469,55 +469,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     const messageIndexTracker: any = {};
     await Promise.all(
       attachedFiles.map(async (fileEntry, index) => {
-        const isImage = fileEntry.file!.type.startsWith("image/");
-        const messageId = v4();
-        messageIndexTracker[messageId] = index;
-        if (isImage) {
-          const imageSupport =
-            modelsUsed[model as keyof typeof modelsUsed].imageSupport;
-          let message: Message;
-          if (imageSupport) {
-            message = {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: fileEntry.file!.name,
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: fileEntry.s3Url!,
-                  },
-                },
-              ],
-              id: messageId,
-              status: "completed",
-              type: "image_url",
-            };
-          } else {
-            const result = await experimentsService
-              .getUrlContent({ url: fileEntry.s3Url! })
-              .fn();
-            message = {
-              role: "user",
-              content: JSON.stringify({
-                fileName: fileEntry.file!.name,
-                url: fileEntry.s3Url!,
-                content: result,
-              }),
-              id: messageId,
-              status: "completed",
-              type: "image_ocr",
-            };
-          }
-          await new Promise((resolve) => setTimeout(resolve, index * 100));
+        const addMessage = async (_message: Message) => {
+          await safeSleep(index * 100, true);
           // artificial delay to ensure setMessages is called sequentialy and not in parallel
+          const message = JSON.parse(JSON.stringify(_message)) as Message;
           setMessages((prev) => {
             if (prev) {
               const fileRelatedMessages = [
-                ...prev.filter((m) =>
-                  Object.keys(messageIndexTracker).includes(m.id)
+                ...prev.filter(
+                  (m) =>
+                    Object.keys(messageIndexTracker).includes(m.id) &&
+                    m.id !== message.id
                 ),
                 message,
               ];
@@ -538,11 +500,89 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             }
             return prev;
           });
+        };
+        const isImage = fileEntry.file!.type.startsWith("image/");
+        const messageId = v4();
+        messageIndexTracker[messageId] = index;
+        let message: Message;
+        if (isImage) {
+          const imageSupport =
+            modelsUsed[model as keyof typeof modelsUsed].imageSupport;
+          if (imageSupport) {
+            message = {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: fileEntry.file!.name,
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: fileEntry.s3Url!,
+                  },
+                },
+              ],
+              id: messageId,
+              status: "completed",
+              type: "image_url",
+            };
+
+            await addMessage(message);
+          } else {
+            const contentObj = {
+              fileName: fileEntry.file!.name,
+              url: fileEntry.s3Url!,
+              content: "",
+            };
+            message = {
+              role: "user",
+              content: JSON.stringify(contentObj),
+              id: messageId,
+              status: "in_progress",
+              type: "image_ocr",
+            };
+            await addMessage(message);
+            const result = await experimentsService
+              .getUrlContent({ url: fileEntry.s3Url! })
+              .fn();
+            contentObj.content = result;
+            message.content = JSON.stringify(contentObj);
+            message.status = "completed";
+            await addMessage(message);
+          }
         } else {
-          // const result = await experimentsService
-          //   .getUrlContent({ url: signedUrl })
-          //   .fn();
+          const contentObj = {
+            fileEntry: {
+              fileMetadata: {
+                name: fileEntry.file!.name,
+                type: fileEntry.file!.type,
+              },
+              id: fileEntry.id,
+              s3Url: fileEntry.s3Url!,
+            },
+            content: "",
+            instruction: html`
+              for this file entry, this is the parsed content, user has attached
+              this file, use the file file contents to answer the user query
+            `,
+          };
+          message = {
+            role: "user",
+            content: JSON.stringify(contentObj),
+            id: messageId,
+            status: "in_progress",
+            type: "file",
+          };
+          await addMessage(message);
+          const result = await experimentsService
+            .getUrlContent({ url: fileEntry.s3Url! })
+            .fn();
           // return result;
+          contentObj.content = result;
+          message.content = JSON.stringify(contentObj);
+          message.status = "completed";
+          await addMessage(message);
         }
       })
     );
