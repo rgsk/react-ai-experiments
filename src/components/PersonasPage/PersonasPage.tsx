@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
-import { openaiIdPlaceholder, uuidPlaceholder } from "~/lib/constants";
+import { uuidPlaceholder } from "~/lib/constants";
 import { Persona } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import jsonDataService from "~/services/jsonDataService";
@@ -34,12 +34,8 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
       collectionName: persona.collectionName,
     });
     await jsonDataService.deleteKeysLike({
-      key: `assistants/${openaiIdPlaceholder}/personas/${persona.id}/conversations/${uuidPlaceholder}`,
+      key: `personas/${persona.id}%`,
     });
-    await jsonDataService.deleteKeysLike({
-      key: `personas/${persona.id}/personaKnowledgeItems`,
-    });
-    await jsonDataService.deleteKey({ key: `personas/${persona.id}` });
     setPersonasDeleteInProgressIds((prev) =>
       prev.filter((v) => v !== persona.id)
     );
