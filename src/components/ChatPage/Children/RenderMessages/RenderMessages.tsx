@@ -159,7 +159,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 {message.tool_calls && (
                   <div className="px-4">
                     <CollapsibleWrapper heading="Tool Calls">
-                      <p className="whitespace-pre-wrap">
+                      <p className="whitespace-pre-wrap pl-4">
                         {JSON.stringify(message.tool_calls, null, 4)}
                       </p>
                     </CollapsibleWrapper>
