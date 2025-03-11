@@ -619,10 +619,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         respond accordingly persona has data from various sources like websites,
         pdfs, and it needs to answer based on that information
       `;
+    const generalInstruction = html`
+      <span>
+        use getUrlContent only sparingly, don't fetch the file contents, if you
+        already have them in tool_call output
+      </span>
+    `;
     const systemInstruction = [
       userInstruction,
       memoryInstruction,
       personaInstruction,
+      generalInstruction,
     ]
       .filter(Boolean)
       .join("\n");
