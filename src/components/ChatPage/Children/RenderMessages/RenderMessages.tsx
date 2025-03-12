@@ -188,7 +188,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             }
           }
           return (
-            <div key={key} className="w-full relative">
+            <div key={key} className="w-full relative px-4">
               <div className={cn("w-full break-words")}>
                 <AIAvatar />
 
@@ -257,7 +257,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             <div key={key} className="w-full flex group">
               <div
                 className={cn(
-                  "rounded-lg bg-gray-100 dark:bg-gray-800 mx-4 break-words ml-auto max-w-[640px] relative"
+                  "rounded-lg bg-gray-100 dark:bg-gray-800 px-4 break-words ml-auto max-w-[640px] relative"
                 )}
               >
                 <div className="absolute top-0 left-0 -translate-x-full group-hover:opacity-100 opacity-0 transition-all">

@@ -9,6 +9,7 @@ import { v4 } from "uuid";
 import OpenInNewTabIcon from "~/components/Icons/OpenInNewTabIcon";
 import PreviewIcon from "~/components/Icons/PreviewIcon";
 import ActionButton from "~/components/Shared/ActionButton";
+import CsvRenderer from "~/components/Shared/CsvRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import useCodeRunners, {
@@ -24,7 +25,7 @@ import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { useWindowSize } from "~/hooks/useWindowSize";
-import { cn } from "~/lib/utils";
+import { cn, getCsvFile } from "~/lib/utils";
 import IFramePreview from "./IFramePreview";
 import JsxPreview from "./JsxPreview";
 import SingleGrid from "./SingleGrid";
@@ -321,9 +322,9 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               if (line.startsWith(pythonImagePrefix)) {
                 return <img key={index} src={line} />;
               } else if (line.startsWith(pythonCSVPrefix)) {
-                return (
-                  <pre>{JSON.stringify(getCSVContents(line), null, 4)}</pre>
-                );
+                const { fileName, csvContent } = getCSVContents(line);
+                const file = getCsvFile({ filename: fileName, csvContent });
+                return <CsvRenderer file={file} />;
               } else {
                 return (
                   <SyntaxHighlighter

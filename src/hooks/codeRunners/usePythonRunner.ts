@@ -53,7 +53,7 @@ export function getCSVContents(line: string) {
   }
   const content = line.slice(pythonCSVPrefix.length);
   const [fileName, rest] = content.split(nameDelimiter);
-  const csvContent = rest.split(lineDelimiter).join("\n");
+  const csvContent = rest.split(lineDelimiter).slice(0, -1).join("\n");
   return {
     fileName,
     csvContent,
