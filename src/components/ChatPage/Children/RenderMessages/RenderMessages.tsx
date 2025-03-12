@@ -177,7 +177,6 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 .split(separator);
             }
           }
-          console.log({ questionSuggestions, questionSuggestionsLoading });
           return (
             <div key={key} className="w-full relative">
               <div className={cn("w-full break-words")}>

@@ -20,6 +20,21 @@ export function MarkdownRenderer({
       rehypePlugins={[rehypeRaw]}
       className="messageContent"
       components={{
+        a: ({ className, children, ...props }: any) => {
+          return (
+            <a
+              {...props}
+              className={cn(
+                className,
+                "text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300"
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {children}
+            </a>
+          );
+        },
         code({ node, className, children, ...props }: any) {
           const match = /language-(\w+)/.exec(className || "");
           const language = match?.[1] ?? "default";
