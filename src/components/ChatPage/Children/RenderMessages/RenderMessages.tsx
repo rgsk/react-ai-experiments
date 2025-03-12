@@ -171,7 +171,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   questionsCodeStartIndex + `<questions>`.length,
                   questionsCodeEndIndex
                 )
-                .split(",");
+                .split("<sep />");
             }
           }
           console.log({ questionSuggestions, questionSuggestionsLoading });
@@ -194,6 +194,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     />
                   </div>
                 )}
+
                 {message.tool_calls && (
                   <div className="px-4">
                     <CollapsibleWrapper

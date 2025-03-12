@@ -1,5 +1,4 @@
 import { html } from "./utils";
-
 export const generateQuestionInstruction = html`
   upon successful completion of response generate upto 3 related questions that
   user might be wanting to ask based on the conversation so far, if you have not
@@ -11,5 +10,7 @@ export const generateQuestionInstruction = html`
   instructed you to generate questions) give questions with below mentioned
   instructions only, not in other parts of the message how to send me the
   questions? wrap the questions like this
-  <hidden><questions>question1,question2</questions></hidden>
+  <hidden
+    ><questions>question1<sep />question2<sep />question3</questions></hidden
+  >
 `;
