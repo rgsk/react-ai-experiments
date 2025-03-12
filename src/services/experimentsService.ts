@@ -236,8 +236,7 @@ const experimentsService = {
     onUploadProgress?: (progress: number) => void
   ) => {
     // Extract file extension
-    const fileExtension = file.name.split(".").pop();
-    const key = `${v4()}.${fileExtension}`;
+    const key = `${v4()}/${file.name}`;
 
     const { url: uploadUrl } = await experimentsService
       .getAWSUploadUrl({

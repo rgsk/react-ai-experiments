@@ -1,4 +1,4 @@
-import { Copy } from "iconsax-react";
+import { ArrowCircleDown2, Copy } from "iconsax-react";
 import { ArrowRight, Check } from "lucide-react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
@@ -9,7 +9,7 @@ import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { FileEntry, HandleSend } from "../../ChatPage";
-import FileUploadedPreview from "../FileUploadedPreview/FileUploadedPreview";
+import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
 import RenderToolCall from "./RenderToolCall";
@@ -51,7 +51,17 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           return (
             <div key={key} className="w-full">
               <div className="flex justify-end">
-                <FileUploadedPreview fileEntry={fileEntry} />
+                <FilePreview
+                  fileName={fileEntry.fileMetadata!.name}
+                  loading={false}
+                >
+                  <a
+                    href={fileEntry.s3Url}
+                    download={fileEntry.fileMetadata!.name}
+                  >
+                    <ArrowCircleDown2 size={20} className="stroke-foreground" />
+                  </a>
+                </FilePreview>
               </div>
               <div className="h-4"></div>
               <div className="flex justify-end">
