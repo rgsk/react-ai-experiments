@@ -1,5 +1,5 @@
 import { Copy } from "iconsax-react";
-import { Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
@@ -145,6 +145,27 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             </div>
           );
         } else if (message.role === "assistant") {
+          let questionSuggestions: string[] = [];
+          let questionSuggestionsLoading = false;
+          const text = message.content as string;
+          if (message.role === "assistant") {
+            const questionsCodeStartIndex = text.indexOf(`<questions>`);
+            const questionsCodeEndIndex = text.indexOf(`</questions>`);
+            if (questionsCodeStartIndex != -1) {
+              questionSuggestionsLoading = true;
+            }
+            if (questionsCodeEndIndex !== -1) {
+              questionSuggestionsLoading = false;
+
+              questionSuggestions = text
+                .slice(
+                  questionsCodeStartIndex + `<questions>`.length,
+                  questionsCodeEndIndex
+                )
+                .split(",");
+            }
+          }
+          console.log({ questionSuggestions, questionSuggestionsLoading });
           return (
             <div key={key} className="w-full relative">
               <div className={cn("w-full break-words")}>
@@ -172,6 +193,34 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                       </p>
                     </CollapsibleWrapper>
                   </div>
+                )}
+              </div>
+              <div className="p-4">
+                {questionSuggestionsLoading && <LoadingSpinner size={20} />}
+                {questionSuggestions.length > 0 && (
+                  <>
+                    <div>
+                      <p>Related Questions:</p>
+                    </div>
+                    <div className="h-2"></div>
+                    <div className="flex flex-col">
+                      {questionSuggestions.map((qs, i) => (
+                        <button
+                          key={qs + i}
+                          onClick={() => {
+                            handleSend({ text: qs });
+                          }}
+                        >
+                          {i === 0 && <Separator />}
+                          <div className="py-2 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                            <span>{qs}</span>
+                            <ArrowRight className="h-5 w-5" />
+                          </div>
+                          <Separator />
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             </div>

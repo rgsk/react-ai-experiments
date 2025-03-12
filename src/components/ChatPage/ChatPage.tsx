@@ -22,6 +22,7 @@ import useWebSTT from "~/hooks/useWebSTT";
 import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
+import { generateQuestionInstruction } from "~/lib/specialMessageParser";
 import { Chat, Memory, Message, Persona } from "~/lib/typesJsonData";
 import { cn, dataURLtoFile, html, safeSleep } from "~/lib/utils";
 import experimentsService, {
@@ -652,7 +653,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       role: "system",
       content: systemInstruction,
     };
-    return [systemMessage, ...(messages ?? [])];
+    const questionMessage: Message = {
+      id: v4(),
+      status: "completed",
+      content: generateQuestionInstruction,
+      role: "user",
+    };
+    const additionalInstructions: Message[] = [questionMessage];
+    return [systemMessage, ...(messages ?? []), ...additionalInstructions];
   };
   const getCurrentMessagesRef = useRef(getCurrentMessages);
   getCurrentMessagesRef.current = getCurrentMessages;
