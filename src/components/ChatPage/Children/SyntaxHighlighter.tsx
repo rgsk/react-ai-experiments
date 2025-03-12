@@ -87,7 +87,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const executeCodeRef = useRef(executeCode);
   executeCodeRef.current = executeCode;
   const iframePreviewLink = `/preview-page?id=${id}`;
-  const countOfLines = code?.split("\n").length ?? 0;
+  const lines = code?.split("\n") ?? [];
+  const countOfLines = lines[lines.length - 1]
+    ? lines.length
+    : lines.length - 1;
   const monacoFontSize = 14;
   const lineHeight = monacoFontSize * 1.5;
   const paddingTop = 20;
@@ -204,7 +207,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 defaultLanguage={language === "jsx" ? "javascript" : language}
                 value={code}
                 theme="vs-dark"
-                height={countOfLines * lineHeight + paddingBottom}
+                height={paddingTop + countOfLines * lineHeight + paddingBottom}
                 options={{
                   fontSize: monacoFontSize,
                   lineHeight: lineHeight,
