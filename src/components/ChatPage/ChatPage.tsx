@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { produce } from "immer";
-import { ArrowDown, Home } from "lucide-react";
+import { ArrowDown, Home, PanelLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
@@ -63,6 +63,7 @@ export type FileEntry = {
 
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const { id: chatId } = useParams<{ id: string }>();
   const modelQuery = useMemo(() => {
     return experimentsService.getModel();
@@ -714,37 +715,39 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
   return (
     <div className="h-screen flex">
-      <div className="w-[260px] border-r border-r-input h-full flex flex-col">
-        <div className="p-[16px]">
-          <Button
-            onClick={() => {
-              openNewChat();
-            }}
-          >
-            <NewChatIcon />
-            <span>New Chat</span>
-          </Button>
+      {leftPanelOpen && (
+        <div className="w-[260px] border-r border-r-input h-full flex flex-col">
+          <div className="p-[16px]">
+            <Button
+              onClick={() => {
+                openNewChat();
+              }}
+            >
+              <NewChatIcon />
+              <span>New Chat</span>
+            </Button>
+          </div>
+          <div className="flex-1 overflow-auto space-y-[20px] px-[16px]">
+            {historyBlocks.map(([date, items], i) => (
+              <HistoryBlock key={i} date={date} chats={items} />
+            ))}
+          </div>
+          <div className="p-[16px]">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <span>
+                  <ProfileInfo />
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent avoidCollisions align="start" side="top">
+                <DropdownMenuItem onClick={authService.logout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex-1 overflow-auto space-y-[20px] px-[16px]">
-          {historyBlocks.map(([date, items], i) => (
-            <HistoryBlock key={i} date={date} chats={items} />
-          ))}
-        </div>
-        <div className="p-[16px]">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <span>
-                <ProfileInfo />
-              </span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent avoidCollisions align="start" side="top">
-              <DropdownMenuItem onClick={authService.logout}>
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      )}
       <div
         className="flex-1 h-full flex flex-col relative"
         style={{
@@ -756,7 +759,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       >
         {isDragging && <DraggingBackdrop />}
         <div className="border-b border-b-input p-4 flex justify-between items-center">
-          <span>
+          <span className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setLeftPanelOpen((prev) => !prev);
+              }}
+            >
+              <PanelLeft />
+            </Button>
             <Link to="/">
               <Button variant="outline" size="icon">
                 <Home />
