@@ -22,6 +22,9 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
   const renderFunction = () => {
     return (
       <div className="pl-4">
+        <div className="mb-4">
+          <p>Function:</p>
+        </div>
         <p className="whitespace-pre-wrap">
           {JSON.stringify(toolCall, null, 4)}
         </p>
@@ -31,7 +34,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
   const renderOutput = () => {
     return (
       <div className="pl-4">
-        <div className="my-4">
+        <div className="mb-4">
           <p>Output:</p>
         </div>
         {message.status === "in_progress" ? (
@@ -59,7 +62,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
             {renderFunction()}
           </CollapsibleWrapper>
         </div>
-
+        {renderSeparator()}
         {renderOutput()}
         {renderSeparator()}
         <div className="pl-4">
@@ -77,6 +80,8 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
       </>
     );
   } else if (toolCall.function.name === "googleSearch") {
+    const { query } = toolCall.function.arguments as any;
+
     const entries = parsedJsonContent.content[0].text as {
       title: string;
       link: string;
@@ -84,10 +89,16 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
       displayLink: string;
       image: string;
     }[];
-    console.log({ entries });
     return (
       <>
-        {renderFunction()}
+        <div className="pl-4">
+          <CollapsibleWrapper
+            heading={`Function`}
+            loading={message.status === "in_progress"}
+          >
+            {renderFunction()}
+          </CollapsibleWrapper>
+        </div>
         {renderSeparator()}
         <div className="pl-4">
           <CollapsibleWrapper
@@ -97,9 +108,13 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
             {renderOutput()}
           </CollapsibleWrapper>
         </div>
+        {renderSeparator()}
         <div className="pl-4">
           <div className="my-4">
-            <p>Search Results:</p>
+            <p>Query: {query}</p>
+          </div>
+          <div className="my-4">
+            <p>Results:</p>
           </div>
           <div className="flex flex-col">
             {entries.map((entry) => (

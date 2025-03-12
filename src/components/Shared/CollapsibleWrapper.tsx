@@ -43,7 +43,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
             {loading && <LoadingSpinner size={18} />}
           </div>
         </CollapsibleTrigger>
-        <div className="h-4"></div>
+        {isOpen && <div className="h-4"></div>}
         <CollapsibleContent>
           <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
             {children}
