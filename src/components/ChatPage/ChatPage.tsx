@@ -815,6 +815,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                     messages={messages ?? []}
                     handleSend={handleSend}
                     hadPendingToolCalls={toolCallsAndOutputs.length > 0}
+                    scrollContainerRef={scrollContainerRef}
                   />
                 </Container>
                 <div className="relative">

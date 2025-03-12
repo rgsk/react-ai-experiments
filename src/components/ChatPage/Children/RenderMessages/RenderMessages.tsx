@@ -17,12 +17,14 @@ interface RenderMessagesProps {
   handleSend: HandleSend;
   scrollToBottom: () => void;
   hadPendingToolCalls: boolean;
+  scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 const RenderMessages: React.FC<RenderMessagesProps> = ({
   messages,
   handleSend,
   scrollToBottom,
   hadPendingToolCalls,
+  scrollContainerRef,
 }) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
 
@@ -54,6 +56,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               <div className="flex justify-end">
                 <div className="max-w-[640px]">
                   <CollapsibleWrapper
+                    scrollContainerRef={scrollContainerRef}
                     heading={`File Parsing Result - ${
                       fileEntry.fileMetadata!.name
                     }`}
@@ -106,6 +109,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               <div className="flex justify-end">
                 <div className="max-w-[640px]">
                   <CollapsibleWrapper
+                    scrollContainerRef={scrollContainerRef}
                     heading={`Image Parsing Result - ${fileName}`}
                     type="right"
                     loading={message.status === "in_progress"}
@@ -136,10 +140,15 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             <div key={key} className="px-4 w-full">
               <div>
                 <CollapsibleWrapper
+                  scrollContainerRef={scrollContainerRef}
                   heading={`Tool Call - ${toolCall.function.name}`}
                   loading={message.status === "in_progress"}
                 >
-                  <RenderToolCall toolCall={toolCall} message={message} />
+                  <RenderToolCall
+                    toolCall={toolCall}
+                    message={message}
+                    scrollContainerRef={scrollContainerRef}
+                  />
                 </CollapsibleWrapper>
               </div>
             </div>
@@ -187,7 +196,10 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 )}
                 {message.tool_calls && (
                   <div className="px-4">
-                    <CollapsibleWrapper heading="Tool Calls">
+                    <CollapsibleWrapper
+                      scrollContainerRef={scrollContainerRef}
+                      heading="Tool Calls"
+                    >
                       <p className="whitespace-pre-wrap pl-4">
                         {JSON.stringify(message.tool_calls, null, 4)}
                       </p>

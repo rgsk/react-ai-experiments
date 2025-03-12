@@ -10,10 +10,12 @@ import SyntaxHighlighter from "../SyntaxHighlighter";
 interface RenderToolCallProps {
   toolCall: ChatCompletionMessageToolCall;
   message: Message;
+  scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 const RenderToolCall: React.FC<RenderToolCallProps> = ({
   toolCall,
   message,
+  scrollContainerRef,
 }) => {
   let parsedJsonContent = undefined;
   try {
@@ -56,6 +58,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
       <>
         <div className="pl-4">
           <CollapsibleWrapper
+            scrollContainerRef={scrollContainerRef}
             level={2}
             heading={`Function`}
             loading={message.status === "in_progress"}
@@ -94,6 +97,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
       <>
         <div className="pl-4">
           <CollapsibleWrapper
+            scrollContainerRef={scrollContainerRef}
             heading={`Function`}
             loading={message.status === "in_progress"}
             level={2}
@@ -104,6 +108,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
         {renderSeparator()}
         <div className="pl-4">
           <CollapsibleWrapper
+            scrollContainerRef={scrollContainerRef}
             heading={`Output`}
             loading={message.status === "in_progress"}
             level={2}

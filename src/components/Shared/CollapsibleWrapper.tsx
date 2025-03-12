@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import {
@@ -14,6 +14,7 @@ interface CollapsibleWrapperProps {
   level?: number;
   loading?: boolean;
   type?: "left" | "right";
+  scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   heading,
@@ -21,18 +22,38 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   loading,
   level = 1,
   type = "left",
+  scrollContainerRef,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const collapsibleRef = useRef<any>(null);
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} ref={collapsibleRef}>
       <div className={cn("flex flex-col", type === "right" && "items-end")}>
         <CollapsibleTrigger
           asChild
           className={cn(
             "sticky bg-background",
-            level === 1 ? "top-[-32px]" : "top-[0px]"
+            level === 1 ? "top-[-32px] z-50" : "top-[0px] z-40"
           )}
+          onClick={() => {
+            if (isOpen) {
+              const collapsible = collapsibleRef.current as HTMLDivElement;
+              if (collapsible) {
+                const top = collapsible.getBoundingClientRect().top;
+                if (top < 32) {
+                  collapsible.scrollIntoView();
+                  const scrollContainer = scrollContainerRef.current;
+                  if (scrollContainer) {
+                    if (level === 1) {
+                      scrollContainer.scrollBy(0, 16);
+                    } else if (level === 2) {
+                      scrollContainer.scrollBy(0, -32);
+                    }
+                  }
+                }
+              }
+            }
+          }}
         >
           <div
             className={cn(
