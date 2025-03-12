@@ -35,22 +35,35 @@ const lineDelimiter = "<line>";
 const replaceToCsvWithEncodedString = (codeStr: string) => {
   return codeStr
     .replace(
-      /data\.to_csv\(["']([^"']+)["'](.*)\)/g,
-      (match, fileName, args) => {
-        const cleanedArgs = args.trim().replace(/^,/, ""); // Remove leading comma
+      // Matches either a literal string or a variable as the file name argument:
+      /(\w+)\.to_csv\(\s*(?:(['"])([^'"]+)\2|(\w+))\s*,?(.*?)\)/g,
+      (match, dataVar, quote, fileNameLiteral, fileNameVar, args) => {
+        let fileName;
+        if (fileNameLiteral) {
+          fileName = fileNameLiteral;
+        } else if (fileNameVar) {
+          // Try to find an assignment for the variable in the code
+          const assignRegex = new RegExp(
+            `${fileNameVar}\\s*=\\s*(['"])([^'"]+)\\1`
+          );
+          const assignMatch = codeStr.match(assignRegex);
+          fileName = assignMatch ? assignMatch[2] : fileNameVar;
+        } else {
+          fileName = "output.csv";
+        }
+        const cleanedArgs = args.trim().replace(/^,/, "");
         return `
 file_name = '${fileName}'
-csv_data = data.to_csv(${cleanedArgs}).replace('\\n', '${lineDelimiter}')
+csv_data = ${dataVar}.to_csv(${cleanedArgs}).replace('\\n', '${lineDelimiter}')
 single_line = f'${pythonCSVPrefix}{file_name}${nameDelimiter}{csv_data}'
 print(single_line)
         `.trim();
       }
     )
-    .replace(
-      /print\(\s*data\.head\(\s*\d*\s*\)\s*\)|data\.head\(\s*\d*\s*\)/g,
+    .replace(/(\w+)\.head\(\s*\d*\s*\)/g, (match, dataVar) =>
       `
 file_name = 'head.csv'
-csv_data = data.head().to_csv(index=False).replace('\\n', '${lineDelimiter}')
+csv_data = ${dataVar}.head().to_csv(index=False).replace('\\n', '${lineDelimiter}')
 single_line = f'${pythonCSVPrefix}{file_name}${nameDelimiter}{csv_data}'
 print(single_line)
       `.trim()
