@@ -56,6 +56,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
       <>
         <div className="pl-4">
           <CollapsibleWrapper
+            level={2}
             heading={`Function`}
             loading={message.status === "in_progress"}
           >
@@ -95,6 +96,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
           <CollapsibleWrapper
             heading={`Function`}
             loading={message.status === "in_progress"}
+            level={2}
           >
             {renderFunction()}
           </CollapsibleWrapper>
@@ -104,6 +106,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
           <CollapsibleWrapper
             heading={`Output`}
             loading={message.status === "in_progress"}
+            level={2}
           >
             {renderOutput()}
           </CollapsibleWrapper>

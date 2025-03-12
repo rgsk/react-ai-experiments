@@ -11,6 +11,7 @@ import { Collapsible } from "../ui/collapsible";
 interface CollapsibleWrapperProps {
   heading: string;
   children: any;
+  level?: number;
   loading?: boolean;
   type?: "left" | "right";
 }
@@ -18,6 +19,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   heading,
   children,
   loading,
+  level = 1,
   type = "left",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +27,13 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className={cn("flex flex-col", type === "right" && "items-end")}>
-        <CollapsibleTrigger asChild>
+        <CollapsibleTrigger
+          asChild
+          className={cn(
+            "sticky bg-white",
+            level === 1 ? "top-[-32px]" : "top-[0px]"
+          )}
+        >
           <div
             className={cn(
               "flex items-center gap-4",
