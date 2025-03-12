@@ -13,9 +13,9 @@ export const modelsUsed = {
     imageSupport: false,
   },
   "openai/gpt-4o": {
-    imageSupport: false,
+    imageSupport: true,
   },
   "openai/gpt-4o-mini": {
-    imageSupport: false,
+    imageSupport: true,
   },
 };

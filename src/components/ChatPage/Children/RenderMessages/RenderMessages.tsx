@@ -1,23 +1,17 @@
 import { Copy } from "iconsax-react";
-import { Check, ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { Check } from "lucide-react";
 import ActionButton from "~/components/Shared/ActionButton";
+import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
-import { Button } from "~/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "~/components/ui/collapsible";
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { Message } from "~/lib/typesJsonData";
-import { cn, recursiveParseJson } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import { FileEntry, HandleSend } from "../../ChatPage";
 import FileUploadedPreview from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
-import SyntaxHighlighter from "../SyntaxHighlighter";
+import RenderToolCall from "./RenderToolCall";
 interface RenderMessagesProps {
   messages: Message[];
   handleSend: HandleSend;
@@ -137,17 +131,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             .find((m) => m.role === "assistant")
             ?.tool_calls?.find((tc) => tc.id === message.tool_call_id);
           if (!toolCall) return null;
-          let code;
-          let language;
-          if (toolCall.function.name === "executeCode") {
-            const res = toolCall.function.arguments as any;
-            code = res.code;
-            language = res.language;
-          }
-          let parsedJsonContent = undefined;
-          try {
-            parsedJsonContent = recursiveParseJson(message.content as any);
-          } catch (err) {}
+
           return (
             <div key={key} className="px-4 w-full">
               <div>
@@ -155,41 +139,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   heading={`Tool Call - ${toolCall.function.name}`}
                   loading={message.status === "in_progress"}
                 >
-                  <div className="pl-4">
-                    <p className="whitespace-pre-wrap">
-                      {JSON.stringify(toolCall, null, 4)}
-                    </p>
-                  </div>
-                  <Separator className="my-4 h-[2px]" />
-                  <div className="pl-4">
-                    <div className="my-4">
-                      <p>Output:</p>
-                    </div>
-                    {message.status === "in_progress" ? (
-                      <LoadingSpinner size={20} />
-                    ) : (
-                      <p className="whitespace-pre-wrap">
-                        {JSON.stringify(parsedJsonContent, null, 4)}
-                      </p>
-                    )}
-                    {code && language && (
-                      <>
-                        <Separator className="my-4 h-[2px]" />
-                        <div>
-                          <div className="my-4">
-                            <p>Code:</p>
-                          </div>
-                          <SyntaxHighlighter
-                            loading={false}
-                            code={code}
-                            language={language}
-                            codeProps={{}}
-                            isCodeOutput={false}
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <RenderToolCall toolCall={toolCall} message={message} />
                 </CollapsibleWrapper>
               </div>
             </div>
@@ -278,51 +228,5 @@ const AIAvatar: React.FC<AIAvatarProps> = ({}) => {
     <div className="absolute top-0 left-0 -translate-x-full translate-y-1/2">
       <img src="/ai-avatar.svg" className="w-[24px]" />
     </div>
-  );
-};
-
-interface CollapsibleWrapperProps {
-  heading: string;
-  children: any;
-  loading?: boolean;
-  type?: "left" | "right";
-}
-const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
-  heading,
-  children,
-  loading,
-  type = "left",
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className={cn("flex flex-col", type === "right" && "items-end")}>
-        <CollapsibleTrigger asChild>
-          <div
-            className={cn(
-              "flex items-center gap-4",
-              type === "right" && "flex-row-reverse"
-            )}
-          >
-            <Button variant="secondary" size="sm">
-              <span className="text-sm">{heading}</span>
-              {isOpen ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-            {loading && <LoadingSpinner size={18} />}
-          </div>
-        </CollapsibleTrigger>
-        <div className="h-4"></div>
-        <CollapsibleContent>
-          <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
-            {children}
-          </div>
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
   );
 };
