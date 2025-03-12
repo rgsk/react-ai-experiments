@@ -1,6 +1,7 @@
 import { ChatCompletionMessageToolCall } from "openai/resources/index.mjs";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
+import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Separator } from "~/components/ui/separator";
 import { Message } from "~/lib/typesJsonData";
 import { recursiveParseJson } from "~/lib/utils";
@@ -14,6 +15,10 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
   toolCall,
   message,
 }) => {
+  let parsedJsonContent = undefined;
+  try {
+    parsedJsonContent = recursiveParseJson(message.content as any);
+  } catch (err) {}
   const renderFunction = () => {
     return (
       <div className="pl-4">
@@ -24,10 +29,6 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
     );
   };
   const renderOutput = () => {
-    let parsedJsonContent = undefined;
-    try {
-      parsedJsonContent = recursiveParseJson(message.content as any);
-    } catch (err) {}
     return (
       <div className="pl-4">
         <div className="my-4">
@@ -72,6 +73,62 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
             codeProps={{}}
             isCodeOutput={false}
           />
+        </div>
+      </>
+    );
+  } else if (toolCall.function.name === "googleSearch") {
+    const entries = parsedJsonContent.content[0].text as {
+      title: string;
+      link: string;
+      snippet: string;
+      displayLink: string;
+      image: string;
+    }[];
+    console.log({ entries });
+    return (
+      <>
+        {renderFunction()}
+        {renderSeparator()}
+        <div className="pl-4">
+          <CollapsibleWrapper
+            heading={`Output`}
+            loading={message.status === "in_progress"}
+          >
+            {renderOutput()}
+          </CollapsibleWrapper>
+        </div>
+        <div className="pl-4">
+          <div className="my-4">
+            <p>Search Results:</p>
+          </div>
+          <div className="flex flex-col">
+            {entries.map((entry) => (
+              <TargetBlankLink href={entry.link} key={entry.title}>
+                <div className="flex gap-[20px] group hover:bg-muted rounded-lg p-3">
+                  <div>
+                    <div className="flex gap-3">
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${entry.displayLink}&sz=64`}
+                        className="w-[24px] h-[24px]"
+                      />
+                      <p>{entry.displayLink}</p>
+                    </div>
+                    <p className="font-bold group-hover:underline">
+                      {entry.title}
+                    </p>
+                    <p>{entry.snippet}</p>
+                  </div>
+                  <div className="flex-1"></div>
+                  <div>
+                    <img
+                      src={entry.image}
+                      className="max-w-[100px] w-[100px] rounded-lg"
+                    />
+                  </div>
+                </div>
+              </TargetBlankLink>
+            ))}
+          </div>
         </div>
       </>
     );
