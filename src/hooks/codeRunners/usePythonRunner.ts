@@ -33,18 +33,28 @@ const nameDelimiter = "<name>";
 const lineDelimiter = "<line>";
 
 const replaceToCsvWithEncodedString = (codeStr: string) => {
-  return codeStr.replace(
-    /data\.to_csv\(["']([^"']+)["'](.*)\)/g,
-    (match, fileName, args) => {
-      const cleanedArgs = args.trim().replace(/^,/, ""); // Remove leading comma and space
-      return `
+  return codeStr
+    .replace(
+      /data\.to_csv\(["']([^"']+)["'](.*)\)/g,
+      (match, fileName, args) => {
+        const cleanedArgs = args.trim().replace(/^,/, ""); // Remove leading comma
+        return `
 file_name = '${fileName}'
 csv_data = data.to_csv(${cleanedArgs}).replace('\\n', '${lineDelimiter}')
 single_line = f'${pythonCSVPrefix}{file_name}${nameDelimiter}{csv_data}'
 print(single_line)
-      `.trim();
-    }
-  );
+        `.trim();
+      }
+    )
+    .replace(
+      /print\(\s*data\.head\(\s*\d*\s*\)\s*\)|data\.head\(\s*\d*\s*\)/g,
+      `
+file_name = 'head.csv'
+csv_data = data.head().to_csv(index=False).replace('\\n', '${lineDelimiter}')
+single_line = f'${pythonCSVPrefix}{file_name}${nameDelimiter}{csv_data}'
+print(single_line)
+      `.trim()
+    );
 };
 
 export function getCSVContents(line: string) {
