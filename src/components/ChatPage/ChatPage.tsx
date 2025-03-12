@@ -13,7 +13,11 @@ import {
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
-import { pythonImagePrefix } from "~/hooks/codeRunners/usePythonRunner";
+import {
+  getCSVContents,
+  pythonCSVPrefix,
+  pythonImagePrefix,
+} from "~/hooks/codeRunners/usePythonRunner";
 import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
 import useGlobalContext from "~/hooks/useGlobalContext";
@@ -27,7 +31,7 @@ import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
 import { generateQuestionInstruction } from "~/lib/specialMessageParser";
 import { Chat, Memory, Message, Persona } from "~/lib/typesJsonData";
-import { cn, dataURLtoFile, html, safeSleep } from "~/lib/utils";
+import { cn, dataURLtoFile, getCsvFile, html, safeSleep } from "~/lib/utils";
 import experimentsService, {
   Tool,
   ToolCall,
@@ -147,6 +151,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           lines.map(async (line) => {
             if (line.startsWith(pythonImagePrefix)) {
               const file = dataURLtoFile(line, "image.png");
+              const result = await experimentsService.uploadFileToS3(file);
+              return result;
+            } else if (line.startsWith(pythonCSVPrefix)) {
+              const { fileName, csvContent } = getCSVContents(line);
+              const file = getCsvFile({ filename: fileName, csvContent });
               const result = await experimentsService.uploadFileToS3(file);
               return result;
             }

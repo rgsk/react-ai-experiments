@@ -198,7 +198,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   {(message.content ?? "") as string}
                 </MemoizedMarkdownRenderer>
                 {message.status !== "in_progress" && (
-                  <div className="m-4">
+                  <div>
                     <MessageActions
                       handleSend={handleSend}
                       messages={messages}
@@ -206,9 +206,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     />
                   </div>
                 )}
-
+                <div className="h-4"></div>
                 {message.tool_calls && (
-                  <div className="px-4">
+                  <div>
                     <CollapsibleWrapper
                       scrollContainerRef={scrollContainerRef}
                       heading="Tool Calls"
