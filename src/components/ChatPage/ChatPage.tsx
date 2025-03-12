@@ -1,7 +1,8 @@
+import { Label } from "@radix-ui/react-label";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { produce } from "immer";
-import { ArrowDown, Home, PanelLeft } from "lucide-react";
+import { ArrowDown, Home, PanelLeft, PanelRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
@@ -17,6 +18,7 @@ import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
+import useLocalStorageState from "~/hooks/useLocalStorageState";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
 import authService from "~/lib/authService";
@@ -45,6 +47,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { Input } from "../ui/input";
+import { Switch } from "../ui/switch";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput from "./Children/MessageInput";
@@ -63,7 +67,14 @@ export type FileEntry = {
 
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
-  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [leftPanelOpen, setLeftPanelOpen] = useLocalStorageState(
+    "leftPanelOpen",
+    true
+  );
+  const [rightPanelOpen, setRightPanelOpen] = useLocalStorageState(
+    "rightPanelOpen",
+    true
+  );
   const { id: chatId } = useParams<{ id: string }>();
   const modelQuery = useMemo(() => {
     return experimentsService.getModel();
@@ -248,6 +259,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     }
     return key;
   };
+  const [preferences, setPreferences] = useJsonData(
+    attachPersonaPrefixIfPresent(`preferences`),
+    { relatedQuestion: { enabled: false, count: 3 } }
+  );
+  useEffect(() => {
+    console.log({ preferences });
+  }, [preferences]);
   const { data: chatHistory, refetch: refetchChatHistory } =
     useJsonDataKeysLike<Chat>(
       attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`)
@@ -596,6 +614,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       alert("memories not loaded");
       return [];
     }
+    if (!preferences) {
+      alert("preferences not loaded");
+      return [];
+    }
     const userInstruction = html`
       you are currently interacting with following user -
       <userData>${JSON.stringify(userData)}</userData>
@@ -654,13 +676,19 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       role: "system",
       content: systemInstruction,
     };
-    const questionMessage: Message = {
-      id: v4(),
-      status: "completed",
-      content: generateQuestionInstruction,
-      role: "user",
-    };
-    const additionalInstructions: Message[] = [questionMessage];
+
+    const additionalInstructions: Message[] = [];
+    if (preferences.relatedQuestion.enabled) {
+      const questionMessage: Message = {
+        id: v4(),
+        status: "completed",
+        content: generateQuestionInstruction(
+          preferences.relatedQuestion.count || 3
+        ),
+        role: "user",
+      };
+      additionalInstructions.push(questionMessage);
+    }
     return [systemMessage, ...(messages ?? []), ...additionalInstructions];
   };
   const getCurrentMessagesRef = useRef(getCurrentMessages);
@@ -776,7 +804,19 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             </Link>
           </span>
           <span>{chat?.title || "New Chat"}</span>
-          <ModeToggle />
+          <span className="flex gap-2">
+            <ModeToggle />
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setRightPanelOpen((prev) => !prev);
+              }}
+            >
+              <PanelRight />
+            </Button>
+          </span>
         </div>
         {messagesLoading ? (
           <>
@@ -860,6 +900,57 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           </>
         )}
       </div>
+      {rightPanelOpen && preferences && (
+        <div className="w-[260px] border-l border-l-input h-full flex flex-col">
+          <div className="p-4">
+            <div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="related-questions"
+                  checked={preferences.relatedQuestion.enabled}
+                  onCheckedChange={(value) => {
+                    setPreferences(
+                      produce((draft) => {
+                        if (!draft) return;
+                        draft.relatedQuestion.enabled = value;
+                      })
+                    );
+                  }}
+                />
+                <Label htmlFor="related-questions">Related Questions</Label>
+              </div>
+              {preferences.relatedQuestion.enabled && (
+                <>
+                  <div className="h-4"></div>
+                  <div>
+                    <Input
+                      type="number"
+                      placeholder="3"
+                      min={1}
+                      max={5}
+                      value={
+                        preferences.relatedQuestion.count === 0
+                          ? ""
+                          : preferences.relatedQuestion.count
+                      }
+                      onChange={(e) => {
+                        setPreferences(
+                          produce((draft) => {
+                            if (!draft) return;
+                            const value = +e.target.value;
+                            if (value > 5) return;
+                            draft.relatedQuestion.count = value;
+                          })
+                        );
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
   // return (
