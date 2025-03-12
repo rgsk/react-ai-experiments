@@ -1,6 +1,6 @@
 // loadPyodideSingleton.ts
 let pyodidePromise: Promise<any> | null = null;
-const packages = ["numpy", "matplotlib", "scipy", "scikit-learn"];
+const packages = ["numpy", "matplotlib", "scipy", "scikit-learn", "pandas"];
 export function loadPyodideSingleton(): Promise<any> {
   if (pyodidePromise) {
     return pyodidePromise;

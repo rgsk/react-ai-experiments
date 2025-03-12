@@ -17,6 +17,7 @@ import { FileEntry, HandleSend } from "../../ChatPage";
 import FileUploadedPreview from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
+import SyntaxHighlighter from "../SyntaxHighlighter";
 interface RenderMessagesProps {
   messages: Message[];
   handleSend: HandleSend;
@@ -136,6 +137,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             .find((m) => m.role === "assistant")
             ?.tool_calls?.find((tc) => tc.id === message.tool_call_id);
           if (!toolCall) return null;
+          let code;
+          let language;
+          if (toolCall.function.name === "executeCode") {
+            const res = toolCall.function.arguments as any;
+            code = res.code;
+            language = res.language;
+          }
           let parsedJsonContent = undefined;
           try {
             parsedJsonContent = recursiveParseJson(message.content as any);
@@ -163,6 +171,23 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                       <p className="whitespace-pre-wrap">
                         {JSON.stringify(parsedJsonContent, null, 4)}
                       </p>
+                    )}
+                    {code && language && (
+                      <>
+                        <Separator className="my-4 h-[2px]" />
+                        <div>
+                          <div className="my-4">
+                            <p>Code:</p>
+                          </div>
+                          <SyntaxHighlighter
+                            loading={false}
+                            code={code}
+                            language={language}
+                            codeProps={{}}
+                            isCodeOutput={false}
+                          />
+                        </div>
+                      </>
                     )}
                   </div>
                 </CollapsibleWrapper>
