@@ -51,6 +51,16 @@ export function MarkdownRenderer({
                   </CollapsibleWrapper>
                 </>
               )}
+              {href.endsWith(".png") && (
+                <>
+                  <div className="h-4"></div>
+                  <CollapsibleWrapper heading={`${filename}`} type="left">
+                    <div className="pl-4">
+                      <img src={href} alt={filename} className="w-full" />
+                    </div>
+                  </CollapsibleWrapper>
+                </>
+              )}
             </>
           );
         },
