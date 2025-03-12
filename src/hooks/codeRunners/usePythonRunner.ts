@@ -35,25 +35,36 @@ const lineDelimiter = "<line>";
 const replaceToCsvWithEncodedString = (codeStr: string) => {
   return codeStr
     .replace(
-      // Matches either a literal string or a variable as the file name argument:
-      /(\w+)\.to_csv\(\s*(?:(['"])([^'"]+)\2|(\w+))\s*,?(.*?)\)/g,
+      // Matches either a literal string or a variable as the file name argument,
+      // and captures any additional arguments until the closing parenthesis.
+      /(\w+)\.to_csv\(\s*(?:(['"])([^'"]+)\2|(\w+))\s*(?:,([^)]*))?\)/g,
       (match, dataVar, quote, fileNameLiteral, fileNameVar, args) => {
         let fileName;
+        let fileNameQuoted; // flag whether to quote the file name in output
         if (fileNameLiteral) {
           fileName = fileNameLiteral;
+          fileNameQuoted = true;
         } else if (fileNameVar) {
-          // Try to find an assignment for the variable in the code
+          // Try to find an assignment for the variable in the code.
           const assignRegex = new RegExp(
             `${fileNameVar}\\s*=\\s*(['"])([^'"]+)\\1`
           );
           const assignMatch = codeStr.match(assignRegex);
-          fileName = assignMatch ? assignMatch[2] : fileNameVar;
+          if (assignMatch) {
+            fileName = assignMatch[2];
+            fileNameQuoted = true;
+          } else {
+            // If no assignment is found, pass the undefined variable as-is.
+            fileName = fileNameVar;
+            fileNameQuoted = false;
+          }
         } else {
           fileName = "output.csv";
+          fileNameQuoted = true;
         }
-        const cleanedArgs = args.trim().replace(/^,/, "");
+        const cleanedArgs = args ? args.trim().replace(/^,/, "") : "";
         return `
-file_name = '${fileName}'
+file_name = ${fileNameQuoted ? `'${fileName}'` : fileName}
 csv_data = ${dataVar}.to_csv(${cleanedArgs}).replace('\\n', '${lineDelimiter}')
 single_line = f'${pythonCSVPrefix}{file_name}${nameDelimiter}{csv_data}'
 print(single_line)
