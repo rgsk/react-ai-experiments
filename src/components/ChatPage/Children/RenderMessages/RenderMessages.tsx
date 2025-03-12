@@ -171,7 +171,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   questionsCodeStartIndex + `<questions>`.length,
                   questionsCodeEndIndex
                 )
-                .split("<sep />");
+                .split("<sep>");
             }
           }
           console.log({ questionSuggestions, questionSuggestionsLoading });
