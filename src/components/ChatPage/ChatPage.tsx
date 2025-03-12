@@ -806,6 +806,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             >
               <PanelLeft />
             </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                openNewChat();
+              }}
+            >
+              <NewChatIcon />
+            </Button>
             <Link to="/">
               <Button variant="outline" size="icon">
                 <Home />
