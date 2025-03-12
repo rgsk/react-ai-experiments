@@ -5,6 +5,7 @@ import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
+import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { FileEntry, HandleSend } from "../../ChatPage";
@@ -171,7 +172,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   questionsCodeStartIndex + `<questions>`.length,
                   questionsCodeEndIndex
                 )
-                .split("<sep>");
+                .split(separator);
             }
           }
           console.log({ questionSuggestions, questionSuggestionsLoading });

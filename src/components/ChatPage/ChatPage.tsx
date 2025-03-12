@@ -632,18 +632,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       conversation so far, save that statement in the memory using the tool
       saveUserInfoToMemory
     `;
-    const personaInstruction =
-      persona &&
-      html`
-        you are persona with following personality
-        <persona>${JSON.stringify(persona)}</persona>
-        you have to respond on persona's behalf additionally since, user is
-        interacting with this persona, retrieveRelevantDocs tool becomes
-        important use this collectionName - ${persona.collectionName} so make
-        sure to pass user query to that tool and fetch the relevant docs and
-        respond accordingly persona has data from various sources like websites,
-        pdfs, and it needs to answer based on that information
-      `;
+
     const currentDate = format(new Date(), "EEEE, MMMM do, yyyy HH:mm:ss");
     const generalInstruction = html`
       <div>
@@ -662,34 +651,50 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       </div>
     `;
 
-    const systemInstruction = [
-      userInstruction,
-      memoryInstruction,
-      personaInstruction,
-      generalInstruction,
-    ]
-      .filter(Boolean)
-      .join("\n");
-    const systemMessage: Message = {
-      id: v4(),
-      status: "completed",
-      role: "system",
-      content: systemInstruction,
-    };
+    const initialInstructions: string[] = [];
+    initialInstructions.push(userInstruction);
+    initialInstructions.push(memoryInstruction);
+    initialInstructions.push(generalInstruction);
+    if (persona) {
+      const personaInstruction = html`
+        you are persona with following personality
+        <persona>${JSON.stringify(persona)}</persona>
+        you have to respond on persona's behalf additionally since, user is
+        interacting with this persona, retrieveRelevantDocs tool becomes
+        important use this collectionName - ${persona.collectionName} so make
+        sure to pass user query to that tool and fetch the relevant docs and
+        respond accordingly persona has data from various sources like websites,
+        pdfs, and it needs to answer based on that information
+      `;
+      initialInstructions.push(personaInstruction);
+    }
 
-    const additionalInstructions: Message[] = [];
-    if (preferences.relatedQuestion.enabled) {
-      const questionMessage: Message = {
+    const initialMessages: Message[] = initialInstructions.map((content) => {
+      return {
         id: v4(),
         status: "completed",
-        content: generateQuestionInstruction(
-          preferences.relatedQuestion.count || 3
-        ),
-        role: "user",
+        role: "system",
+        content: content,
       };
-      additionalInstructions.push(questionMessage);
+    });
+
+    const additionalInstructions: string[] = [];
+    if (preferences.relatedQuestion.enabled) {
+      additionalInstructions.push(
+        generateQuestionInstruction(preferences.relatedQuestion.count || 3)
+      );
     }
-    return [systemMessage, ...(messages ?? []), ...additionalInstructions];
+    const additionalMessages: Message[] = additionalInstructions.map(
+      (content) => {
+        return {
+          id: v4(),
+          status: "completed",
+          role: "system",
+          content: content,
+        };
+      }
+    );
+    return [...initialMessages, ...(messages ?? []), ...additionalMessages];
   };
   const getCurrentMessagesRef = useRef(getCurrentMessages);
   getCurrentMessagesRef.current = getCurrentMessages;
