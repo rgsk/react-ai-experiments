@@ -13,6 +13,7 @@ import {
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
+import { pythonImagePrefix } from "~/hooks/codeRunners/usePythonRunner";
 import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
 import useGlobalContext from "~/hooks/useGlobalContext";
@@ -144,7 +145,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         const lines = output.split("\n") as string[];
         const newLines = await Promise.all(
           lines.map(async (line) => {
-            if (line.startsWith("data:image/png;base64,")) {
+            if (line.startsWith(pythonImagePrefix)) {
               const file = dataURLtoFile(line, "image.png");
               const result = await experimentsService.uploadFileToS3(file);
               return result;

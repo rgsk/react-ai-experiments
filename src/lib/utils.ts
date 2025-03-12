@@ -125,3 +125,18 @@ export const safeSleep = (ms: number, allowInNonDevelopment = false) => {
   }
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+export function getCsvFile({
+  csvContent,
+  filename,
+}: {
+  csvContent: string;
+  filename: string;
+}) {
+  // Convert CSV string to a Blob
+  const blob = new Blob([csvContent], { type: "text/csv" });
+
+  // Convert Blob to File (File API is available in the browser)
+  const file = new File([blob], filename, { type: "text/csv" });
+  return file;
+}

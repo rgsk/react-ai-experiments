@@ -15,6 +15,11 @@ import useCodeRunners, {
   CodeRunnerSupportedLanguages,
   codeRunnerSupportedLanguages,
 } from "~/hooks/codeRunners/useCodeRunners";
+import {
+  getCSVContents,
+  pythonCSVPrefix,
+  pythonImagePrefix,
+} from "~/hooks/codeRunners/usePythonRunner";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
@@ -313,8 +318,12 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           <>
             {executeCodeDetails.output.split("\n").map((line, index) => {
               if (!line) return;
-              if (line.startsWith("data:image/png;base64,")) {
+              if (line.startsWith(pythonImagePrefix)) {
                 return <img key={index} src={line} />;
+              } else if (line.startsWith(pythonCSVPrefix)) {
+                return (
+                  <pre>{JSON.stringify(getCSVContents(line), null, 4)}</pre>
+                );
               } else {
                 return (
                   <SyntaxHighlighter

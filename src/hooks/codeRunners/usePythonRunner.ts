@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { loadPyodideSingleton } from "./singletons/loadPyodideSingleton";
-
+export const pythonImagePrefix = "data:image/png;base64,";
+export const pythonCSVPrefix = "data:text/csv;";
 const renderImageCode = `
 import io
 import base64
@@ -12,7 +13,7 @@ buffer.seek(0)
 
 # Encode the image in base64
 img_base64 = base64.b64encode(buffer.read()).decode('utf-8')
-img_src = f"data:image/png;base64,{img_base64}"
+img_src = f"${pythonImagePrefix}{img_base64}"
 print(img_src)
 `;
 
@@ -27,6 +28,38 @@ function replacePltShowWithRenderImageCode(codeStr: string): string {
   });
   return replacedLines.join("\n");
 }
+
+const nameDelimiter = "<name>";
+const lineDelimiter = "<line>";
+
+const replaceToCsvWithEncodedString = (codeStr: string) => {
+  return codeStr.replace(
+    /data\.to_csv\(["']([^"']+)["'](.*)\)/g,
+    (match, fileName, args) => {
+      const cleanedArgs = args.trim().replace(/^,/, ""); // Remove leading comma and space
+      return `
+file_name = '${fileName}'
+csv_data = data.to_csv(${cleanedArgs}).replace('\\n', '${lineDelimiter}')
+single_line = f'${pythonCSVPrefix}{file_name}${nameDelimiter}{csv_data}'
+print(single_line)
+      `.trim();
+    }
+  );
+};
+
+export function getCSVContents(line: string) {
+  if (!line.startsWith(pythonCSVPrefix)) {
+    throw new Error(`doesn't starts with ${pythonCSVPrefix}`);
+  }
+  const content = line.slice(pythonCSVPrefix.length);
+  const [fileName, rest] = content.split(nameDelimiter);
+  const csvContent = rest.split(lineDelimiter).join("\n");
+  return {
+    fileName,
+    csvContent,
+  };
+}
+
 function wrapLastLineInPrint(codeStr: string): string {
   const lines = codeStr.split("\n");
   if (lines.length === 0) return codeStr;
@@ -101,7 +134,11 @@ const usePythonRunner = () => {
       }
       const result = await pyodide.runPythonAsync(
         codeWrapper(
-          wrapLastLineInPrint(replacePltShowWithRenderImageCode(code))
+          wrapLastLineInPrint(
+            replaceToCsvWithEncodedString(
+              replacePltShowWithRenderImageCode(code)
+            )
+          )
         )
       );
       return result;
