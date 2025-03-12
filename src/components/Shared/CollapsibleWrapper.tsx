@@ -14,7 +14,7 @@ interface CollapsibleWrapperProps {
   level?: number;
   loading?: boolean;
   type?: "left" | "right";
-  scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
+  scrollContainerRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   heading,
@@ -42,7 +42,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
                 const top = collapsible.getBoundingClientRect().top;
                 if (top < 32) {
                   collapsible.scrollIntoView();
-                  const scrollContainer = scrollContainerRef.current;
+                  const scrollContainer = scrollContainerRef?.current;
                   if (scrollContainer) {
                     if (level === 1) {
                       scrollContainer.scrollBy(0, 16);

@@ -2,6 +2,8 @@ import { memo } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
+import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
+import CsvRenderer from "~/components/Shared/CsvRenderer";
 import { cn } from "~/lib/utils";
 import SyntaxHighlighter from "./SyntaxHighlighter";
 
@@ -21,18 +23,35 @@ export function MarkdownRenderer({
       className="messageContent"
       components={{
         a: ({ className, children, ...props }: any) => {
+          const href = props.href as string;
+          const hasTargetBlank = !href.startsWith(
+            "https://pubbuckrah.s3.us-east-1.amazonaws.com"
+          );
+          const filename = href.split("/").pop();
           return (
-            <a
-              {...props}
-              className={cn(
-                className,
-                "text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300"
+            <>
+              <a
+                {...props}
+                className={cn(
+                  className,
+                  "text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-800 dark:hover:text-blue-300"
+                )}
+                target={hasTargetBlank ? "_blank" : "_self"}
+                rel="noopener noreferrer"
+              >
+                {children}
+              </a>
+              {href.endsWith(".csv") && (
+                <>
+                  <div className="h-4"></div>
+                  <CollapsibleWrapper heading={`${filename}`} type="left">
+                    <div className="pl-4">
+                      <CsvRenderer url={href} />
+                    </div>
+                  </CollapsibleWrapper>
+                </>
               )}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {children}
-            </a>
+            </>
           );
         },
         code({ node, className, children, ...props }: any) {
