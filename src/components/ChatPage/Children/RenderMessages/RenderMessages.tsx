@@ -155,6 +155,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             </div>
           );
         } else if (message.role === "assistant") {
+          let hasQuestionSuggestions = false;
           let questionSuggestions: string[] = [];
           let questionSuggestionsLoading = false;
           const text = message.content as string;
@@ -162,6 +163,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             const questionsCodeStartIndex = text.indexOf(`<questions>`);
             const questionsCodeEndIndex = text.indexOf(`</questions>`);
             if (questionsCodeStartIndex != -1) {
+              hasQuestionSuggestions = true;
               questionSuggestionsLoading = true;
             }
             if (questionsCodeEndIndex !== -1) {
@@ -209,34 +211,36 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   </div>
                 )}
               </div>
-              <div className="p-4">
-                {questionSuggestionsLoading && <LoadingSpinner size={20} />}
-                {questionSuggestions.length > 0 && (
-                  <>
-                    <div>
-                      <p>Related Questions:</p>
-                    </div>
-                    <div className="h-2"></div>
-                    <div className="flex flex-col">
-                      {questionSuggestions.map((qs, i) => (
-                        <button
-                          key={qs + i}
-                          onClick={() => {
-                            handleSend({ text: qs });
-                          }}
-                        >
-                          {i === 0 && <Separator />}
-                          <div className="py-2 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                            <span>{qs}</span>
-                            <ArrowRight className="h-5 w-5" />
-                          </div>
-                          <Separator />
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+              {hasQuestionSuggestions && (
+                <div className="p-4">
+                  {questionSuggestionsLoading && <LoadingSpinner size={20} />}
+                  {questionSuggestions.length > 0 && (
+                    <>
+                      <div>
+                        <p>Related Questions:</p>
+                      </div>
+                      <div className="h-2"></div>
+                      <div className="flex flex-col">
+                        {questionSuggestions.map((qs, i) => (
+                          <button
+                            key={qs + i}
+                            onClick={() => {
+                              handleSend({ text: qs });
+                            }}
+                          >
+                            {i === 0 && <Separator />}
+                            <div className="py-2 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                              <span>{qs}</span>
+                              <ArrowRight className="h-5 w-5" />
+                            </div>
+                            <Separator />
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           );
         } else if (message.role === "user") {

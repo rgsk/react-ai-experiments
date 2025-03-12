@@ -693,7 +693,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         return {
           id: v4(),
           status: "completed",
-          role: "system",
+          role: "user",
           content: content,
         };
       }
