@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { produce } from "immer";
 import { ArrowDown, Home } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -619,12 +620,24 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         respond accordingly persona has data from various sources like websites,
         pdfs, and it needs to answer based on that information
       `;
+    const currentDate = format(new Date(), "EEEE, MMMM do, yyyy HH:mm:ss");
     const generalInstruction = html`
-      <span>
-        use getUrlContent only sparingly, don't fetch the file contents, if you
-        already have them in tool_call output
-      </span>
+      <div>
+        <div>
+          use getUrlContent only sparingly, don't fetch the file contents, if
+          you already have them in tool_call output
+        </div>
+        <div>
+          <span>Current Date: ${currentDate}</span>
+          <span
+            >This is the time and date in user's timezone, when the query is
+            made to you, use this date to ensure you use the latest information
+            from googleSearch tool
+          </span>
+        </div>
+      </div>
     `;
+
     const systemInstruction = [
       userInstruction,
       memoryInstruction,
