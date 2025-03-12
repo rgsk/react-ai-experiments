@@ -683,6 +683,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       additionalInstructions.push(
         generateQuestionInstruction(preferences.relatedQuestion.count || 3)
       );
+    } else {
+      additionalInstructions.push(
+        "user has disabled generateQuestionInstruction, no need to generate anymore"
+      );
     }
     const additionalMessages: Message[] = additionalInstructions.map(
       (content) => {

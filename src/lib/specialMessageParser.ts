@@ -2,6 +2,7 @@ import { html } from "./utils";
 export const separator = "<sep>";
 export const generateQuestionInstruction = (numRelatedQuestions: number) => {
   return html`
+    generateQuestionInstruction:
     <span>
       upon successful completion of response generate exactly
       ${numRelatedQuestions} related questions that user might be wanting to ask
