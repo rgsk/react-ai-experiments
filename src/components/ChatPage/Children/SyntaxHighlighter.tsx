@@ -170,8 +170,15 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 ) : (
                   <>
                     {codeExecutionAllowed && (
-                      <CodeButton onClick={executeCode}>
-                        <Play size={12} />
+                      <CodeButton
+                        disabled={codeRunnersLoading}
+                        onClick={executeCode}
+                      >
+                        {codeRunnersLoading ? (
+                          <LoadingSpinner size={12} />
+                        ) : (
+                          <Play size={12} />
+                        )}
                         <span>Run</span>
                       </CodeButton>
                     )}
@@ -427,10 +434,16 @@ const RenderOutput: React.FC<RenderOutputProps> = ({ code }) => {
 interface CodeButtonProps {
   onClick?: () => void;
   children: any;
+  disabled?: boolean;
 }
-const CodeButton: React.FC<CodeButtonProps> = ({ onClick, children }) => {
+const CodeButton: React.FC<CodeButtonProps> = ({
+  onClick,
+  children,
+  disabled,
+}) => {
   return (
     <button
+      disabled={disabled}
       className="text-white text-xs border border-white rounded-md px-2 flex items-center gap-2 py-1"
       onClick={onClick}
     >
