@@ -317,27 +317,66 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         )}
         {executeCodeDetails.output && (
           <>
-            {executeCodeDetails.output.split("\n").map((line, index) => {
-              if (!line) return;
-              if (line.startsWith(pythonImagePrefix)) {
-                return <img key={index} src={line} />;
-              } else if (line.startsWith(pythonCSVPrefix)) {
-                const { fileName, csvContent } = getCSVContents(line);
-                const file = getCsvFile({ filename: fileName, csvContent });
-                return <CsvRenderer file={file} />;
-              } else {
-                return (
-                  <SyntaxHighlighter
-                    key={index}
-                    code={line}
-                    language={"output"}
-                    codeProps={codeProps}
-                    isCodeOutput={true}
-                    loading={true} // temporarily so that we show prism for output
-                  />
+            {(() => {
+              const outputLines = executeCodeDetails.output.split("\n");
+              let normalTextBuffer: string[] = [];
+
+              return outputLines
+                .map((line, index) => {
+                  if (!line) return null;
+
+                  if (line.startsWith(pythonImagePrefix)) {
+                    // Flush the normal text buffer before rendering an image
+                    const syntaxHighlighter =
+                      normalTextBuffer.length > 0 ? (
+                        <RenderOutput
+                          key={`code-${index}`}
+                          code={normalTextBuffer.join("\n")}
+                        />
+                      ) : null;
+                    normalTextBuffer = [];
+
+                    return (
+                      <>
+                        {syntaxHighlighter}
+                        <img key={`img-${index}`} src={line} />
+                      </>
+                    );
+                  } else if (line.startsWith(pythonCSVPrefix)) {
+                    // Flush the normal text buffer before rendering CSV
+                    const syntaxHighlighter =
+                      normalTextBuffer.length > 0 ? (
+                        <RenderOutput
+                          key={`code-${index}`}
+                          code={normalTextBuffer.join("\n")}
+                        />
+                      ) : null;
+                    normalTextBuffer = [];
+
+                    const { fileName, csvContent } = getCSVContents(line);
+                    const file = getCsvFile({ filename: fileName, csvContent });
+                    return (
+                      <>
+                        {syntaxHighlighter}
+                        <CsvRenderer key={`csv-${index}`} file={file} />
+                      </>
+                    );
+                  } else {
+                    // Collect normal text lines
+                    normalTextBuffer.push(line);
+                    return null;
+                  }
+                })
+                .concat(
+                  // Render remaining normal text buffer at the end
+                  normalTextBuffer.length > 0 ? (
+                    <RenderOutput
+                      key="final-code"
+                      code={normalTextBuffer.join("\n")}
+                    />
+                  ) : null
                 );
-              }
-            })}
+            })()}
           </>
         )}
 
@@ -352,6 +391,22 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   );
 };
 export default SyntaxHighlighter;
+
+interface RenderOutputProps {
+  code: string;
+}
+const RenderOutput: React.FC<RenderOutputProps> = ({ code }) => {
+  return (
+    <SyntaxHighlighter
+      key="final-code"
+      code={code}
+      language={"output"}
+      codeProps={{}}
+      isCodeOutput={true}
+      loading={true}
+    />
+  );
+};
 
 interface CodeButtonProps {
   onClick?: () => void;
