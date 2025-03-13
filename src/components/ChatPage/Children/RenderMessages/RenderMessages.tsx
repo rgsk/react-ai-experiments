@@ -1,8 +1,10 @@
-import { ArrowCircleDown2, Copy } from "iconsax-react";
-import { ArrowRight, Check } from "lucide-react";
+import { Copy } from "iconsax-react";
+import { ArrowRight, Check, Download } from "lucide-react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
+import PDFReader from "~/components/Shared/PDFReader/PDFReader";
+import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { separator } from "~/lib/specialMessageParser";
@@ -59,9 +61,27 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     href={fileEntry.s3Url}
                     download={fileEntry.fileMetadata!.name}
                   >
-                    <ArrowCircleDown2 size={20} className="stroke-foreground" />
+                    <Button size="icon" variant="outline">
+                      <Download size={30} />
+                    </Button>
                   </a>
                 </FilePreview>
+              </div>
+              <div className="h-4"></div>
+              <div>
+                <CollapsibleWrapper
+                  scrollContainerRef={scrollContainerRef}
+                  heading={`View - ${fileEntry.fileMetadata!.name}`}
+                  type="right"
+                  loading={false}
+                >
+                  <div className="pr-4 w-[784px]">
+                    <PDFReader
+                      pdfUrl={fileEntry.s3Url!}
+                      fileName={fileEntry.fileMetadata!.name}
+                    />
+                  </div>
+                </CollapsibleWrapper>
               </div>
               <div className="h-4"></div>
               <div className="flex justify-end">

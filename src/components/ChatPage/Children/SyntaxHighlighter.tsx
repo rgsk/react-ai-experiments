@@ -328,9 +328,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           <>
             {language === "latex" ? (
               <>
-                <div className="border border-muted-foreground rounded-lg overflow-hidden">
-                  <PDFReader pdfUrl={executeCodeDetails.output} />
-                </div>
+                <PDFReader pdfUrl={executeCodeDetails.output} />
               </>
             ) : (
               <>

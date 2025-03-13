@@ -15,8 +15,9 @@ const sampleLink3 =
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 interface PDFReaderProps {
   pdfUrl: string;
+  fileName?: string;
 }
-const PDFReader: React.FC<PDFReaderProps> = ({ pdfUrl }) => {
+const PDFReader: React.FC<PDFReaderProps> = ({ pdfUrl, fileName }) => {
   const [numPages, setNumPages] = useState<number>();
   const loadingElement = () => (
     <div className="h-[50vh] flex justify-center items-center">
@@ -27,13 +28,16 @@ const PDFReader: React.FC<PDFReaderProps> = ({ pdfUrl }) => {
   const [divRef, divBounds] = useMeasure();
   const [pdfProgressLoaded, setProgressPdfLoaded] = useState(0);
   const [pdfProgressTotal, setProgressTotal] = useState(0);
-  let fileName = pdfUrl?.split("/").pop();
-  if (fileName && !fileName.endsWith(".pdf")) {
-    fileName = fileName + ".pdf";
+  if (!fileName) {
+    fileName = pdfUrl?.split("/").pop();
+    if (!fileName?.endsWith(".pdf")) {
+      fileName = fileName + ".pdf";
+    }
   }
+
   return (
-    <div>
-      <div className="flex justify-between items-center px-4 bg-gray-500">
+    <div className="border border-muted-foreground rounded-lg overflow-hidden">
+      <div className="flex justify-between items-center px-4 py-2 bg-gray-500">
         <p className="!text-white">{fileName}</p>
         <div className="flex gap-2 items-center">
           <Button
