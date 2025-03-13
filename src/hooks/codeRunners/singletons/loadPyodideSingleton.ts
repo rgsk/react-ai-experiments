@@ -1,28 +1,39 @@
 let worker: Worker | null = null;
+let workerLoadedPromise: Promise<void> | null = null;
 
 export function loadPyodideWorker(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (!worker) {
-      worker = new Worker(new URL("./pyodideWorker.js", import.meta.url));
+  if (workerLoadedPromise) {
+    return workerLoadedPromise;
+  }
 
-      worker.onmessage = (event) => {
+  workerLoadedPromise = new Promise((resolve, reject) => {
+    worker = new Worker(new URL("./pyodideWorker.js", import.meta.url));
+
+    worker.addEventListener(
+      "message",
+      (event) => {
         if (
           event.data.type === "loaded" &&
           event.data.namespace === "pyodideWorker"
         ) {
           resolve();
         }
-      };
+      },
+      { once: true }
+    );
 
-      worker.onerror = (error) => {
+    worker.addEventListener(
+      "error",
+      (error) => {
         reject(error);
-      };
+      },
+      { once: true }
+    );
 
-      worker.postMessage({ type: "load", namespace: "pyodideWorker" });
-    } else {
-      resolve();
-    }
+    worker.postMessage({ type: "load", namespace: "pyodideWorker" });
   });
+
+  return workerLoadedPromise;
 }
 
 export function runPython(code: string): Promise<any> {
@@ -32,19 +43,19 @@ export function runPython(code: string): Promise<any> {
       return;
     }
 
-    worker.onmessage = (event) => {
-      if (
-        event.data.type === "result" &&
-        event.data.namespace === "pyodideWorker"
-      ) {
-        resolve(event.data.result);
-      } else if (
-        event.data.type === "error" &&
-        event.data.namespace === "pyodideWorker"
-      ) {
-        reject(event.data.errorMessage);
-      }
-    };
+    worker.addEventListener(
+      "message",
+      (event) => {
+        if (event.data.namespace !== "pyodideWorker") return;
+
+        if (event.data.type === "result") {
+          resolve(event.data.result);
+        } else if (event.data.type === "error") {
+          reject(event.data.errorMessage);
+        }
+      },
+      { once: true }
+    );
 
     worker.postMessage({ type: "run", namespace: "pyodideWorker", code });
   });
