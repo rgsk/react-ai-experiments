@@ -27,8 +27,10 @@ const PDFReader: React.FC<PDFReaderProps> = ({ pdfUrl }) => {
   const [divRef, divBounds] = useMeasure();
   const [pdfProgressLoaded, setProgressPdfLoaded] = useState(0);
   const [pdfProgressTotal, setProgressTotal] = useState(0);
-  const fileName = pdfUrl?.split("/").pop();
-
+  let fileName = pdfUrl?.split("/").pop();
+  if (fileName && !fileName.endsWith(".pdf")) {
+    fileName = fileName + ".pdf";
+  }
   return (
     <div>
       <div className="flex justify-between items-center px-4 bg-gray-500">
