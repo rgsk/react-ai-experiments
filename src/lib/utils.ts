@@ -1,3 +1,4 @@
+import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import environmentVars from "./environmentVars";
@@ -140,3 +141,13 @@ export function getCsvFile({
   const file = new File([blob], filename, { type: "text/csv" });
   return file;
 }
+
+// New function to fetch CSV content
+export const fetchCSV = async (url: string): Promise<string> => {
+  try {
+    const response = await axios.get(url, { responseType: "text" });
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to fetch CSV content: ${error}`);
+  }
+};

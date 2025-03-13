@@ -32,6 +32,10 @@ const clientTools: Tool[] = [
                 data.head() # data will be saved to head.csv
               </span>
               <span>
+                when you have the file url, use code like below to fetch it's contents
+                pd.read_csv('https://pubbuckrah.s3.us-east-1.amazonaws.com/91bff1cc-6a88-4c4f-9af0-097f0428d8cc/sample_linear_regression.csv')
+              </span>
+              <span>
                 # for generating graph use matplotlib like below
                 import matplotlib.pyplot as plt
                 x = [1, 2, 3, 4, 5]

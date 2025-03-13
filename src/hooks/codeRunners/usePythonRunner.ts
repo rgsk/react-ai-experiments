@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { fetchCSV } from "~/lib/utils";
 import {
   loadPyodideWorker,
   runPython,
@@ -83,6 +84,35 @@ single_line = f'${pythonCSVPrefix}{file_name}${nameDelimiter}{csv_data}'
 print(single_line)
       `.trim()
     );
+};
+
+const replaceUrlWithCsvString = async (codeStr: string) => {
+  const regex = /(.*?)=\s*pd\.read_csv\(\s*(['"])([^'"]+)\2\s*\)(.*)/g;
+
+  // Extract all matches and process them asynchronously
+  const matches = [...codeStr.matchAll(regex)];
+
+  // Replace matches asynchronously
+  const replacements = await Promise.all(
+    matches.map(async (match) => {
+      const [fullMatch, leftSide, quote, url, rightSide] = match;
+      const csvContent = await fetchCSV(url);
+      console.log({ csvContent });
+      return `
+from io import StringIO
+csv_content = """${csvContent}"""
+csv_data = StringIO(csv_content)
+${leftSide}= pd.read_csv(csv_data)${rightSide}`.trim();
+    })
+  );
+
+  // Replace the matches in the original string
+  let modifiedCode = codeStr;
+  matches.forEach((match, i) => {
+    modifiedCode = modifiedCode.replace(match[0], replacements[i]);
+  });
+
+  return modifiedCode;
 };
 
 export function getCSVContents(line: string) {
@@ -174,7 +204,9 @@ const usePythonRunner = () => {
           codeWrapper(
             wrapLastLineInPrint(
               replaceToCsvWithEncodedString(
-                replacePltShowWithRenderImageCode(code)
+                await replaceUrlWithCsvString(
+                  replacePltShowWithRenderImageCode(code)
+                )
               )
             )
           )
