@@ -231,6 +231,15 @@ const experimentsService = {
       },
     };
   },
+  executeLatex: async ({ code }: { code: string }) => {
+    const result = await axiosExperimentsInstance.post(
+      `/experiments/execute-latex`,
+      { code },
+      { responseType: "blob" }
+    );
+    const blobUrl = URL.createObjectURL(result.data);
+    return { pdfUrl: blobUrl };
+  },
   uploadFileToS3: async (
     file: File,
     onUploadProgress?: (progress: number) => void

@@ -1,6 +1,9 @@
+import { Download, ZoomIn, ZoomOut } from "lucide-react";
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import useMeasure from "react-use-measure";
+import { Button } from "~/components/ui/button";
+import { Separator } from "~/components/ui/separator";
 import LoadingProgress from "../LoadingProgress";
 import { LoadingSpinner } from "../LoadingSpinner";
 const sampleS3Link =
@@ -20,45 +23,85 @@ const PDFReader: React.FC<PDFReaderProps> = ({ pdfUrl }) => {
       <LoadingSpinner />
     </div>
   );
+  const [scale, setScale] = useState(1);
   const [divRef, divBounds] = useMeasure();
   const [pdfProgressLoaded, setProgressPdfLoaded] = useState(0);
   const [pdfProgressTotal, setProgressTotal] = useState(0);
+  const fileName = pdfUrl?.split("/").pop();
 
   return (
-    <div ref={divRef}>
-      <Document
-        file={pdfUrl}
-        onLoadSuccess={({ numPages }) => {
-          setNumPages(numPages);
-        }}
-        loading={
-          <div className="h-[50vh] flex justify-center items-center">
-            {!!pdfProgressTotal && (
-              <LoadingProgress
-                percentage={(pdfProgressLoaded / pdfProgressTotal) * 100}
-              />
-            )}
-          </div>
-        }
-        onLoadProgress={({ loaded, total }) => {
-          setProgressPdfLoaded(loaded);
-          setProgressTotal(total);
-        }}
-      >
-        {Array.from({ length: numPages ?? 0 }, (_, index) => {
-          const page = index + 1;
-          return (
-            <Page
-              width={divBounds.width}
-              key={page}
-              pageNumber={page}
-              renderAnnotationLayer={false}
-              renderTextLayer={false}
-              loading={loadingElement}
-            />
-          );
-        })}
-      </Document>
+    <div>
+      <div className="flex justify-between items-center px-4 bg-gray-500">
+        <p className="!text-white">{fileName}</p>
+        <div className="flex gap-2 items-center">
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => {
+              setScale((prev) => prev - 0.1);
+            }}
+          >
+            <ZoomOut size={30} />
+          </Button>
+          <p className="!text-white">{(scale * 100).toFixed(0)}%</p>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => {
+              setScale((prev) => prev + 0.1);
+            }}
+          >
+            <ZoomIn size={30} />
+          </Button>
+          <a href={pdfUrl} download={fileName}>
+            <Button size="icon" variant="outline">
+              <Download size={30} />
+            </Button>
+          </a>
+        </div>
+      </div>
+      <div ref={divRef}>
+        <Document
+          file={pdfUrl}
+          onLoadSuccess={({ numPages }) => {
+            setNumPages(numPages);
+          }}
+          loading={
+            <div className="h-[50vh] flex justify-center items-center">
+              {!!pdfProgressTotal && (
+                <LoadingProgress
+                  percentage={(pdfProgressLoaded / pdfProgressTotal) * 100}
+                />
+              )}
+            </div>
+          }
+          onLoadProgress={({ loaded, total }) => {
+            setProgressPdfLoaded(loaded);
+            setProgressTotal(total);
+          }}
+        >
+          {Array.from({ length: numPages ?? 0 }, (_, index) => {
+            const page = index + 1;
+            return (
+              <div key={page}>
+                <div className="flex justify-center">
+                  <Page
+                    width={divBounds.width}
+                    pageNumber={page}
+                    renderAnnotationLayer={false}
+                    renderTextLayer={false}
+                    loading={loadingElement}
+                    scale={scale}
+                  />
+                </div>
+                {page !== numPages && (
+                  <Separator className="h-[1px] bg-black" />
+                )}
+              </div>
+            );
+          })}
+        </Document>
+      </div>
     </div>
   );
 };

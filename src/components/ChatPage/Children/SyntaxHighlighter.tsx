@@ -11,6 +11,7 @@ import PreviewIcon from "~/components/Icons/PreviewIcon";
 import ActionButton from "~/components/Shared/ActionButton";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
+import PDFReader from "~/components/Shared/PDFReader/PDFReader";
 import { Button } from "~/components/ui/button";
 import useCodeRunners, {
   CodeRunnerSupportedLanguages,
@@ -26,6 +27,7 @@ import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { useWindowSize } from "~/hooks/useWindowSize";
 import { cn, getCsvFile } from "~/lib/utils";
+import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
 import JsxPreview from "./JsxPreview";
 import SingleGrid from "./SingleGrid";
@@ -65,12 +67,12 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
 
   const { currentExecuteCodeRef } = useGlobalContext();
   const codeExecutionAllowed = useMemo(
-    () => codeRunnerSupportedLanguages.includes(language as any),
+    () => [...codeRunnerSupportedLanguages, "latex"].includes(language as any),
     [language]
   );
   const executeCode = async () => {
     if (code) {
-      if (codeExecutionAllowed) {
+      if (codeRunnerSupportedLanguages.includes(language as any)) {
         setExecuteCodeDetails({ loading: true, output: "", error: "" });
         try {
           const output = await runCode({
@@ -85,6 +87,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             error: err.message,
           });
         }
+      } else if (language === "latex") {
+        setExecuteCodeDetails({ loading: true, output: "", error: "" });
+
+        const { pdfUrl } = await experimentsService.executeLatex({
+          code: code,
+        });
+        setExecuteCodeDetails({ loading: false, output: pdfUrl, error: "" });
       } else {
         alert(`${language} isn't supported for code execution`);
       }
@@ -317,62 +326,75 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         )}
         {executeCodeDetails.output && (
           <>
-            {(() => {
-              const outputLines = executeCodeDetails.output.split("\n");
-              let normalTextBuffer: string[] = [];
+            {language === "latex" ? (
+              <>
+                <div className="border border-muted-foreground rounded-lg overflow-hidden">
+                  <PDFReader pdfUrl={executeCodeDetails.output} />
+                </div>
+              </>
+            ) : (
+              <>
+                {(() => {
+                  const outputLines = executeCodeDetails.output.split("\n");
+                  let normalTextBuffer: string[] = [];
 
-              return outputLines
-                .map((line, index) => {
-                  if (!line) return null;
+                  return outputLines
+                    .map((line, index) => {
+                      if (!line) return null;
 
-                  if (line.startsWith(pythonImagePrefix)) {
-                    const syntaxHighlighter =
+                      if (line.startsWith(pythonImagePrefix)) {
+                        const syntaxHighlighter =
+                          normalTextBuffer.length > 0 ? (
+                            <RenderOutput
+                              key={`code-${index}`}
+                              code={normalTextBuffer.join("\n")}
+                            />
+                          ) : null;
+                        normalTextBuffer = [];
+
+                        return (
+                          <React.Fragment key={`fragment-${index}`}>
+                            {syntaxHighlighter}
+                            <img key={`img-${index}`} src={line} />
+                          </React.Fragment>
+                        );
+                      } else if (line.startsWith(pythonCSVPrefix)) {
+                        const syntaxHighlighter =
+                          normalTextBuffer.length > 0 ? (
+                            <RenderOutput
+                              key={`code-${index}`}
+                              code={normalTextBuffer.join("\n")}
+                            />
+                          ) : null;
+                        normalTextBuffer = [];
+
+                        const { fileName, csvContent } = getCSVContents(line);
+                        const file = getCsvFile({
+                          filename: fileName,
+                          csvContent,
+                        });
+                        return (
+                          <React.Fragment key={`fragment-${index}`}>
+                            {syntaxHighlighter}
+                            <CsvRenderer key={`csv-${index}`} file={file} />
+                          </React.Fragment>
+                        );
+                      } else {
+                        normalTextBuffer.push(line);
+                        return null;
+                      }
+                    })
+                    .concat(
                       normalTextBuffer.length > 0 ? (
                         <RenderOutput
-                          key={`code-${index}`}
+                          key="final-code"
                           code={normalTextBuffer.join("\n")}
                         />
-                      ) : null;
-                    normalTextBuffer = [];
-
-                    return (
-                      <React.Fragment key={`fragment-${index}`}>
-                        {syntaxHighlighter}
-                        <img key={`img-${index}`} src={line} />
-                      </React.Fragment>
+                      ) : null
                     );
-                  } else if (line.startsWith(pythonCSVPrefix)) {
-                    const syntaxHighlighter =
-                      normalTextBuffer.length > 0 ? (
-                        <RenderOutput
-                          key={`code-${index}`}
-                          code={normalTextBuffer.join("\n")}
-                        />
-                      ) : null;
-                    normalTextBuffer = [];
-
-                    const { fileName, csvContent } = getCSVContents(line);
-                    const file = getCsvFile({ filename: fileName, csvContent });
-                    return (
-                      <React.Fragment key={`fragment-${index}`}>
-                        {syntaxHighlighter}
-                        <CsvRenderer key={`csv-${index}`} file={file} />
-                      </React.Fragment>
-                    );
-                  } else {
-                    normalTextBuffer.push(line);
-                    return null;
-                  }
-                })
-                .concat(
-                  normalTextBuffer.length > 0 ? (
-                    <RenderOutput
-                      key="final-code"
-                      code={normalTextBuffer.join("\n")}
-                    />
-                  ) : null
-                );
-            })()}
+                })()}
+              </>
+            )}
           </>
         )}
 
