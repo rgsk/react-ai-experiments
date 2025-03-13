@@ -1,40 +1,51 @@
-// loadPyodideSingleton.ts
-let pyodidePromise: Promise<any> | null = null;
-const packages = ["numpy", "matplotlib", "scipy", "scikit-learn", "pandas"];
-export function loadPyodideSingleton(): Promise<any> {
-  if (pyodidePromise) {
-    return pyodidePromise;
-  }
+let worker: Worker | null = null;
 
-  pyodidePromise = new Promise((resolve, reject) => {
-    // Check if the script is already present in the DOM
-    if (!(window as any).loadPyodide) {
-      const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js";
-      script.onload = async () => {
-        try {
-          const pyodideModule = await (window as any).loadPyodide();
-          await pyodideModule.loadPackage(packages);
-          resolve(pyodideModule);
-        } catch (e) {
-          reject(e);
+export function loadPyodideWorker(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!worker) {
+      worker = new Worker(new URL("./pyodideWorker.js", import.meta.url));
+
+      worker.onmessage = (event) => {
+        if (
+          event.data.type === "loaded" &&
+          event.data.namespace === "pyodideWorker"
+        ) {
+          resolve();
         }
       };
-      script.onerror = (err) => {
-        reject(err);
+
+      worker.onerror = (error) => {
+        reject(error);
       };
-      document.body.appendChild(script);
+
+      worker.postMessage({ type: "load", namespace: "pyodideWorker" });
     } else {
-      // If the script is already loaded, use it directly.
-      (window as any)
-        .loadPyodide()
-        .then(async (pyodideModule: any) => {
-          await pyodideModule.loadPackage(packages);
-          resolve(pyodideModule);
-        })
-        .catch(reject);
+      resolve();
     }
   });
+}
 
-  return pyodidePromise;
+export function runPython(code: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (!worker) {
+      reject("Pyodide is not loaded yet.");
+      return;
+    }
+
+    worker.onmessage = (event) => {
+      if (
+        event.data.type === "result" &&
+        event.data.namespace === "pyodideWorker"
+      ) {
+        resolve(event.data.result);
+      } else if (
+        event.data.type === "error" &&
+        event.data.namespace === "pyodideWorker"
+      ) {
+        reject(event.data.errorMessage);
+      }
+    };
+
+    worker.postMessage({ type: "run", namespace: "pyodideWorker", code });
+  });
 }

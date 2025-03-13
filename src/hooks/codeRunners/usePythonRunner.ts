@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { loadPyodideSingleton } from "./singletons/loadPyodideSingleton";
+import {
+  loadPyodideWorker,
+  runPython,
+} from "./singletons/loadPyodideSingleton";
 export const pythonImagePrefix = "data:image/png;base64,";
 export const pythonCSVPrefix = "data:text/csv;";
+
 const renderImageCode = `
 import io
 import base64
@@ -132,6 +136,9 @@ function wrapLastLineInPrint(codeStr: string): string {
 
 const codeWrapper = (code: string) => {
   return `
+import matplotlib
+matplotlib.use("Agg")  # Set backend to avoid GUI-related errors
+
 import sys
 from io import StringIO
 
@@ -147,40 +154,40 @@ output.getvalue()
 };
 
 const usePythonRunner = () => {
-  const [pyodide, setPyodide] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only call the singleton function
-    loadPyodideSingleton()
-      .then((pyodideModule) => {
-        setPyodide(pyodideModule);
-      })
-      .catch((error) => {
-        console.error("Failed to load Pyodide:", error);
-      });
+    (async () => {
+      await loadPyodideWorker();
+      setLoading(false);
+    })();
   }, []);
 
   // Run the Python code
   const runCode = useCallback(
     async (code: string) => {
-      if (!pyodide) {
+      if (loading) {
         throw new Error("Pyodide is not loaded yet.");
       }
-      const result = await pyodide.runPythonAsync(
-        codeWrapper(
-          wrapLastLineInPrint(
-            replaceToCsvWithEncodedString(
-              replacePltShowWithRenderImageCode(code)
+      try {
+        const result = await runPython(
+          codeWrapper(
+            wrapLastLineInPrint(
+              replaceToCsvWithEncodedString(
+                replacePltShowWithRenderImageCode(code)
+              )
             )
           )
-        )
-      );
-      return result;
+        );
+        return result;
+      } catch (errorMessage: any) {
+        throw new Error(errorMessage);
+      }
     },
-    [pyodide]
+    [loading]
   );
   return {
-    loading: !pyodide,
+    loading: loading,
     runCode,
   };
 };
