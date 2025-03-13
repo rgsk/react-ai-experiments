@@ -1,7 +1,7 @@
 import Editor from "@monaco-editor/react";
 import { Copy } from "iconsax-react";
 import { Check, Play, RefreshCw, RotateCcw, X } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
@@ -326,7 +326,6 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                   if (!line) return null;
 
                   if (line.startsWith(pythonImagePrefix)) {
-                    // Flush the normal text buffer before rendering an image
                     const syntaxHighlighter =
                       normalTextBuffer.length > 0 ? (
                         <RenderOutput
@@ -337,13 +336,12 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                     normalTextBuffer = [];
 
                     return (
-                      <>
+                      <React.Fragment key={`fragment-${index}`}>
                         {syntaxHighlighter}
                         <img key={`img-${index}`} src={line} />
-                      </>
+                      </React.Fragment>
                     );
                   } else if (line.startsWith(pythonCSVPrefix)) {
-                    // Flush the normal text buffer before rendering CSV
                     const syntaxHighlighter =
                       normalTextBuffer.length > 0 ? (
                         <RenderOutput
@@ -356,19 +354,17 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                     const { fileName, csvContent } = getCSVContents(line);
                     const file = getCsvFile({ filename: fileName, csvContent });
                     return (
-                      <>
+                      <React.Fragment key={`fragment-${index}`}>
                         {syntaxHighlighter}
                         <CsvRenderer key={`csv-${index}`} file={file} />
-                      </>
+                      </React.Fragment>
                     );
                   } else {
-                    // Collect normal text lines
                     normalTextBuffer.push(line);
                     return null;
                   }
                 })
                 .concat(
-                  // Render remaining normal text buffer at the end
                   normalTextBuffer.length > 0 ? (
                     <RenderOutput
                       key="final-code"
