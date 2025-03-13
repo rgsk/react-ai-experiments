@@ -87,30 +87,38 @@ print(single_line)
 };
 
 const replaceUrlWithCsvString = async (codeStr: string) => {
-  const regex = /(.*?)=\s*pd\.read_csv\(\s*(['"])([^'"]+)\2\s*\)(.*)/g;
+  const regex = /(\w+)\s*=\s*pd\.read_csv\(\s*(\w+|['"]([^'"]+)['"])\s*\)/g;
 
-  // Extract all matches and process them asynchronously
+  let modifiedCode = codeStr;
+
+  // Process matches synchronously to extract URLs
   const matches = [...codeStr.matchAll(regex)];
+  for (const match of matches) {
+    const [fullMatch, leftSide, variable, directUrl] = match;
+    let url;
 
-  // Replace matches asynchronously
-  const replacements = await Promise.all(
-    matches.map(async (match) => {
-      const [fullMatch, leftSide, quote, url, rightSide] = match;
-      const csvContent = await fetchCSV(url);
-      console.log({ csvContent });
-      return `
+    if (directUrl) {
+      url = directUrl;
+    } else {
+      // Extract the value of the variable from the codeStr
+      const urlRegex = new RegExp(`\\b${variable}\\s*=\\s*['"]([^'"]+)['"]`);
+      const urlMatch = codeStr.match(urlRegex);
+      if (urlMatch) {
+        url = urlMatch[1];
+      } else {
+        continue; // Skip if URL variable is not found
+      }
+    }
+
+    const csvContent = await fetchCSV(url);
+    const replacement = `
 from io import StringIO
 csv_content = """${csvContent}"""
 csv_data = StringIO(csv_content)
-${leftSide}= pd.read_csv(csv_data)${rightSide}`.trim();
-    })
-  );
+${leftSide} = pd.read_csv(csv_data)`.trim();
 
-  // Replace the matches in the original string
-  let modifiedCode = codeStr;
-  matches.forEach((match, i) => {
-    modifiedCode = modifiedCode.replace(match[0], replacements[i]);
-  });
+    modifiedCode = modifiedCode.replace(fullMatch, replacement);
+  }
 
   return modifiedCode;
 };
