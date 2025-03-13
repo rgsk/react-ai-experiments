@@ -7,11 +7,14 @@ import { LoadingSpinner } from "./LoadingSpinner";
 interface CsvRendererProps {
   file?: File;
   url?: string;
+  fileName?: string;
 }
 
-const CsvRenderer = ({ file, url }: CsvRendererProps) => {
+const CsvRenderer = ({ file, url, fileName }: CsvRendererProps) => {
   const [data, setData] = useState<any[]>([]);
-  const fileName = file?.name || url?.split("/").pop() || "data.csv";
+  if (!fileName) {
+    fileName = file?.name || url?.split("/").pop() || "data.csv";
+  }
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (file) {

@@ -2,6 +2,7 @@ import { Copy } from "iconsax-react";
 import { ArrowRight, Check, Download } from "lucide-react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
+import CsvRenderer from "~/components/Shared/CsvRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import PDFReader from "~/components/Shared/PDFReader/PDFReader";
 import { Button } from "~/components/ui/button";
@@ -47,9 +48,10 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             message.content as string
           ) as {
             fileEntry: FileEntry;
-            content: string;
+            content: any;
             instruction: string;
           };
+          console.log({ content });
           return (
             <div key={key} className="w-full">
               <div className="flex justify-end">
@@ -76,16 +78,28 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   loading={false}
                 >
                   <div className="pr-4 w-[784px]">
-                    <PDFReader
-                      pdfUrl={fileEntry.s3Url!}
-                      fileName={fileEntry.fileMetadata!.name}
-                    />
+                    {fileEntry.s3Url!.endsWith(".pdf") ? (
+                      <PDFReader
+                        pdfUrl={fileEntry.s3Url!}
+                        fileName={fileEntry.fileMetadata!.name}
+                      />
+                    ) : fileEntry.s3Url!.endsWith(".csv") ? (
+                      <CsvRenderer
+                        url={fileEntry.s3Url!}
+                        fileName={fileEntry.fileMetadata!.name}
+                      />
+                    ) : (
+                      <p>
+                        Rendering the file {fileEntry.fileMetadata!.name} is not
+                        supported.
+                      </p>
+                    )}
                   </div>
                 </CollapsibleWrapper>
               </div>
               <div className="h-4"></div>
               <div className="flex justify-end">
-                <div className="max-w-[640px]">
+                <div className="w-[640px]">
                   <CollapsibleWrapper
                     scrollContainerRef={scrollContainerRef}
                     heading={`File Parsing Result - ${
@@ -95,7 +109,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     loading={message.status === "in_progress"}
                   >
                     <div className="pr-4">
-                      <p>{content}</p>
+                      {typeof content === "string" ? (
+                        <p className="whitespace-pre-wrap">{content}</p>
+                      ) : (
+                        <p className="whitespace-pre-wrap break-words w-[640px]">
+                          {JSON.stringify(content, null, 4)}
+                        </p>
+                      )}
                     </div>
                   </CollapsibleWrapper>
                 </div>
