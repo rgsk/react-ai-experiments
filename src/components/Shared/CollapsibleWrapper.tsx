@@ -15,6 +15,7 @@ interface CollapsibleWrapperProps {
   loading?: boolean;
   type?: "left" | "right";
   scrollContainerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  triggerClassName?: string;
 }
 const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   heading,
@@ -23,6 +24,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   level = 1,
   type = "left",
   scrollContainerRef,
+  triggerClassName,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const collapsibleRef = useRef<any>(null);
@@ -33,7 +35,8 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
           asChild
           className={cn(
             "sticky bg-background",
-            level === 1 ? "top-[-32px] z-50" : "top-[0px] z-40"
+            level === 1 ? "top-[-32px] z-50" : "top-[0px] z-40",
+            triggerClassName
           )}
           onClick={() => {
             if (isOpen) {

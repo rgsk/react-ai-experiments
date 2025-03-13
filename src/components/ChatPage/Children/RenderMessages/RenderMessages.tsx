@@ -317,6 +317,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 </div>
                 <MemoizedMarkdownRenderer
                   loading={message.status === "in_progress"}
+                  collapsibleWrapperTriggerClassname={
+                    "bg-gray-100 dark:bg-gray-800"
+                  }
                 >
                   {(message.content ?? "") as string}
                 </MemoizedMarkdownRenderer>

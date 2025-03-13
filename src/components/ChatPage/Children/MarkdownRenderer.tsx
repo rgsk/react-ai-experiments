@@ -11,11 +11,13 @@ import SyntaxHighlighter from "./SyntaxHighlighter";
 type MarkdownRendererProps = {
   children: string;
   loading: boolean;
+  collapsibleWrapperTriggerClassname?: string;
 };
 
 export function MarkdownRenderer({
   children: markdown,
   loading,
+  collapsibleWrapperTriggerClassname,
 }: MarkdownRendererProps) {
   return (
     <div className="messageContent">
@@ -45,7 +47,11 @@ export function MarkdownRenderer({
                 {href.endsWith(".csv") && (
                   <>
                     <div className="h-4"></div>
-                    <CollapsibleWrapper heading={`${filename}`} type="left">
+                    <CollapsibleWrapper
+                      heading={`${filename}`}
+                      type="left"
+                      triggerClassName={collapsibleWrapperTriggerClassname}
+                    >
                       <div className="pl-4">
                         <CsvRenderer url={href} />
                       </div>
@@ -55,7 +61,11 @@ export function MarkdownRenderer({
                 {href.endsWith(".png") && (
                   <>
                     <div className="h-4"></div>
-                    <CollapsibleWrapper heading={`${filename}`} type="left">
+                    <CollapsibleWrapper
+                      heading={`${filename}`}
+                      type="left"
+                      triggerClassName={collapsibleWrapperTriggerClassname}
+                    >
                       <div className="pl-4">
                         <img src={href} alt={filename} className="w-full" />
                       </div>
