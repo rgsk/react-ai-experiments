@@ -4,7 +4,13 @@ import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/useGlobalContext";
 import environmentVars from "~/lib/environmentVars";
-import { CreditDetails, Message, Tool, ToolCall } from "~/lib/typesJsonData";
+import {
+  Chat,
+  CreditDetails,
+  Message,
+  Tool,
+  ToolCall,
+} from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 import { JsonData } from "./jsonDataService";
@@ -291,9 +297,10 @@ const experimentsService = {
     return {
       key: ["search-messages", query],
       fn: async () => {
-        const response = await axiosExperimentsInstance.get<
-          JsonData<Message[]>[]
-        >(`/search-messages?${query}`);
+        const response = await axiosExperimentsInstance.get<{
+          messagesJsonDataEntries: JsonData<Message[]>[];
+          chatJsonDataEntries: JsonData<Chat>[];
+        }>(`/search-messages?${query}`);
         return response.data;
       },
     };

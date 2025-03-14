@@ -12,6 +12,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
 import useDebounce from "~/hooks/useDebounce";
+import { Chat } from "~/lib/typesJsonData";
 
 export function SearchDialog() {
   const [searchParams] = useSearchParams();
@@ -33,6 +34,22 @@ export function SearchDialog() {
     queryFn: searchMessagesQuery.fn,
     enabled: !!searchQuery,
   });
+  const messagesJsonDataEntries =
+    searchMessagesQueryResult.data?.messagesJsonDataEntries ?? [];
+  const chatJsonDataEntries = useMemo(
+    () => searchMessagesQueryResult.data?.chatJsonDataEntries ?? [],
+    [searchMessagesQueryResult.data?.chatJsonDataEntries]
+  );
+  const idToChat = useMemo(() => {
+    const result: Record<string, Chat> = chatJsonDataEntries.reduce(
+      (acc, c) => {
+        acc[c.value.id!] = c.value;
+        return acc;
+      },
+      {} as any
+    );
+    return result;
+  }, [chatJsonDataEntries]);
 
   React.useEffect(() => {
     if (open && inputRef.current) {
@@ -59,9 +76,9 @@ export function SearchDialog() {
           />
         </div>
         <div className="h-[360px] overflow-y-auto">
-          {(searchMessagesQueryResult.data?.length ?? 0) > 0 ? (
+          {messagesJsonDataEntries.length > 0 ? (
             <>
-              {searchMessagesQueryResult.data?.map((d) => {
+              {messagesJsonDataEntries.map((d) => {
                 const messages = d.value;
                 const matchingMessage = messages.find(
                   (m) =>
@@ -97,38 +114,39 @@ export function SearchDialog() {
 
                   snippet = (start > 0 ? "..." : "") + content.slice(start);
                 }
+                const match = d.key.match(/\/chats\/([^/]+)\/messages/);
 
+                const chatId = match![1];
+                const chat = idToChat[chatId];
                 return (
                   <div key={d.id}>
                     <div
                       className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex justify-between items-center gap-2"
                       onClick={() => {
                         setOpen(false);
-                        const match = d.key.match(/\/chats\/([^/]+)\/messages/);
 
-                        if (match) {
-                          const uuid = match[1];
-                          if (personaId) {
-                            navigate(
-                              `/chat/${uuid}?personaId=${personaId}#message-${matchingMessage.id}`
-                            );
-                          } else {
-                            navigate(
-                              `/chat/${uuid}#message-${matchingMessage.id}`
-                            );
-                          }
+                        if (personaId) {
+                          navigate(
+                            `/chat/${chatId}?personaId=${personaId}#message-${matchingMessage.id}`
+                          );
+                        } else {
+                          navigate(
+                            `/chat/${chatId}#message-${matchingMessage.id}`
+                          );
                         }
                       }}
                     >
-                      {/* <h4 className="text-sm font-medium">{d.title}</h4> */}
                       <Messages2 className="min-w-[16px] w-[16px] text-gray-600 dark:text-gray-400" />
-                      <p
-                        className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1"
-                        dangerouslySetInnerHTML={{ __html: snippet }}
-                      ></p>
+                      <div className="flex flex-col">
+                        <h4 className="text-sm font-medium">{chat.title}</h4>
+                        <p
+                          className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1"
+                          dangerouslySetInnerHTML={{ __html: snippet }}
+                        ></p>
+                      </div>
                       <div className="flex-1"></div>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {format(d.createdAt, "dd/MM/yy")}
+                        {format(chat.createdAt, "dd/MM/yy")}
                       </p>
                     </div>
                   </div>
