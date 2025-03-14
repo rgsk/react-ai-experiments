@@ -4,15 +4,10 @@ import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/useGlobalContext";
 import environmentVars from "~/lib/environmentVars";
-import {
-  CreditDetails,
-  JsonData,
-  Message,
-  Tool,
-  ToolCall,
-} from "~/lib/typesJsonData";
+import { CreditDetails, Message, Tool, ToolCall } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
+import { JsonData } from "./jsonDataService";
 export const axiosExperimentsInstance = axios.create({
   baseURL: environmentVars.NODE_EXPERIMENTS_SERVER_URL,
 });

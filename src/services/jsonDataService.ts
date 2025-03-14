@@ -1,6 +1,16 @@
-import { JsonData } from "~/lib/typesJsonData";
+import { ISODateString } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import { axiosExperimentsInstance } from "./experimentsService";
+
+export type JsonData<T> = {
+  id: string;
+  key: string;
+  value: T;
+  version: string;
+  expireAt: ISODateString | null;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+};
 
 const addPrefixToKey = (key: string) => {
   if (key.includes("admin")) {

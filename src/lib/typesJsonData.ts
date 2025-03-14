@@ -2,16 +2,6 @@ import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 
 export type ISODateString = string;
 
-export type JsonData<T> = {
-  id: string;
-  key: string;
-  value: T;
-  version: string;
-  expireAt: ISODateString | null;
-  createdAt: ISODateString;
-  updatedAt: ISODateString;
-};
-
 export enum ToolVariant {
   serverSide = "serverSide",
   clientSide = "clientSide",
