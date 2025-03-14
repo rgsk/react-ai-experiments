@@ -72,7 +72,7 @@ export function SearchDialog() {
             value={_searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="border-0 shadow-none outline-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+            className="border-0 pr-10 shadow-none outline-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
           />
         </div>
         <div className="h-[360px] overflow-y-auto">
