@@ -30,14 +30,18 @@ import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
 import { generateQuestionInstruction } from "~/lib/specialMessageParser";
-import { Chat, Memory, Message, Persona } from "~/lib/typesJsonData";
-import { cn, dataURLtoFile, getCsvFile, html, safeSleep } from "~/lib/utils";
-import experimentsService, {
+import {
+  Chat,
+  Memory,
+  Message,
+  Persona,
   Tool,
   ToolCall,
   ToolSource,
   ToolVariant,
-} from "~/services/experimentsService";
+} from "~/lib/typesJsonData";
+import { cn, dataURLtoFile, getCsvFile, html, safeSleep } from "~/lib/utils";
+import experimentsService from "~/services/experimentsService";
 import NewChatIcon from "../Icons/NewChatIcon";
 import ProfileInfo from "../ProfileInfo/ProfileInfo";
 import CentralLoader from "../Shared/CentralLoader";

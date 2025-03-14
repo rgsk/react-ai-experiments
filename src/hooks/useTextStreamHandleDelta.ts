@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
-import { Message } from "~/lib/typesJsonData";
+import { Message, ToolCall } from "~/lib/typesJsonData";
 import { uint8ArrayToString } from "~/lib/utils";
-import experimentsService, { ToolCall } from "~/services/experimentsService";
+import experimentsService from "~/services/experimentsService";
 
 const useTextStreamHandleDelta = () => {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>();

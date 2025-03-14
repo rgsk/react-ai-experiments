@@ -1,5 +1,4 @@
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-import { ToolCall } from "~/services/experimentsService";
 
 export type ISODateString = string;
 
@@ -11,6 +10,49 @@ export type JsonData<T> = {
   expireAt: ISODateString | null;
   createdAt: ISODateString;
   updatedAt: ISODateString;
+};
+
+export enum ToolVariant {
+  serverSide = "serverSide",
+  clientSide = "clientSide",
+  serverSideRequiresPermission = "serverSideRequiresPermission",
+  clientSideRequiresPermission = "clientSideRequiresPermission",
+}
+export enum ToolSource {
+  mcp = "mcp",
+  composio = "composio",
+  web = "web",
+}
+export type ToolCall = {
+  index: number;
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: any;
+  };
+  source: ToolSource;
+  variant: ToolVariant;
+};
+
+export type Tool = {
+  type: "function";
+  variant: ToolVariant;
+  source: ToolSource;
+  function: {
+    name: string;
+    description: string;
+    parameters: {
+      type: "object";
+      properties: Record<
+        string,
+        { type: "string"; description?: string; enum?: string[] }
+      >;
+      required: string[];
+      additionalProperties: boolean;
+    };
+    strict: boolean;
+  };
 };
 
 export type Message = ChatCompletionMessageParam & {

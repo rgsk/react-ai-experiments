@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Message } from "~/lib/typesJsonData";
-import experimentsService, {
-  Tool,
-  ToolCall,
-} from "~/services/experimentsService";
+import { Message, Tool, ToolCall } from "~/lib/typesJsonData";
+
+import experimentsService from "~/services/experimentsService";
 import useSocket from "./useSocket";
 
 const useTextStream = ({

@@ -4,7 +4,13 @@ import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/useGlobalContext";
 import environmentVars from "~/lib/environmentVars";
-import { CreditDetails, JsonData, Message } from "~/lib/typesJsonData";
+import {
+  CreditDetails,
+  JsonData,
+  Message,
+  Tool,
+  ToolCall,
+} from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 export const axiosExperimentsInstance = axios.create({
@@ -299,48 +305,7 @@ const experimentsService = {
   },
 };
 export default experimentsService;
-export enum ToolVariant {
-  serverSide = "serverSide",
-  clientSide = "clientSide",
-  serverSideRequiresPermission = "serverSideRequiresPermission",
-  clientSideRequiresPermission = "clientSideRequiresPermission",
-}
-export enum ToolSource {
-  mcp = "mcp",
-  composio = "composio",
-  web = "web",
-}
-export type ToolCall = {
-  index: number;
-  id: string;
-  type: "function";
-  function: {
-    name: string;
-    arguments: any;
-  };
-  source: ToolSource;
-  variant: ToolVariant;
-};
 
-export type Tool = {
-  type: "function";
-  variant: ToolVariant;
-  source: ToolSource;
-  function: {
-    name: string;
-    description: string;
-    parameters: {
-      type: "object";
-      properties: Record<
-        string,
-        { type: "string"; description?: string; enum?: string[] }
-      >;
-      required: string[];
-      additionalProperties: boolean;
-    };
-    strict: boolean;
-  };
-};
 type UrlContentType =
   | "pdf"
   | "google_doc"

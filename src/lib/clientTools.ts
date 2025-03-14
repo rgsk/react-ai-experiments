@@ -1,5 +1,5 @@
 import { codeRunnerSupportedLanguages } from "~/hooks/codeRunners/useCodeRunners";
-import { Tool, ToolSource, ToolVariant } from "~/services/experimentsService";
+import { Tool, ToolSource, ToolVariant } from "./typesJsonData";
 
 const clientTools: Tool[] = [
   {
