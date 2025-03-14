@@ -286,6 +286,18 @@ const experimentsService = {
     }>(`/deduct-credits`);
     return result.data;
   },
+  searchMessages: ({ q }: { q: string }) => {
+    const query = encodeQueryParams({ q });
+    return {
+      key: ["search-messages", query],
+      fn: async () => {
+        const response = await axiosExperimentsInstance.get<
+          JsonData<Message[]>[]
+        >(`/search-messages?${query}`);
+        return response.data;
+      },
+    };
+  },
 };
 export default experimentsService;
 export enum ToolVariant {
