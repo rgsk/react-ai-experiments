@@ -58,6 +58,7 @@ import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBloc
 import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
+import { SearchDialog } from "./Children/SearchDialog";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
 export type FileEntry = {
@@ -764,7 +765,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     <div className="h-screen flex">
       {leftPanelOpen && (
         <div className="w-[260px] border-r border-r-input h-full flex flex-col">
-          <div className="p-[16px]">
+          <div className="p-[16px] flex justify-between items-center">
             <Button
               onClick={() => {
                 openNewChat();
@@ -773,6 +774,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               <NewChatIcon />
               <span>New Chat</span>
             </Button>
+            <SearchDialog />
           </div>
           <div className="flex-1 overflow-auto space-y-[20px] px-[16px]">
             {historyBlocks.map(([date, items], i) => (

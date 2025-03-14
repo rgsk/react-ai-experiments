@@ -53,7 +53,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           };
           console.log({ content });
           return (
-            <div key={key} className="w-full">
+            <div key={key} id={`message-${message.id}`} className="w-full">
               <div className="flex justify-end">
                 <FilePreview
                   fileName={fileEntry.fileMetadata!.name}
@@ -126,7 +126,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           const fileName = (message as any).content[0].text;
           const url = (message as any).content[1].image_url.url;
           return (
-            <div key={key} className="w-full">
+            <div key={key} id={`message-${message.id}`} className="w-full">
               <div className="flex justify-end">
                 <img
                   src={url}
@@ -147,7 +147,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           };
           const { imageModelOutput, imageOCROutput } = content as any;
           return (
-            <div key={key} className="w-full">
+            <div key={key} id={`message-${message.id}`} className="w-full">
               <div className="flex justify-end">
                 <img
                   src={url}
@@ -188,7 +188,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           if (!toolCall) return null;
 
           return (
-            <div key={key} className="px-4 w-full">
+            <div key={key} id={`message-${message.id}`} className="px-4 w-full">
               <div>
                 <CollapsibleWrapper
                   scrollContainerRef={scrollContainerRef}
@@ -228,7 +228,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             }
           }
           return (
-            <div key={key} className="w-full relative px-4">
+            <div
+              key={key}
+              id={`message-${message.id}`}
+              className="w-full relative px-4"
+            >
               <div className={cn("w-full break-words")}>
                 <AIAvatar />
 
@@ -294,7 +298,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           );
         } else if (message.role === "user") {
           return (
-            <div key={key} className="w-full flex group">
+            <div
+              key={key}
+              id={`message-${message.id}`}
+              className="w-full flex group"
+            >
               <div
                 className={cn(
                   "rounded-lg bg-gray-100 dark:bg-gray-800 px-4 break-words ml-auto max-w-[640px] relative"

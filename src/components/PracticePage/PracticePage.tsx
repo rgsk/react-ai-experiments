@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import experimentsService from "~/services/experimentsService";
+import { SearchDialog } from "../ChatPage/Children/SearchDialog";
 import { Input } from "../ui/input";
 
 interface PracticePageProps {}
@@ -62,6 +63,7 @@ const PracticePage: React.FC<PracticePageProps> = ({}) => {
           </div>
         );
       })}
+      <SearchDialog />
     </div>
   );
 };
