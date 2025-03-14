@@ -87,33 +87,34 @@ export function SearchDialog() {
                     m.content.toLowerCase().includes(searchQuery.toLowerCase())
                 );
 
-                if (!matchingMessage) return null;
+                let content = matchingMessage?.content as string | undefined;
+                let snippet = "";
+                if (content) {
+                  const index = content
+                    .toLowerCase()
+                    .indexOf(searchQuery.toLowerCase());
 
-                let content = matchingMessage.content as string;
-                const index = content
-                  .toLowerCase()
-                  .indexOf(searchQuery.toLowerCase());
+                  if (index !== -1) {
+                    const beforeMatch = content.substring(0, index);
+                    const match = content.substring(
+                      index,
+                      index + searchQuery.length
+                    );
+                    const afterMatch = content.substring(
+                      index + searchQuery.length
+                    );
+                    content = `${beforeMatch}<b>${match}</b>${afterMatch}`;
+                  }
+                  const snippetLength = 30; // Adjust this to control snippet size
 
-                if (index !== -1) {
-                  const beforeMatch = content.substring(0, index);
-                  const match = content.substring(
-                    index,
-                    index + searchQuery.length
-                  );
-                  const afterMatch = content.substring(
-                    index + searchQuery.length
-                  );
-                  content = `${beforeMatch}<b>${match}</b>${afterMatch}`;
+                  snippet = content;
+                  if (index !== -1) {
+                    const start = Math.max(0, index - snippetLength / 2);
+
+                    snippet = (start > 0 ? "..." : "") + content.slice(start);
+                  }
                 }
 
-                const snippetLength = 30; // Adjust this to control snippet size
-
-                let snippet = content;
-                if (index !== -1) {
-                  const start = Math.max(0, index - snippetLength / 2);
-
-                  snippet = (start > 0 ? "..." : "") + content.slice(start);
-                }
                 const match = d.key.match(/\/chats\/([^/]+)\/messages/);
 
                 const chatId = match![1];
@@ -126,13 +127,21 @@ export function SearchDialog() {
                         setOpen(false);
 
                         if (personaId) {
-                          navigate(
-                            `/chat/${chatId}?personaId=${personaId}#message-${matchingMessage.id}`
-                          );
+                          if (matchingMessage) {
+                            navigate(
+                              `/chat/${chatId}?personaId=${personaId}#message-${matchingMessage.id}`
+                            );
+                          } else {
+                            navigate(`/chat/${chatId}?personaId=${personaId}`);
+                          }
                         } else {
-                          navigate(
-                            `/chat/${chatId}#message-${matchingMessage.id}`
-                          );
+                          if (matchingMessage) {
+                            navigate(
+                              `/chat/${chatId}#message-${matchingMessage.id}`
+                            );
+                          } else {
+                            navigate(`/chat/${chatId}`);
+                          }
                         }
                       }}
                     >
