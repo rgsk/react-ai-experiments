@@ -45,7 +45,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
       if (hashValue) {
         const id = hashValue.substring(1);
         setTimeout(() => {
-          document.getElementById(id)?.scrollIntoView();
+          document
+            .getElementById(id)
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 100);
       }
     }

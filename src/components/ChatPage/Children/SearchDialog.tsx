@@ -138,7 +138,7 @@ export function SearchDialog() {
                     >
                       <Messages2 className="min-w-[16px] w-[16px] text-gray-600 dark:text-gray-400" />
                       <div className="flex flex-col">
-                        <h4 className="text-sm font-medium">{chat.title}</h4>
+                        <h4 className="text-sm font-medium">{chat?.title}</h4>
                         <p
                           className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1"
                           dangerouslySetInnerHTML={{ __html: snippet }}
@@ -146,7 +146,7 @@ export function SearchDialog() {
                       </div>
                       <div className="flex-1"></div>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {format(chat.createdAt, "dd/MM/yy")}
+                        {format(chat?.createdAt ?? new Date(), "dd/MM/yy")}
                       </p>
                     </div>
                   </div>
