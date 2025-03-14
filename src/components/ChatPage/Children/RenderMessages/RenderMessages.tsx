@@ -47,7 +47,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
         setTimeout(() => {
           document
             .getElementById(id)
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
       }
     }
