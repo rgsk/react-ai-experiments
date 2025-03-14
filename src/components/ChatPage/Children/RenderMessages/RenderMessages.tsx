@@ -1,5 +1,6 @@
 import { Copy } from "iconsax-react";
 import { ArrowRight, Check, Download } from "lucide-react";
+import { useEffect } from "react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
@@ -37,6 +38,19 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
       messages[messages.length - 1].role !== "assistant" &&
       messages.every((m) => m.status === "completed")) ||
     hadPendingToolCalls;
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const hashValue = window.location.hash;
+      if (hashValue) {
+        const id = hashValue.substring(1);
+        setTimeout(() => {
+          document.getElementById(id)?.scrollIntoView();
+        }, 100);
+      }
+    }
+  }, [messages.length]);
+
   return (
     <div className="flex flex-col gap-4 items-end">
       {messages.map((message, i) => {
