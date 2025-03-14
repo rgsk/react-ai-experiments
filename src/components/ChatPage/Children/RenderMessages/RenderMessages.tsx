@@ -45,13 +45,12 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
       if (hashValue) {
         const id = hashValue.substring(1);
         setTimeout(() => {
-          document
-            .getElementById(id)
-            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          document.getElementById(id)?.scrollIntoView();
+          scrollContainerRef.current?.scrollBy({ top: -16 });
         }, 100);
       }
     }
-  }, [messages.length]);
+  }, [messages.length, scrollContainerRef]);
 
   return (
     <div className="flex flex-col gap-4 items-end">

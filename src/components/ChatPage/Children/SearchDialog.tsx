@@ -12,6 +12,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
 import useDebounce from "~/hooks/useDebounce";
+import useGlobalContext from "~/hooks/useGlobalContext";
 import { Chat } from "~/lib/typesJsonData";
 
 export function SearchDialog() {
@@ -23,6 +24,7 @@ export function SearchDialog() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const personaId = searchParams?.get("personaId") ?? undefined;
   const navigate = useNavigate();
+  const { setIsFirstHistoryRender } = useGlobalContext();
 
   const searchMessagesQuery = useMemo(
     () => experimentsService.searchMessages({ q: searchQuery }),
@@ -125,7 +127,7 @@ export function SearchDialog() {
                       className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex justify-between items-center gap-2"
                       onClick={() => {
                         setOpen(false);
-
+                        setIsFirstHistoryRender(true);
                         if (personaId) {
                           if (matchingMessage) {
                             navigate(
