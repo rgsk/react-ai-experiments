@@ -3,6 +3,16 @@ import { ToolCall } from "~/services/experimentsService";
 
 export type ISODateString = string;
 
+export type JsonData<T> = {
+  id: string;
+  key: string;
+  value: T;
+  version: string;
+  expireAt: ISODateString | null;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+};
+
 export type Message = ChatCompletionMessageParam & {
   id: string;
   status: "in_progress" | "incomplete" | "completed";
