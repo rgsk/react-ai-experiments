@@ -301,19 +301,22 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     return key;
   };
   const [preferences, setPreferences] = useJsonData(
-    attachPersonaPrefixIfPresent(`preference111111ss211`),
-    {
-      instructions: {
-        enabled: true,
-        children: {
-          userDetails: { enabled: true },
-          memory: { enabled: true },
-          currentDate: { enabled: true },
-          persona: { enabled: true },
-          relatedQuestion: { enabled: false, count: 3 },
+    attachPersonaPrefixIfPresent(`preferences`),
+    () => {
+      return {
+        instructions: {
+          enabled: true,
+          children: {
+            userDetails: { enabled: true },
+            memory: { enabled: true },
+            currentDate: { enabled: true },
+            persona: { enabled: true },
+            relatedQuestion: { enabled: false, count: 3 },
+          },
         },
-      },
-    }
+      };
+    },
+    {}
   );
   useEffect(() => {
     console.log({ preferences });
@@ -752,23 +755,26 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       if (modelOptions[model].toolsSupport) {
         initialInstructions.push(googleSearchInstruction);
       }
-      if (preferences.instructions.children.persona.enabled && persona) {
-        const personaInstruction = html`
-          you are persona with following personality
-          <persona>${JSON.stringify(persona)}</persona>
-          you have to respond on persona's behalf
-          ${modelOptions[model].toolsSupport
-            ? html`
-                additionally since, user is interacting with this persona,
-                retrieveRelevantDocs tool becomes important use this
-                collectionName - ${persona.collectionName} so make sure to pass
-                user query to that tool and fetch the relevant docs and respond
-                accordingly persona has data from various sources like websites,
-                pdfs, and it needs to answer based on that information
-              `
-            : ""}
-        `;
-        initialInstructions.push(personaInstruction);
+      if (persona) {
+        if (preferences.instructions.children.persona.enabled) {
+          const personaInstruction = html`
+            you are persona with following personality
+            <persona>${JSON.stringify(persona)}</persona>
+            you have to respond on persona's behalf
+            ${modelOptions[model].toolsSupport
+              ? html`
+                  additionally since, user is interacting with this persona,
+                  retrieveRelevantDocs tool becomes important use this
+                  collectionName - ${persona.collectionName} so make sure to
+                  pass user query to that tool and fetch the relevant docs and
+                  respond accordingly persona has data from various sources like
+                  websites, pdfs, and it needs to answer based on that
+                  information
+                `
+              : ""}
+          `;
+          initialInstructions.push(personaInstruction);
+        }
       }
     }
 
@@ -1105,21 +1111,25 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                   />
                   <Label htmlFor="currentDate">Current Date</Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="persona"
-                    checked={preferences.instructions.children.persona.enabled}
-                    onCheckedChange={(value) => {
-                      setPreferences(
-                        produce((draft) => {
-                          if (!draft) return;
-                          draft.instructions.children.persona.enabled = value;
-                        })
-                      );
-                    }}
-                  />
-                  <Label htmlFor="persona">Persona</Label>
-                </div>
+                {persona && (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="persona"
+                      checked={
+                        preferences.instructions.children.persona.enabled
+                      }
+                      onCheckedChange={(value) => {
+                        setPreferences(
+                          produce((draft) => {
+                            if (!draft) return;
+                            draft.instructions.children.persona.enabled = value;
+                          })
+                        );
+                      }}
+                    />
+                    <Label htmlFor="persona">Persona</Label>
+                  </div>
+                )}
                 <div>
                   <div className="flex items-center space-x-2">
                     <Switch
