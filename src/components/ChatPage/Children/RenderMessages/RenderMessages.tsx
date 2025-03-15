@@ -316,7 +316,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                             }}
                           >
                             {i === 0 && <Separator />}
-                            <div className="py-2 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                            <div className="py-2 text-left flex gap-2 items-center justify-between hover:bg-muted/50 transition-colors">
                               <span>{qs}</span>
                               <ArrowRight className="h-5 w-5" />
                             </div>

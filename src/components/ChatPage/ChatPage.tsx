@@ -1168,10 +1168,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 <div>
                   <div className="flex items-center space-x-2">
                     <Switch
-                      disabled={!modelOptions[model].successiveMessagesSupport}
                       id="related-questions"
                       checked={
-                        modelOptions[model].successiveMessagesSupport &&
                         preferences.instructions.children.relatedQuestion
                           .enabled
                       }
@@ -1187,39 +1185,38 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                     />
                     <Label htmlFor="related-questions">Related Questions</Label>
                   </div>
-                  {modelOptions[model].successiveMessagesSupport &&
-                    preferences.instructions.children.relatedQuestion
-                      .enabled && (
-                      <>
-                        <div className="h-4"></div>
-                        <div>
-                          <Input
-                            type="number"
-                            placeholder="3"
-                            min={1}
-                            max={5}
-                            value={
-                              preferences.instructions.children.relatedQuestion
-                                .count === 0
-                                ? ""
-                                : preferences.instructions.children
-                                    .relatedQuestion.count
-                            }
-                            onChange={(e) => {
-                              setPreferences(
-                                produce((draft) => {
-                                  if (!draft) return;
-                                  const value = +e.target.value;
-                                  if (value > 5) return;
-                                  draft.instructions.children.relatedQuestion.count =
-                                    value;
-                                })
-                              );
-                            }}
-                          />
-                        </div>
-                      </>
-                    )}
+                  {preferences.instructions.children.relatedQuestion
+                    .enabled && (
+                    <>
+                      <div className="h-4"></div>
+                      <div>
+                        <Input
+                          type="number"
+                          placeholder="3"
+                          min={1}
+                          max={5}
+                          value={
+                            preferences.instructions.children.relatedQuestion
+                              .count === 0
+                              ? ""
+                              : preferences.instructions.children
+                                  .relatedQuestion.count
+                          }
+                          onChange={(e) => {
+                            setPreferences(
+                              produce((draft) => {
+                                if (!draft) return;
+                                const value = +e.target.value;
+                                if (value > 5) return;
+                                draft.instructions.children.relatedQuestion.count =
+                                  value;
+                              })
+                            );
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}

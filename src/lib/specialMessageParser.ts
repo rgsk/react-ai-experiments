@@ -2,7 +2,8 @@ import { html } from "./utils";
 export const separator = "<sep>";
 export const generateQuestionInstruction = (numRelatedQuestions: number) => {
   return html`
-    generateQuestionInstruction:
+    generateQuestionInstruction: make sure you generate the questions, only
+    after answering the user query, not before it
     <span>
       upon successful completion of response generate exactly
       ${numRelatedQuestions} related questions that user might be wanting to ask
