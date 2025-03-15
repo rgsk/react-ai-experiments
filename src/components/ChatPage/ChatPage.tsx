@@ -28,7 +28,12 @@ import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
 import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
-import { defaultModel, modelOptions, uuidPlaceholder } from "~/lib/constants";
+import {
+  defaultModel,
+  Model,
+  modelOptions,
+  uuidPlaceholder,
+} from "~/lib/constants";
 import { generateQuestionInstruction } from "~/lib/specialMessageParser";
 import {
   Chat,
@@ -105,7 +110,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   // }, [memories]);
 
   const [tools, setTools] = useState<Tool[]>([]);
-  const [_model, setModel] = useJsonData("model", () => {
+  const [_model, setModel] = useJsonData<Model>("model", () => {
     return defaultModel;
   });
   const model = _model ?? defaultModel;
@@ -199,7 +204,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   } = useTextStream({
     handleToolCall,
     handleToolCallOutput,
-    model: model,
   });
 
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
@@ -368,6 +372,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               `,
               },
             ],
+            model,
           });
           setChat((prev) => {
             if (prev) {
@@ -381,7 +386,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         }
       }
     },
-    [setChat, setMessages]
+    [model, setChat, setMessages]
   );
   const handleFilesChange = async (files: File[]) => {
     if (files) {
@@ -459,6 +464,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             tools: modelOptions[model].toolsSupport ? tools : undefined,
             messages: getCurrentMessagesRef.current(),
             onComplete: onGenerateComplete,
+            model,
           });
         }, 100);
       }
@@ -802,6 +808,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         messages: getCurrentMessagesRef.current(),
         tools: modelOptions[model].toolsSupport ? tools : undefined,
         onComplete: onGenerateComplete,
+        model,
       });
     }, 100);
   };

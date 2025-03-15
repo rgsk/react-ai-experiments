@@ -141,6 +141,7 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
     let title = extractTagContent(firstUserMessage, "title");
     if (!title) {
       const result = await experimentsService.getCompletion({
+        model: "openai/gpt-4o",
         messages: [
           {
             role: "user",

@@ -3,6 +3,7 @@ import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
 import { getToken } from "~/hooks/useGlobalContext";
+import { Model } from "~/lib/constants";
 import environmentVars from "~/lib/environmentVars";
 import {
   Chat,
@@ -67,7 +68,7 @@ const experimentsService = {
     messages: Message[];
     socketId?: string;
     tools?: Tool[];
-    model: string;
+    model: Model;
   }) => {
     const result = await axiosExperimentsInstance.post<{
       toolCalls: ToolCall[];
@@ -107,23 +108,29 @@ const experimentsService = {
   },
   getJsonCompletion: async <T>({
     messages,
+    model,
   }: {
     messages: CompletionMessage[];
+    model: Model;
   }) => {
     const result = await axiosExperimentsInstance.post<T>("/json-completion", {
       messages,
+      model,
     });
     return result.data;
   },
   getCompletion: async ({
     messages,
+    model,
   }: {
     messages: ChatCompletionMessageParam[];
+    model: Model;
   }) => {
     const result = await axiosExperimentsInstance.post<{ content: string }>(
       "/completion",
       {
         messages,
+        model,
       }
     );
     return result.data;

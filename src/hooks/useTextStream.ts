@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Message, Tool, ToolCall } from "~/lib/typesJsonData";
 
+import { Model } from "~/lib/constants";
 import experimentsService from "~/services/experimentsService";
 import useSocket from "./useSocket";
 
 const useTextStream = ({
   handleToolCall,
   handleToolCallOutput,
-  model,
 }: {
   handleToolCall: (toolCall: ToolCall) => Promise<void>;
   handleToolCallOutput: (entry: {
     toolCall: ToolCall;
     toolCallOutput: string;
   }) => Promise<void>;
-  model: string;
 }) => {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>(undefined);
   const [text, setText] = useState("");
@@ -47,10 +46,12 @@ const useTextStream = ({
       messages,
       onComplete,
       tools,
+      model,
     }: {
       messages: Message[];
       onComplete?: ({ toolCalls }: { toolCalls: ToolCall[] }) => void;
       tools?: Tool[];
+      model: Model;
     }) => {
       if (readerRef.current) {
         await readerRef.current.cancel();
@@ -67,7 +68,7 @@ const useTextStream = ({
       setLoading(false);
       onComplete?.({ toolCalls: result.toolCalls });
     },
-    [model, socketRef]
+    [socketRef]
   );
   const reset = useCallback(() => {
     setText("");

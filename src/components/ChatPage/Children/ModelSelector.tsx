@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { modelOptions } from "~/lib/constants";
+import { Model, modelOptions } from "~/lib/constants";
 import { cn } from "~/lib/utils";
 
 const items = Object.keys(modelOptions).map((key) => ({
@@ -28,8 +28,8 @@ function ModelSelector({
   model,
   setModel,
 }: {
-  model: string;
-  setModel: (value: string) => void;
+  model: Model;
+  setModel: (value: Model) => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const [buttonRef, buttonBounds] = useMeasure();
@@ -64,7 +64,7 @@ function ModelSelector({
                   key={item.value}
                   value={item.value}
                   onSelect={(currentValue) => {
-                    setModel(currentValue);
+                    setModel(currentValue as Model);
                     setOpen(false);
                   }}
                 >

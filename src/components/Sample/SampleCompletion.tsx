@@ -14,6 +14,7 @@ const SampleCompletion: React.FC<SampleCompletionProps> = ({}) => {
         onClick={async () => {
           const { content } = await experimentsService.getCompletion({
             messages: [{ role: "user", content: "Hello" }],
+            model: "openai/gpt-4o",
           });
           console.log({ content });
         }}
@@ -31,6 +32,7 @@ const SampleCompletion: React.FC<SampleCompletionProps> = ({}) => {
                     "generate a random person with name, age and designation as json, name should be mehak",
                 },
               ],
+              model: "openai/gpt-4o",
             });
           console.log({ result });
           console.log("name:", result.name);
