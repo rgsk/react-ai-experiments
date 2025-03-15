@@ -301,8 +301,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     return key;
   };
   const [preferences, setPreferences] = useJsonData(
-    attachPersonaPrefixIfPresent(`preferences`),
-    { relatedQuestion: { enabled: false, count: 3 } }
+    attachPersonaPrefixIfPresent(`preference`),
+    {
+      instructions: {
+        userDetails: { enabled: true },
+        memory: { enabled: true },
+        currentDate: { enabled: true },
+        relatedQuestion: { enabled: false, count: 3 },
+      },
+    }
   );
   useEffect(() => {
     console.log({ preferences });
@@ -697,7 +704,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       alert("preferences not loaded");
       return [];
     }
-    const userInstruction = html`
+    const userDetailsInstruction = html`
       you are currently interacting with following user -
       <userData>${JSON.stringify(userData)}</userData>
     `;
@@ -717,35 +724,29 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     `;
 
     const currentDate = format(new Date(), "EEEE, MMMM do, yyyy HH:mm:ss");
-    const generalInstruction = html`
-      <div>
-        ${modelOptions[model].toolsSupport
-          ? html`
-              <div>
-                use getUrlContent only sparingly, don't fetch the file contents,
-                if you already have them in tool_call output
-              </div>
-            `
-          : ``}
-        <div>
-          <span>Current Date: ${currentDate}</span>
-          ${modelOptions[model].toolsSupport
-            ? html`
-                <span
-                  >This is the time and date in user's timezone, when the query
-                  is made to you, use this date to ensure you use the latest
-                  information from googleSearch tool
-                </span>
-              `
-            : ``}
-        </div>
-      </div>
+    const currentDateInstruction = html`
+      <span>Current Date: ${currentDate}</span>
+    `;
+    const googleSearchInstruction = html`
+      <span
+        >when the query is made to you, use Current Date to ensure you use the
+        latest information from googleSearch tool
+      </span>
     `;
 
     const initialInstructions: string[] = [];
-    initialInstructions.push(userInstruction);
-    initialInstructions.push(memoryInstruction);
-    initialInstructions.push(generalInstruction);
+    if (preferences.instructions.userDetails.enabled) {
+      initialInstructions.push(userDetailsInstruction);
+    }
+    if (preferences.instructions.memory.enabled) {
+      initialInstructions.push(memoryInstruction);
+    }
+    if (preferences.instructions.currentDate.enabled) {
+      initialInstructions.push(currentDateInstruction);
+    }
+    if (modelOptions[model].toolsSupport) {
+      initialInstructions.push(googleSearchInstruction);
+    }
     if (persona) {
       const personaInstruction = html`
         you are persona with following personality
@@ -775,9 +776,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     });
 
     const additionalInstructions: string[] = [];
-    if (preferences.relatedQuestion.enabled) {
+    if (preferences.instructions.relatedQuestion.enabled) {
       additionalInstructions.push(
-        generateQuestionInstruction(preferences.relatedQuestion.count || 3)
+        generateQuestionInstruction(
+          preferences.instructions.relatedQuestion.count || 3
+        )
       );
     } else {
       additionalInstructions.push(
@@ -1030,6 +1033,54 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       {rightPanelOpen && preferences && model && (
         <div className="w-[260px] border-l border-l-input h-full flex flex-col">
           <div className="p-4">
+            <p>Instructions:</p>
+            <div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="userDetails"
+                  checked={preferences.instructions.userDetails.enabled}
+                  onCheckedChange={(value) => {
+                    setPreferences(
+                      produce((draft) => {
+                        if (!draft) return;
+                        draft.instructions.userDetails.enabled = value;
+                      })
+                    );
+                  }}
+                />
+                <Label htmlFor="userDetails">User Details</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="memory"
+                  checked={preferences.instructions.memory.enabled}
+                  onCheckedChange={(value) => {
+                    setPreferences(
+                      produce((draft) => {
+                        if (!draft) return;
+                        draft.instructions.memory.enabled = value;
+                      })
+                    );
+                  }}
+                />
+                <Label htmlFor="memory">Memory</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="currentDate"
+                  checked={preferences.instructions.currentDate.enabled}
+                  onCheckedChange={(value) => {
+                    setPreferences(
+                      produce((draft) => {
+                        if (!draft) return;
+                        draft.instructions.currentDate.enabled = value;
+                      })
+                    );
+                  }}
+                />
+                <Label htmlFor="currentDate">Current Date</Label>
+              </div>
+            </div>
             <div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -1037,13 +1088,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                   id="related-questions"
                   checked={
                     modelOptions[model].successiveMessagesSupport &&
-                    preferences.relatedQuestion.enabled
+                    preferences.instructions.relatedQuestion.enabled
                   }
                   onCheckedChange={(value) => {
                     setPreferences(
                       produce((draft) => {
                         if (!draft) return;
-                        draft.relatedQuestion.enabled = value;
+                        draft.instructions.relatedQuestion.enabled = value;
                       })
                     );
                   }}
@@ -1051,7 +1102,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 <Label htmlFor="related-questions">Related Questions</Label>
               </div>
               {modelOptions[model].successiveMessagesSupport &&
-                preferences.relatedQuestion.enabled && (
+                preferences.instructions.relatedQuestion.enabled && (
                   <>
                     <div className="h-4"></div>
                     <div>
@@ -1061,9 +1112,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                         min={1}
                         max={5}
                         value={
-                          preferences.relatedQuestion.count === 0
+                          preferences.instructions.relatedQuestion.count === 0
                             ? ""
-                            : preferences.relatedQuestion.count
+                            : preferences.instructions.relatedQuestion.count
                         }
                         onChange={(e) => {
                           setPreferences(
@@ -1071,7 +1122,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                               if (!draft) return;
                               const value = +e.target.value;
                               if (value > 5) return;
-                              draft.relatedQuestion.count = value;
+                              draft.instructions.relatedQuestion.count = value;
                             })
                           );
                         }}
