@@ -27,8 +27,8 @@ export function SearchDialog() {
   const { setIsFirstHistoryRender } = useGlobalContext();
 
   const searchMessagesQuery = useMemo(
-    () => experimentsService.searchMessages({ q: searchQuery }),
-    [searchQuery]
+    () => experimentsService.searchMessages({ q: searchQuery, personaId }),
+    [personaId, searchQuery]
   );
 
   const searchMessagesQueryResult = useQuery({

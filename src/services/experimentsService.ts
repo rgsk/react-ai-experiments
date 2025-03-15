@@ -292,8 +292,8 @@ const experimentsService = {
     }>(`/deduct-credits`);
     return result.data;
   },
-  searchMessages: ({ q }: { q: string }) => {
-    const query = encodeQueryParams({ q });
+  searchMessages: ({ q, personaId }: { q: string; personaId?: string }) => {
+    const query = encodeQueryParams({ q, personaId });
     return {
       key: ["search-messages", query],
       fn: async () => {
