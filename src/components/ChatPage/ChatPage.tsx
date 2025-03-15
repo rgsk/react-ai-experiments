@@ -707,25 +707,37 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       a more personalized response.
       <statements> ${memories.map((m) => m.statement).join(", ")} </statements>
 
-      additionally, if user has revealed something new about himself in the
-      conversation so far, save that statement in the memory using the tool
-      saveUserInfoToMemory
+      ${modelOptions[model].toolsSupport
+        ? html`
+            additionally, if user has revealed something new about himself in
+            the conversation so far, save that statement in the memory using the
+            tool saveUserInfoToMemory
+          `
+        : ``}
     `;
 
     const currentDate = format(new Date(), "EEEE, MMMM do, yyyy HH:mm:ss");
     const generalInstruction = html`
       <div>
-        <div>
-          use getUrlContent only sparingly, don't fetch the file contents, if
-          you already have them in tool_call output
-        </div>
+        ${modelOptions[model].toolsSupport
+          ? html`
+              <div>
+                use getUrlContent only sparingly, don't fetch the file contents,
+                if you already have them in tool_call output
+              </div>
+            `
+          : ``}
         <div>
           <span>Current Date: ${currentDate}</span>
-          <span
-            >This is the time and date in user's timezone, when the query is
-            made to you, use this date to ensure you use the latest information
-            from googleSearch tool
-          </span>
+          ${modelOptions[model].toolsSupport
+            ? html`
+                <span
+                  >This is the time and date in user's timezone, when the query
+                  is made to you, use this date to ensure you use the latest
+                  information from googleSearch tool
+                </span>
+              `
+            : ``}
         </div>
       </div>
     `;
@@ -738,12 +750,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       const personaInstruction = html`
         you are persona with following personality
         <persona>${JSON.stringify(persona)}</persona>
-        you have to respond on persona's behalf additionally since, user is
-        interacting with this persona, retrieveRelevantDocs tool becomes
-        important use this collectionName - ${persona.collectionName} so make
-        sure to pass user query to that tool and fetch the relevant docs and
-        respond accordingly persona has data from various sources like websites,
-        pdfs, and it needs to answer based on that information
+        you have to respond on persona's behalf
+        ${modelOptions[model].toolsSupport
+          ? html`
+              additionally since, user is interacting with this persona,
+              retrieveRelevantDocs tool becomes important use this
+              collectionName - ${persona.collectionName} so make sure to pass
+              user query to that tool and fetch the relevant docs and respond
+              accordingly persona has data from various sources like websites,
+              pdfs, and it needs to answer based on that information
+            `
+          : ""}
       `;
       initialInstructions.push(personaInstruction);
     }
