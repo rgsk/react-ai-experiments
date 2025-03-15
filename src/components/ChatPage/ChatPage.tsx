@@ -752,9 +752,25 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         };
       }
     );
+    const finalMessages = (messages ?? []).map((m) => {
+      if (
+        m.role === "assistant" &&
+        typeof m.content === "string" &&
+        m.content.startsWith("<reasoning_content>")
+      ) {
+        return {
+          ...m,
+          content: m.content.slice(
+            m.content.indexOf("</reasoning_content>") +
+              "</reasoning_content>".length
+          ),
+        };
+      }
+      return m;
+    });
     return [
       ...initialMessages,
-      ...(messages ?? []),
+      ...finalMessages,
       ...(modelOptions[model].successiveMessagesSupport
         ? additionalMessages
         : []),
