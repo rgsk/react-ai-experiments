@@ -44,9 +44,11 @@ function ModelSelector({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {model
-            ? items.find((item) => item.value === model)?.label
-            : "Select model..."}
+          <span className="text-ellipsis overflow-hidden">
+            {model
+              ? items.find((item) => item.value === model)?.label
+              : "Select model..."}
+          </span>
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
