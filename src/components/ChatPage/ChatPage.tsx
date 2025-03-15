@@ -144,8 +144,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     true
   );
   const { id: chatId } = useParams<{ id: string }>();
-  const chatIdRef = useRef(chatId);
-  chatIdRef.current = chatId;
   const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
     {
@@ -267,6 +265,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     handleToolCall,
     handleToolCallOutput,
   });
+
+  const localHandleStop = () => {
+    handleStop();
+    setToolCallsAndOutputs([]);
+  };
 
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [voiceModeLoading, setVoiceModeLoading] = useState(false);
@@ -505,10 +508,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
 
   useEffect(() => {
-    if (toolCallsAndOutputs.some((tco) => tco.chatId !== chatIdRef.current)) {
-      setToolCallsAndOutputs([]);
-      return;
-    }
     const toolsMessages: Message[] = toolCallsAndOutputs.map((tco) => {
       return {
         role: "tool" as const,
@@ -902,7 +901,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const [openNewChatLoading, setOpenNewChatLoading] = useState(false);
   const openNewChat = () => {
     setOpenNewChatLoading(true);
-    handleStop();
+    localHandleStop();
     if (!textStreamLoading) {
       setOpenNewChatLoading(false);
       if (personaId) {
@@ -924,8 +923,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     return (
       <MessageInput
         handleSend={handleSend}
-        loading={textStreamLoading}
-        interrupt={handleStop}
+        loading={toolCallsAndOutputs.length > 0 || textStreamLoading}
+        interrupt={localHandleStop}
         disabled={!model}
         placeholder="Message"
         interruptEnabled={true}
