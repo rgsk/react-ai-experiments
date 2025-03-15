@@ -8,14 +8,32 @@ export const fileIcons = {
 export const uuidPlaceholder = "________-____-____-____-____________";
 export const openaiIdPlaceholder = "_____________________________";
 export const defaultModel = "openai/gpt-4o";
-export const modelOptions = {
+export const modelOptions: Record<
+  string,
+  {
+    toolsSupport: boolean;
+    imageSupport: boolean;
+    successiveMessagesSupport: boolean;
+  }
+> = {
   "deepseek/deepseek-chat": {
+    toolsSupport: true,
     imageSupport: false,
+    successiveMessagesSupport: true,
+  },
+  "deepseek/deepseek-reasoner": {
+    toolsSupport: false,
+    imageSupport: false,
+    successiveMessagesSupport: false,
   },
   "openai/gpt-4o": {
+    toolsSupport: true,
     imageSupport: true,
+    successiveMessagesSupport: true,
   },
   "openai/gpt-4o-mini": {
+    toolsSupport: true,
     imageSupport: true,
+    successiveMessagesSupport: true,
   },
 };

@@ -105,9 +105,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   // }, [memories]);
 
   const [tools, setTools] = useState<Tool[]>([]);
-  const [model, setModel] = useJsonData("model", () => {
+  const [_model, setModel] = useJsonData("model", () => {
     return defaultModel;
   });
+  const model = _model ?? defaultModel;
   useEffect(() => {
     if (serverTools) {
       setTools([
@@ -194,10 +195,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     handleGenerate,
     loading: textStreamLoading,
     text,
+    reasoningText,
   } = useTextStream({
     handleToolCall,
     handleToolCallOutput,
-    model: model ?? defaultModel,
+    model: model,
   });
 
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
@@ -454,7 +456,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         setToolCallsAndOutputs([]);
         setTimeout(() => {
           handleGenerate({
-            tools: tools,
+            tools: modelOptions[model].toolsSupport ? tools : undefined,
             messages: getCurrentMessagesRef.current(),
             onComplete: onGenerateComplete,
           });
@@ -464,6 +466,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   }, [
     handleGenerate,
     hasAssistantMessageForCurrentToolCalls,
+    model,
     onGenerateComplete,
     setMessages,
     toolCallsAndOutputs,
@@ -482,6 +485,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 content: text,
                 status: "in_progress",
               });
+            } else if (
+              draft[draft.length - 1].role === "assistant" &&
+              draft[draft.length - 1].type === "reasoning_content"
+            ) {
+              draft[draft.length - 1].status = "completed";
+              draft.push({
+                id: v4(),
+                role: "assistant",
+                content: text,
+                status: "in_progress",
+              });
             } else {
               draft[draft.length - 1].content = text;
             }
@@ -490,6 +504,27 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       );
     }
   }, [setMessages, text]);
+  useEffect(() => {
+    if (reasoningText) {
+      setMessages(
+        produce((draft) => {
+          if (draft) {
+            if (draft[draft.length - 1].role !== "assistant") {
+              draft.push({
+                id: v4(),
+                role: "assistant",
+                content: reasoningText,
+                status: "in_progress",
+                type: "reasoning_content",
+              });
+            } else {
+              draft[draft.length - 1].content = reasoningText;
+            }
+          }
+        })
+      );
+    }
+  }, [setMessages, reasoningText]);
   const { dropAreaProps, isDragging } = useDropArea({
     onFilesChange: handleFilesChange,
   });
@@ -714,7 +749,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         };
       }
     );
-    return [...initialMessages, ...(messages ?? []), ...additionalMessages];
+    return [
+      ...initialMessages,
+      ...(messages ?? []),
+      ...(modelOptions[model].successiveMessagesSupport
+        ? additionalMessages
+        : []),
+    ];
   };
   const getCurrentMessagesRef = useRef(getCurrentMessages);
   getCurrentMessagesRef.current = getCurrentMessages;
@@ -740,7 +781,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     setTimeout(() => {
       handleGenerate({
         messages: getCurrentMessagesRef.current(),
-        tools: tools,
+        tools: modelOptions[model].toolsSupport ? tools : undefined,
         onComplete: onGenerateComplete,
       });
     }, 100);
@@ -945,8 +986,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             <div>
               <div className="flex items-center space-x-2">
                 <Switch
+                  disabled={!modelOptions[model].successiveMessagesSupport}
                   id="related-questions"
-                  checked={preferences.relatedQuestion.enabled}
+                  checked={
+                    modelOptions[model].successiveMessagesSupport &&
+                    preferences.relatedQuestion.enabled
+                  }
                   onCheckedChange={(value) => {
                     setPreferences(
                       produce((draft) => {
@@ -958,34 +1003,35 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 />
                 <Label htmlFor="related-questions">Related Questions</Label>
               </div>
-              {preferences.relatedQuestion.enabled && (
-                <>
-                  <div className="h-4"></div>
-                  <div>
-                    <Input
-                      type="number"
-                      placeholder="3"
-                      min={1}
-                      max={5}
-                      value={
-                        preferences.relatedQuestion.count === 0
-                          ? ""
-                          : preferences.relatedQuestion.count
-                      }
-                      onChange={(e) => {
-                        setPreferences(
-                          produce((draft) => {
-                            if (!draft) return;
-                            const value = +e.target.value;
-                            if (value > 5) return;
-                            draft.relatedQuestion.count = value;
-                          })
-                        );
-                      }}
-                    />
-                  </div>
-                </>
-              )}
+              {modelOptions[model].successiveMessagesSupport &&
+                preferences.relatedQuestion.enabled && (
+                  <>
+                    <div className="h-4"></div>
+                    <div>
+                      <Input
+                        type="number"
+                        placeholder="3"
+                        min={1}
+                        max={5}
+                        value={
+                          preferences.relatedQuestion.count === 0
+                            ? ""
+                            : preferences.relatedQuestion.count
+                        }
+                        onChange={(e) => {
+                          setPreferences(
+                            produce((draft) => {
+                              if (!draft) return;
+                              const value = +e.target.value;
+                              if (value > 5) return;
+                              draft.relatedQuestion.count = value;
+                            })
+                          );
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
             </div>
             <div className="h-4"></div>
             <div>

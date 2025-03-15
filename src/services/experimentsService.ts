@@ -66,7 +66,7 @@ const experimentsService = {
   getText: async (payload: {
     messages: Message[];
     socketId?: string;
-    tools: Tool[];
+    tools?: Tool[];
     model: string;
   }) => {
     const result = await axiosExperimentsInstance.post<{
