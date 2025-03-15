@@ -21,23 +21,17 @@ interface RenderMessagesProps {
   messages: Message[];
   handleSend: HandleSend;
   scrollToBottom: () => void;
-  hadPendingToolCalls: boolean;
+  loading: boolean;
   scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 const RenderMessages: React.FC<RenderMessagesProps> = ({
   messages,
   handleSend,
   scrollToBottom,
-  hadPendingToolCalls,
+  loading,
   scrollContainerRef,
 }) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
-
-  const loading =
-    (messages.length > 0 &&
-      messages[messages.length - 1].role !== "assistant" &&
-      messages.every((m) => m.status === "completed")) ||
-    hadPendingToolCalls;
 
   useEffect(() => {
     if (messages.length > 0) {

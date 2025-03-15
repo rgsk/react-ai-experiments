@@ -882,8 +882,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       });
     }, 100);
   };
-  const openNewChat = () => {
-    handleStop();
+  const openNewChat = async () => {
+    await handleStop();
     if (personaId) {
       navigate(`/chat/${v4()}?personaId=${personaId}`);
     } else {
@@ -1044,7 +1044,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                     scrollToBottom={scrollToBottom}
                     messages={messages ?? []}
                     handleSend={handleSend}
-                    hadPendingToolCalls={toolCallsAndOutputs.length > 0}
+                    loading={
+                      toolCallsAndOutputs.length > 0 ||
+                      (textStreamLoading && !text && !reasoningText)
+                    }
                     scrollContainerRef={scrollContainerRef}
                   />
                 </Container>

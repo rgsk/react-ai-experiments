@@ -15,10 +15,11 @@ const useTextStream = ({
     toolCallOutput: string;
   }) => Promise<void>;
 }) => {
-  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>(undefined);
   const [text, setText] = useState("");
   const [reasoningText, setReasoningText] = useState("");
   const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(loading);
+  loadingRef.current = loading;
   const { socketRef } = useSocket();
   const handleToolCallRef = useRef(handleToolCall);
   handleToolCallRef.current = handleToolCall;
@@ -46,6 +47,19 @@ const useTextStream = ({
     if (socket) {
       socket.emit("stop");
     }
+    if (loadingRef.current) {
+      return new Promise<undefined>((resolve) => {
+        window.addEventListener(
+          "message",
+          (e) => {
+            if (e.data.type === "textStreamComplete") {
+              resolve(undefined);
+            }
+          },
+          { once: true }
+        );
+      });
+    }
   }, [socketRef]);
   const handleGenerate = useCallback(
     async ({
@@ -59,9 +73,6 @@ const useTextStream = ({
       tools?: Tool[];
       model: Model;
     }) => {
-      if (readerRef.current) {
-        await readerRef.current.cancel();
-      }
       setLoading(true);
       setText("");
       setReasoningText("");
@@ -73,6 +84,12 @@ const useTextStream = ({
       });
       setLoading(false);
       onComplete?.({ toolCalls: result.toolCalls });
+      window.postMessage(
+        {
+          type: "textStreamComplete",
+        },
+        "*"
+      );
     },
     [socketRef]
   );
