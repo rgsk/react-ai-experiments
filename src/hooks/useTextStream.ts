@@ -47,19 +47,6 @@ const useTextStream = ({
     if (socket) {
       socket.emit("stop");
     }
-    if (loadingRef.current) {
-      return new Promise<undefined>((resolve) => {
-        window.addEventListener(
-          "message",
-          (e) => {
-            if (e.data.type === "textStreamComplete") {
-              resolve(undefined);
-            }
-          },
-          { once: true }
-        );
-      });
-    }
   }, [socketRef]);
   const handleGenerate = useCallback(
     async ({
@@ -69,7 +56,7 @@ const useTextStream = ({
       model,
     }: {
       messages: Message[];
-      onComplete?: ({ toolCalls }: { toolCalls: ToolCall[] }) => void;
+      onComplete?: ({ toolCalls }: { toolCalls: ToolCall[] }) => Promise<void>;
       tools?: Tool[];
       model: Model;
     }) => {
@@ -83,13 +70,7 @@ const useTextStream = ({
         model,
       });
       setLoading(false);
-      onComplete?.({ toolCalls: result.toolCalls });
-      window.postMessage(
-        {
-          type: "textStreamComplete",
-        },
-        "*"
-      );
+      await onComplete?.({ toolCalls: result.toolCalls });
     },
     [socketRef]
   );

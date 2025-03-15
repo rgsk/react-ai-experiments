@@ -395,30 +395,30 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   }, [chat?.title, chatUpdating, refetchChatHistory]);
   const onGenerateComplete = useCallback(
     async ({ toolCalls }: { toolCalls: ToolCall[] }) => {
-      setTimeout(() => {
-        setMessages(
-          produce((draft) => {
-            if (draft && draft[draft.length - 1].role === "assistant") {
-              if (toolCalls.length > 0) {
-                draft[draft.length - 1].tool_calls = toolCalls;
-              }
-              draft[draft.length - 1].status = "completed";
-            } else {
-              if (toolCalls.length > 0) {
-                draft?.push({
-                  role: "assistant",
-                  status: "completed",
-                  tool_calls: toolCalls,
-                  id: v4(),
-                  content: `calling tools - ${toolCalls
-                    .map((tc) => tc.function.name)
-                    .join(", ")}`,
-                });
-              }
+      await safeSleep(100, true);
+      setMessages(
+        produce((draft) => {
+          if (draft && draft[draft.length - 1].role === "assistant") {
+            if (toolCalls.length > 0) {
+              draft[draft.length - 1].tool_calls = toolCalls;
             }
-          })
-        );
-      }, 100);
+            draft[draft.length - 1].status = "completed";
+          } else {
+            if (toolCalls.length > 0) {
+              draft?.push({
+                role: "assistant",
+                status: "completed",
+                tool_calls: toolCalls,
+                id: v4(),
+                content: `calling tools - ${toolCalls
+                  .map((tc) => tc.function.name)
+                  .join(", ")}`,
+              });
+            }
+          }
+        })
+      );
+      await safeSleep(100, true);
       if (!chatRef.current?.title) {
         const currentMessages = messagesRef.current;
         if (currentMessages) {
@@ -450,7 +450,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             }
             return prev;
           });
+          await safeSleep(100, true);
         }
+      }
+      if (openNewChatLoadingRef.current) {
+        openNewChatRef.current();
       }
     },
     [setChat, setMessages]
@@ -882,14 +886,23 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       });
     }, 100);
   };
-  const openNewChat = async () => {
-    await handleStop();
-    if (personaId) {
-      navigate(`/chat/${v4()}?personaId=${personaId}`);
-    } else {
-      navigate(`/chat/${v4()}`);
+  const [openNewChatLoading, setOpenNewChatLoading] = useState(false);
+  const openNewChat = () => {
+    setOpenNewChatLoading(true);
+    handleStop();
+    if (!textStreamLoading) {
+      setOpenNewChatLoading(false);
+      if (personaId) {
+        navigate(`/chat/${v4()}?personaId=${personaId}`);
+      } else {
+        navigate(`/chat/${v4()}`);
+      }
     }
   };
+  const openNewChatLoadingRef = useRef(openNewChatLoading);
+  openNewChatLoadingRef.current = openNewChatLoading;
+  const openNewChatRef = useRef(openNewChat);
+  openNewChatRef.current = openNewChat;
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(chatHistory || []);
   }, [chatHistory]);
@@ -918,6 +931,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               onClick={() => {
                 openNewChat();
               }}
+              disabled={openNewChatLoading}
             >
               <NewChatIcon />
               <span>New Chat</span>
@@ -969,6 +983,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             <Button
               variant="outline"
               size="icon"
+              disabled={openNewChatLoading}
               onClick={() => {
                 openNewChat();
               }}
