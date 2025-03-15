@@ -531,12 +531,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ) {
         setToolCallsAndOutputs([]);
         setTimeout(() => {
-          handleGenerate({
-            tools: modelOptions[model].toolsSupport ? tools : undefined,
-            messages: getCurrentMessagesRef.current(),
-            onComplete: onGenerateComplete,
-            model,
-          });
+          if (!openNewChatLoadingRef.current) {
+            handleGenerate({
+              tools: modelOptions[model].toolsSupport ? tools : undefined,
+              messages: getCurrentMessagesRef.current(),
+              onComplete: onGenerateComplete,
+              model,
+            });
+          }
         }, 100);
       }
     }
