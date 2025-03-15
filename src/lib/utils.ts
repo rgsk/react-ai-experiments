@@ -39,14 +39,32 @@ export function html(strings: any, ...values: any) {
   }
   return result;
 }
-export function extractTagContent(inputString: string, tagName: string) {
-  const regex = new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`);
-  const match = inputString.match(regex);
-  if (match && match[1]) {
-    return match[1];
+export function extractTagContent(
+  inputString: string,
+  tagName: string,
+  allowContentAfterOnlyFirstTag?: boolean
+) {
+  const openTag = `<${tagName}>`;
+  const closeTag = `</${tagName}>`;
+  const openIndex = inputString.indexOf(openTag);
+  if (openIndex !== -1) {
+    const start = openIndex + openTag.length;
+    const closeIndex = inputString.indexOf(closeTag, start);
+    // If the closing tag is found, return content between open and close.
+    // Otherwise, return everything after the opening tag.
+    if (closeIndex !== -1) {
+      return inputString.substring(start, closeIndex);
+    } else {
+      if (allowContentAfterOnlyFirstTag) {
+        return inputString.substring(start);
+      } else {
+        return null;
+      }
+    }
   }
   return null;
 }
+
 export const handleInputOnPaste = (
   event: React.ClipboardEvent<HTMLElement>,
   onFilesChange: (files: File[]) => void

@@ -478,7 +478,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       setMessages(
         produce((draft) => {
           if (draft) {
-            if (draft[draft.length - 1].role !== "assistant") {
+            const lastMessage = draft[draft.length - 1];
+            if (lastMessage.role !== "assistant") {
               draft.push({
                 id: v4(),
                 role: "assistant",
@@ -486,18 +487,19 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 status: "in_progress",
               });
             } else if (
-              draft[draft.length - 1].role === "assistant" &&
-              draft[draft.length - 1].type === "reasoning_content"
+              lastMessage.role === "assistant" &&
+              typeof lastMessage.content === "string" &&
+              lastMessage.content.startsWith("<reasoning_content>")
             ) {
-              draft[draft.length - 1].status = "completed";
-              draft.push({
-                id: v4(),
-                role: "assistant",
-                content: text,
-                status: "in_progress",
-              });
+              lastMessage.content =
+                lastMessage.content!.slice(
+                  0,
+                  (lastMessage.content as string).indexOf(
+                    "</reasoning_content>"
+                  ) + "</reasoning_content>".length
+                ) + text;
             } else {
-              draft[draft.length - 1].content = text;
+              lastMessage.content = text;
             }
           }
         })
@@ -513,12 +515,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               draft.push({
                 id: v4(),
                 role: "assistant",
-                content: reasoningText,
+                content: `<reasoning_content>${reasoningText}</reasoning_content>`,
                 status: "in_progress",
-                type: "reasoning_content",
               });
             } else {
-              draft[draft.length - 1].content = reasoningText;
+              draft[
+                draft.length - 1
+              ].content = `<reasoning_content>${reasoningText}</reasoning_content>`;
             }
           }
         })

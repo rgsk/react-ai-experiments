@@ -49,7 +49,7 @@ export type Message = ChatCompletionMessageParam & {
   id: string;
   status: "in_progress" | "incomplete" | "completed";
   tool_calls?: ToolCall[];
-  type?: "image_url" | "image_ocr" | "file" | "reasoning_content";
+  type?: "image_url" | "image_ocr" | "file";
 };
 export type Role = Message["role"];
 export type MessageFeedback = {

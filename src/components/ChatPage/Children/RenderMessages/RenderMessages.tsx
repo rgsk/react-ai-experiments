@@ -11,7 +11,7 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
-import { cn } from "~/lib/utils";
+import { cn, extractTagContent } from "~/lib/utils";
 import { FileEntry, HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
@@ -220,10 +220,22 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             </div>
           );
         } else if (message.role === "assistant") {
+          if (typeof message.content !== "string") return null;
+          const reasoningContent = extractTagContent(
+            message.content,
+            "reasoning_content",
+            true
+          );
+          const restContent = message.content.includes("</reasoning_content>")
+            ? message.content.slice(
+                message.content.indexOf("</reasoning_content>") +
+                  "</reasoning_content>".length
+              )
+            : message.content;
           let hasQuestionSuggestions = false;
           let questionSuggestions: string[] = [];
           let questionSuggestionsLoading = false;
-          const text = message.content as string;
+          const text = restContent;
           if (message.role === "assistant") {
             const questionsCodeStartIndex = text.indexOf(`<questions>`);
             const questionsCodeEndIndex = text.indexOf(`</questions>`);
@@ -250,11 +262,18 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             >
               <div className={cn("w-full break-words")}>
                 <AIAvatar />
+                {reasoningContent && (
+                  <CollapsibleWrapper heading="Reasoning" openByDefault={true}>
+                    <p className="pl-4 text-sm text-muted-foreground">
+                      {reasoningContent}
+                    </p>
+                  </CollapsibleWrapper>
+                )}
 
                 <MemoizedMarkdownRenderer
                   loading={message.status === "in_progress"}
                 >
-                  {(message.content ?? "") as string}
+                  {text}
                 </MemoizedMarkdownRenderer>
                 {message.status !== "in_progress" && (
                   <div>

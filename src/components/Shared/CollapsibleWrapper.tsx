@@ -16,6 +16,7 @@ interface CollapsibleWrapperProps {
   type?: "left" | "right";
   scrollContainerRef?: React.MutableRefObject<HTMLDivElement | null>;
   triggerClassName?: string;
+  openByDefault?: boolean;
 }
 const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   heading,
@@ -25,8 +26,9 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   type = "left",
   scrollContainerRef,
   triggerClassName,
+  openByDefault = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(openByDefault);
   const collapsibleRef = useRef<any>(null);
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} ref={collapsibleRef}>
