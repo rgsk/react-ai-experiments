@@ -253,6 +253,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     loading: textStreamLoading,
     text,
     reasoningText,
+    handleStop,
   } = useTextStream({
     handleToolCall,
     handleToolCallOutput,
@@ -882,6 +883,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     }, 100);
   };
   const openNewChat = () => {
+    handleStop();
     if (personaId) {
       navigate(`/chat/${v4()}?personaId=${personaId}`);
     } else {
@@ -891,15 +893,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(chatHistory || []);
   }, [chatHistory]);
+
   const renderMessageInput = () => {
     return (
       <MessageInput
         handleSend={handleSend}
         loading={textStreamLoading}
-        interrupt={() => {}}
+        interrupt={handleStop}
         disabled={!model}
         placeholder="Message"
-        interruptEnabled={false}
+        interruptEnabled={true}
         handleFilesChange={handleFilesChange}
         attachedFiles={attachedFiles}
         setAttachedFiles={setAttachedFiles}

@@ -41,6 +41,12 @@ const useTextStream = ({
       });
     }
   }, [socketRef]);
+  const handleStop = useCallback(() => {
+    const socket = socketRef.current;
+    if (socket) {
+      socket.emit("stop");
+    }
+  }, [socketRef]);
   const handleGenerate = useCallback(
     async ({
       messages,
@@ -81,6 +87,7 @@ const useTextStream = ({
     handleGenerate,
     reset,
     reasoningText,
+    handleStop,
   };
 };
 export default useTextStream;
