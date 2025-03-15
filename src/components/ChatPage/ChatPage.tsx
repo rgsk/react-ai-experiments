@@ -81,6 +81,25 @@ export type FileEntry = {
   s3Url?: string;
 };
 
+const preProcessMessages = (messages: Message[]) => {
+  return messages.map((m) => {
+    if (
+      m.role === "assistant" &&
+      typeof m.content === "string" &&
+      m.content.startsWith("<reasoning_content>")
+    ) {
+      return {
+        ...m,
+        content: m.content.slice(
+          m.content.indexOf("</reasoning_content>") +
+            "</reasoning_content>".length
+        ),
+      };
+    }
+    return m;
+  });
+};
+
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const [leftPanelOpen, setLeftPanelOpen] = useLocalStorageState(
@@ -367,12 +386,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               the title should max 50 characters
               don't add double quotes at start and end
               <currentMessages>${JSON.stringify(
-                currentMessages
+                preProcessMessages(currentMessages ?? [])
               )}</currentMessages>
               `,
               },
             ],
-            model,
+            model: "openai/gpt-4o-mini",
           });
           setChat((prev) => {
             if (prev) {
@@ -386,7 +405,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         }
       }
     },
-    [model, setChat, setMessages]
+    [setChat, setMessages]
   );
   const handleFilesChange = async (files: File[]) => {
     if (files) {
@@ -758,22 +777,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         };
       }
     );
-    const finalMessages = (messages ?? []).map((m) => {
-      if (
-        m.role === "assistant" &&
-        typeof m.content === "string" &&
-        m.content.startsWith("<reasoning_content>")
-      ) {
-        return {
-          ...m,
-          content: m.content.slice(
-            m.content.indexOf("</reasoning_content>") +
-              "</reasoning_content>".length
-          ),
-        };
-      }
-      return m;
-    });
+    const finalMessages = preProcessMessages(messages ?? []);
     return [
       ...initialMessages,
       ...finalMessages,
