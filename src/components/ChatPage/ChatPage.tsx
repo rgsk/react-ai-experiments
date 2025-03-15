@@ -717,8 +717,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
   const getCurrentMessagesRef = useRef(getCurrentMessages);
   getCurrentMessagesRef.current = getCurrentMessages;
+  const { deductCredits } = useGlobalContext();
 
   const handleSend: HandleSend = async ({ text }) => {
+    const hasRemainingCredits = await deductCredits();
+    if (!hasRemainingCredits) return;
+
     setAttachedFiles([]);
     const userMessage: Message = {
       id: v4(),
