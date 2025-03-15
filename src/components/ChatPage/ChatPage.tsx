@@ -144,10 +144,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     true
   );
   const { id: chatId } = useParams<{ id: string }>();
-
+  const chatIdRef = useRef(chatId);
+  chatIdRef.current = chatId;
   const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
-    { toolCall: ToolCall; toolCallOutput?: string; isLoading: boolean }[]
+    {
+      toolCall: ToolCall;
+      toolCallOutput?: string;
+      isLoading: boolean;
+      chatId: string;
+    }[]
   >([]);
   const { data: serverTools, isLoading: toolsLoading } = useQuery({
     queryKey: ["tools"],
@@ -187,7 +193,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const handleToolCall = async (toolCall: ToolCall) => {
     // console.log({ toolCall });
 
-    setToolCallsAndOutputs((prev) => [...prev, { toolCall, isLoading: true }]);
+    setToolCallsAndOutputs((prev) => [
+      ...prev,
+      { toolCall, isLoading: true, chatId: chatId! },
+    ]);
     if (toolCall.variant === ToolVariant.serverSideRequiresPermission) {
       let output = "";
       const permission = confirm(
@@ -531,7 +540,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ) {
         setToolCallsAndOutputs([]);
         setTimeout(() => {
-          if (!openNewChatLoadingRef.current) {
+          if (
+            toolCallsAndOutputs.some((tc) => tc.chatId === chatIdRef.current)
+          ) {
             handleGenerate({
               tools: modelOptions[model].toolsSupport ? tools : undefined,
               messages: getCurrentMessagesRef.current(),
