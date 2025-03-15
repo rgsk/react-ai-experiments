@@ -301,13 +301,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     return key;
   };
   const [preferences, setPreferences] = useJsonData(
-    attachPersonaPrefixIfPresent(`preference`),
+    attachPersonaPrefixIfPresent(`preference111111ss211`),
     {
       instructions: {
-        userDetails: { enabled: true },
-        memory: { enabled: true },
-        currentDate: { enabled: true },
-        relatedQuestion: { enabled: false, count: 3 },
+        enabled: true,
+        children: {
+          userDetails: { enabled: true },
+          memory: { enabled: true },
+          currentDate: { enabled: true },
+          persona: { enabled: true },
+          relatedQuestion: { enabled: false, count: 3 },
+        },
       },
     }
   );
@@ -735,35 +739,37 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     `;
 
     const initialInstructions: string[] = [];
-    if (preferences.instructions.userDetails.enabled) {
-      initialInstructions.push(userDetailsInstruction);
-    }
-    if (preferences.instructions.memory.enabled) {
-      initialInstructions.push(memoryInstruction);
-    }
-    if (preferences.instructions.currentDate.enabled) {
-      initialInstructions.push(currentDateInstruction);
-    }
-    if (modelOptions[model].toolsSupport) {
-      initialInstructions.push(googleSearchInstruction);
-    }
-    if (persona) {
-      const personaInstruction = html`
-        you are persona with following personality
-        <persona>${JSON.stringify(persona)}</persona>
-        you have to respond on persona's behalf
-        ${modelOptions[model].toolsSupport
-          ? html`
-              additionally since, user is interacting with this persona,
-              retrieveRelevantDocs tool becomes important use this
-              collectionName - ${persona.collectionName} so make sure to pass
-              user query to that tool and fetch the relevant docs and respond
-              accordingly persona has data from various sources like websites,
-              pdfs, and it needs to answer based on that information
-            `
-          : ""}
-      `;
-      initialInstructions.push(personaInstruction);
+    if (preferences.instructions.enabled) {
+      if (preferences.instructions.children.userDetails.enabled) {
+        initialInstructions.push(userDetailsInstruction);
+      }
+      if (preferences.instructions.children.memory.enabled) {
+        initialInstructions.push(memoryInstruction);
+      }
+      if (preferences.instructions.children.currentDate.enabled) {
+        initialInstructions.push(currentDateInstruction);
+      }
+      if (modelOptions[model].toolsSupport) {
+        initialInstructions.push(googleSearchInstruction);
+      }
+      if (preferences.instructions.children.persona.enabled && persona) {
+        const personaInstruction = html`
+          you are persona with following personality
+          <persona>${JSON.stringify(persona)}</persona>
+          you have to respond on persona's behalf
+          ${modelOptions[model].toolsSupport
+            ? html`
+                additionally since, user is interacting with this persona,
+                retrieveRelevantDocs tool becomes important use this
+                collectionName - ${persona.collectionName} so make sure to pass
+                user query to that tool and fetch the relevant docs and respond
+                accordingly persona has data from various sources like websites,
+                pdfs, and it needs to answer based on that information
+              `
+            : ""}
+        `;
+        initialInstructions.push(personaInstruction);
+      }
     }
 
     const initialMessages: Message[] = initialInstructions.map((content) => {
@@ -776,16 +782,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     });
 
     const additionalInstructions: string[] = [];
-    if (preferences.instructions.relatedQuestion.enabled) {
-      additionalInstructions.push(
-        generateQuestionInstruction(
-          preferences.instructions.relatedQuestion.count || 3
-        )
-      );
-    } else {
-      additionalInstructions.push(
-        "user has disabled generateQuestionInstruction, no need to generate anymore"
-      );
+    if (preferences.instructions.enabled) {
+      if (preferences.instructions.children.relatedQuestion.enabled) {
+        additionalInstructions.push(
+          generateQuestionInstruction(
+            preferences.instructions.children.relatedQuestion.count || 3
+          )
+        );
+      }
     }
     const additionalMessages: Message[] = additionalInstructions.map(
       (content) => {
@@ -1033,104 +1037,148 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       {rightPanelOpen && preferences && model && (
         <div className="w-[260px] border-l border-l-input h-full flex flex-col">
           <div className="p-4">
-            <p>Instructions:</p>
-            <div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="userDetails"
-                  checked={preferences.instructions.userDetails.enabled}
-                  onCheckedChange={(value) => {
-                    setPreferences(
-                      produce((draft) => {
-                        if (!draft) return;
-                        draft.instructions.userDetails.enabled = value;
-                      })
-                    );
-                  }}
-                />
-                <Label htmlFor="userDetails">User Details</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="memory"
-                  checked={preferences.instructions.memory.enabled}
-                  onCheckedChange={(value) => {
-                    setPreferences(
-                      produce((draft) => {
-                        if (!draft) return;
-                        draft.instructions.memory.enabled = value;
-                      })
-                    );
-                  }}
-                />
-                <Label htmlFor="memory">Memory</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="currentDate"
-                  checked={preferences.instructions.currentDate.enabled}
-                  onCheckedChange={(value) => {
-                    setPreferences(
-                      produce((draft) => {
-                        if (!draft) return;
-                        draft.instructions.currentDate.enabled = value;
-                      })
-                    );
-                  }}
-                />
-                <Label htmlFor="currentDate">Current Date</Label>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="instructions"
+                checked={preferences.instructions.enabled}
+                onCheckedChange={(value) => {
+                  setPreferences(
+                    produce((draft) => {
+                      if (!draft) return;
+                      draft.instructions.enabled = value;
+                    })
+                  );
+                }}
+              />
+              <Label htmlFor="instructions">Instructions</Label>
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  disabled={!modelOptions[model].successiveMessagesSupport}
-                  id="related-questions"
-                  checked={
-                    modelOptions[model].successiveMessagesSupport &&
-                    preferences.instructions.relatedQuestion.enabled
-                  }
-                  onCheckedChange={(value) => {
-                    setPreferences(
-                      produce((draft) => {
-                        if (!draft) return;
-                        draft.instructions.relatedQuestion.enabled = value;
-                      })
-                    );
-                  }}
-                />
-                <Label htmlFor="related-questions">Related Questions</Label>
+            {preferences.instructions.enabled && (
+              <div className="pl-4 pt-2 space-y-2 scale-90 origin-top-left">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="userDetails"
+                    checked={
+                      preferences.instructions.children.userDetails.enabled
+                    }
+                    onCheckedChange={(value) => {
+                      setPreferences(
+                        produce((draft) => {
+                          if (!draft) return;
+                          draft.instructions.children.userDetails.enabled =
+                            value;
+                        })
+                      );
+                    }}
+                  />
+                  <Label htmlFor="userDetails">User Details</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="memory"
+                    checked={preferences.instructions.children.memory.enabled}
+                    onCheckedChange={(value) => {
+                      setPreferences(
+                        produce((draft) => {
+                          if (!draft) return;
+                          draft.instructions.children.memory.enabled = value;
+                        })
+                      );
+                    }}
+                  />
+                  <Label htmlFor="memory">Memory</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="currentDate"
+                    checked={
+                      preferences.instructions.children.currentDate.enabled
+                    }
+                    onCheckedChange={(value) => {
+                      setPreferences(
+                        produce((draft) => {
+                          if (!draft) return;
+                          draft.instructions.children.currentDate.enabled =
+                            value;
+                        })
+                      );
+                    }}
+                  />
+                  <Label htmlFor="currentDate">Current Date</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="persona"
+                    checked={preferences.instructions.children.persona.enabled}
+                    onCheckedChange={(value) => {
+                      setPreferences(
+                        produce((draft) => {
+                          if (!draft) return;
+                          draft.instructions.children.persona.enabled = value;
+                        })
+                      );
+                    }}
+                  />
+                  <Label htmlFor="persona">Persona</Label>
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      disabled={!modelOptions[model].successiveMessagesSupport}
+                      id="related-questions"
+                      checked={
+                        modelOptions[model].successiveMessagesSupport &&
+                        preferences.instructions.children.relatedQuestion
+                          .enabled
+                      }
+                      onCheckedChange={(value) => {
+                        setPreferences(
+                          produce((draft) => {
+                            if (!draft) return;
+                            draft.instructions.children.relatedQuestion.enabled =
+                              value;
+                          })
+                        );
+                      }}
+                    />
+                    <Label htmlFor="related-questions">Related Questions</Label>
+                  </div>
+                  {modelOptions[model].successiveMessagesSupport &&
+                    preferences.instructions.children.relatedQuestion
+                      .enabled && (
+                      <>
+                        <div className="h-4"></div>
+                        <div>
+                          <Input
+                            type="number"
+                            placeholder="3"
+                            min={1}
+                            max={5}
+                            value={
+                              preferences.instructions.children.relatedQuestion
+                                .count === 0
+                                ? ""
+                                : preferences.instructions.children
+                                    .relatedQuestion.count
+                            }
+                            onChange={(e) => {
+                              setPreferences(
+                                produce((draft) => {
+                                  if (!draft) return;
+                                  const value = +e.target.value;
+                                  if (value > 5) return;
+                                  draft.instructions.children.relatedQuestion.count =
+                                    value;
+                                })
+                              );
+                            }}
+                          />
+                        </div>
+                      </>
+                    )}
+                </div>
               </div>
-              {modelOptions[model].successiveMessagesSupport &&
-                preferences.instructions.relatedQuestion.enabled && (
-                  <>
-                    <div className="h-4"></div>
-                    <div>
-                      <Input
-                        type="number"
-                        placeholder="3"
-                        min={1}
-                        max={5}
-                        value={
-                          preferences.instructions.relatedQuestion.count === 0
-                            ? ""
-                            : preferences.instructions.relatedQuestion.count
-                        }
-                        onChange={(e) => {
-                          setPreferences(
-                            produce((draft) => {
-                              if (!draft) return;
-                              const value = +e.target.value;
-                              if (value > 5) return;
-                              draft.instructions.relatedQuestion.count = value;
-                            })
-                          );
-                        }}
-                      />
-                    </div>
-                  </>
-                )}
-            </div>
+            )}
+
             <div className="h-4"></div>
             <div>
               <ModelSelector model={model} setModel={setModel} />
