@@ -505,6 +505,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
 
   useEffect(() => {
+    if (toolCallsAndOutputs.some((tco) => tco.chatId !== chatIdRef.current)) {
+      setToolCallsAndOutputs([]);
+      return;
+    }
     const toolsMessages: Message[] = toolCallsAndOutputs.map((tco) => {
       return {
         role: "tool" as const,
@@ -540,16 +544,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       ) {
         setToolCallsAndOutputs([]);
         setTimeout(() => {
-          if (
-            toolCallsAndOutputs.some((tc) => tc.chatId === chatIdRef.current)
-          ) {
-            handleGenerate({
-              tools: modelOptions[model].toolsSupport ? tools : undefined,
-              messages: getCurrentMessagesRef.current(),
-              onComplete: onGenerateComplete,
-              model,
-            });
-          }
+          handleGenerate({
+            tools: modelOptions[model].toolsSupport ? tools : undefined,
+            messages: getCurrentMessagesRef.current(),
+            onComplete: onGenerateComplete,
+            model,
+          });
         }, 100);
       }
     }
