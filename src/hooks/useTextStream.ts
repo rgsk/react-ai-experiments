@@ -7,12 +7,14 @@ import useSocket from "./useSocket";
 const useTextStream = ({
   handleToolCall,
   handleToolCallOutput,
+  model,
 }: {
   handleToolCall: (toolCall: ToolCall) => Promise<void>;
   handleToolCallOutput: (entry: {
     toolCall: ToolCall;
     toolCallOutput: string;
   }) => Promise<void>;
+  model: string;
 }) => {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>(undefined);
   const [text, setText] = useState("");
@@ -55,11 +57,12 @@ const useTextStream = ({
         messages,
         socketId: socketRef.current?.id,
         tools: tools,
+        model,
       });
       setLoading(false);
       onComplete?.({ toolCalls: result.toolCalls });
     },
-    [socketRef]
+    [model, socketRef]
   );
   const reset = useCallback(() => {
     setText("");

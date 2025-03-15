@@ -28,7 +28,7 @@ import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
 import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
-import { modelsUsed, uuidPlaceholder } from "~/lib/constants";
+import { defaultModel, modelOptions, uuidPlaceholder } from "~/lib/constants";
 import { generateQuestionInstruction } from "~/lib/specialMessageParser";
 import {
   Chat,
@@ -61,6 +61,7 @@ import { Switch } from "../ui/switch";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput from "./Children/MessageInput";
+import ModelSelector from "./Children/ModelSelector";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import { SearchDialog } from "./Children/SearchDialog";
 export type HandleSend = ({ text }: { text: string }) => void;
@@ -86,13 +87,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     true
   );
   const { id: chatId } = useParams<{ id: string }>();
-  const modelQuery = useMemo(() => {
-    return experimentsService.getModel();
-  }, []);
-  const { data: { model } = {} } = useQuery({
-    queryKey: modelQuery.key,
-    queryFn: modelQuery.fn,
-  });
+
   const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
     { toolCall: ToolCall; toolCallOutput?: string; isLoading: boolean }[]
@@ -110,7 +105,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   // }, [memories]);
 
   const [tools, setTools] = useState<Tool[]>([]);
-
+  const [model, setModel] = useJsonData("model", () => {
+    return defaultModel;
+  });
   useEffect(() => {
     if (serverTools) {
       setTools([
@@ -197,7 +194,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     handleGenerate,
     loading: textStreamLoading,
     text,
-  } = useTextStream({ handleToolCall, handleToolCallOutput });
+  } = useTextStream({
+    handleToolCall,
+    handleToolCallOutput,
+    model: model ?? defaultModel,
+  });
 
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [voiceModeLoading, setVoiceModeLoading] = useState(false);
@@ -498,7 +499,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       alert("Please select a model first");
       return;
     }
-    if (!Object.keys(modelsUsed).includes(model)) {
+    if (!Object.keys(modelOptions).includes(model)) {
       alert("Model not specified");
       return;
     }
@@ -543,7 +544,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         let message: Message;
         if (isImage) {
           const imageSupport =
-            modelsUsed[model as keyof typeof modelsUsed].imageSupport;
+            modelOptions[model as keyof typeof modelOptions].imageSupport;
           if (imageSupport) {
             message = {
               role: "user",
@@ -938,7 +939,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           </>
         )}
       </div>
-      {rightPanelOpen && preferences && (
+      {rightPanelOpen && preferences && model && (
         <div className="w-[260px] border-l border-l-input h-full flex flex-col">
           <div className="p-4">
             <div>
@@ -985,6 +986,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                   </div>
                 </>
               )}
+            </div>
+            <div className="h-4"></div>
+            <div>
+              <ModelSelector model={model} setModel={setModel} />
             </div>
           </div>
         </div>

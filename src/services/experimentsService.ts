@@ -67,8 +67,8 @@ const experimentsService = {
     messages: Message[];
     socketId?: string;
     tools: Tool[];
+    model: string;
   }) => {
-    console.log({ tools: payload.tools });
     const result = await axiosExperimentsInstance.post<{
       toolCalls: ToolCall[];
     }>("/text", payload);
@@ -164,17 +164,7 @@ const experimentsService = {
       },
     };
   },
-  getModel: () => {
-    return {
-      key: ["model"],
-      fn: async () => {
-        const response = await axiosExperimentsInstance.get<{ model: string }>(
-          `/model`
-        );
-        return response.data;
-      },
-    };
-  },
+
   executeCode: async ({
     code,
     language,
