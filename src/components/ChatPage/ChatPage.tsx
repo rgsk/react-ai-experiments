@@ -100,6 +100,39 @@ const preProcessMessages = (messages: Message[]) => {
   });
 };
 
+function mergeUserMessages(messages: Message[]): Message[] {
+  const result: Message[] = [];
+  let userContentBuffer = "";
+
+  for (const message of messages) {
+    if (message.role === "user") {
+      userContentBuffer += message.content + "\n";
+    } else {
+      if (userContentBuffer) {
+        result.push({
+          id: v4(),
+          status: "completed",
+          role: "user",
+          content: userContentBuffer,
+        });
+        userContentBuffer = "";
+      }
+      result.push(message);
+    }
+  }
+
+  if (userContentBuffer) {
+    result.push({
+      id: v4(),
+      status: "completed",
+      role: "user",
+      content: userContentBuffer,
+    });
+  }
+
+  return result;
+}
+
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const [leftPanelOpen, setLeftPanelOpen] = useLocalStorageState(
@@ -808,13 +841,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       }
     );
     const finalMessages = preProcessMessages(messages ?? []);
-    return [
-      ...initialMessages,
-      ...finalMessages,
-      ...(modelOptions[model].successiveMessagesSupport
-        ? additionalMessages
-        : []),
-    ];
+    if (modelOptions[model].successiveMessagesSupport) {
+      return [...initialMessages, ...finalMessages, ...additionalMessages];
+    } else {
+      return mergeUserMessages([
+        ...initialMessages,
+        ...finalMessages,
+        ...additionalMessages,
+      ]);
+    }
   };
   const getCurrentMessagesRef = useRef(getCurrentMessages);
   getCurrentMessagesRef.current = getCurrentMessages;
