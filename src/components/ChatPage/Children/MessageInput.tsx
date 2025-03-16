@@ -1,10 +1,20 @@
 import { ArrowUp, Paperclip2 } from "iconsax-react";
-import { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { EditableMathField } from "react-mathquill";
 import TextareaAutosize from "react-textarea-autosize";
 import { cn, handleInputOnPaste } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import { FileEntry, HandleSend } from "../ChatPage";
-import FileUploadedPreview from "./FileUploadedPreview/FileUploadedPreview";
+import FileUploadedPreview, {
+  CloseButton,
+} from "./FileUploadedPreview/FileUploadedPreview";
 
 interface MessageInputProps {
   handleSend: HandleSend;
@@ -28,7 +38,10 @@ const MessageInput: React.FC<MessageInputProps> = ({
   attachedFiles,
   setAttachedFiles,
 }) => {
+  const [latex, setLatex] = useState("");
+  const [latexActive, setLatexActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textAreaInputRef = useRef<HTMLTextAreaElement>(null);
   const [inputFocused, setInputFocused] = useState(false);
   const handleFileInputClick = () => {
     if (fileInputRef.current) {
@@ -36,6 +49,13 @@ const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
   const [text, setText] = useState("");
+
+  useEffect(() => {
+    if (text.includes("/math")) {
+      setLatexActive(true);
+      setText(text.replace("/math", ""));
+    }
+  }, [text]);
   const canSend = useMemo(() => {
     return (
       !loading &&
@@ -46,7 +66,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
   }, [attachedFiles, disabled, loading, text]);
   const handleSubmit = () => {
     if (!canSend) return;
-
     handleSend({ text });
     setText("");
   };
@@ -87,7 +106,42 @@ const MessageInput: React.FC<MessageInputProps> = ({
           ))}
         </div>
       )}
-
+      {latexActive && (
+        <div className="flex pb-[24px]">
+          <div className="relative">
+            <CloseButton
+              onClick={() => {
+                setLatex("");
+                setLatexActive(false);
+              }}
+            />
+            <EditableMathField
+              id="EditableMathField"
+              mathquillDidMount={(mathField) => {
+                mathField.focus();
+              }}
+              style={{ padding: 8 }}
+              latex={latex}
+              onChange={(mathField) => {
+                setLatex(mathField.latex());
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setLatex("");
+                  setLatexActive(false);
+                  textAreaInputRef.current?.focus();
+                } else if (e.key === "Enter") {
+                  e.preventDefault();
+                  setText((prev) => prev + `\\(${latex}\\)`);
+                  setLatex("");
+                  setLatexActive(false);
+                  textAreaInputRef.current?.focus();
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
       <form
         className="relative flex"
         onSubmit={(e) => {
@@ -115,6 +169,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
         </button>
         <div className="w-[8px]"></div>
         <TextareaAutosize
+          ref={textAreaInputRef}
           minRows={1}
           maxRows={6}
           value={text}

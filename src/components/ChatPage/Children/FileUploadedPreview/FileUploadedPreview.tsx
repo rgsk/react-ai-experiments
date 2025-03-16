@@ -58,16 +58,7 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
   };
   const renderCloseButton = () => {
     if (onRemove) {
-      return (
-        <div className="absolute top-0 right-0 translate-x-[10px] -translate-y-1/2">
-          <button
-            onClick={onRemove}
-            className="bg-foreground text-background rounded-full w-[18px] h-[18px] flex justify-center items-center"
-          >
-            <XIcon size={14} />
-          </button>
-        </div>
-      );
+      return <CloseButton onClick={onRemove} />;
     }
     return null;
   };
@@ -97,6 +88,22 @@ const FileUploadedPreview: React.FC<FileUploadedPreviewProps> = ({
       {renderCloseButton()}
       {children}
     </FilePreview>
+  );
+};
+
+interface CloseButtonProps {
+  onClick?: () => void;
+}
+export const CloseButton: React.FC<CloseButtonProps> = ({ onClick }) => {
+  return (
+    <div className="absolute top-0 right-0 translate-x-[10px] -translate-y-1/2">
+      <button
+        onClick={onClick}
+        className="bg-foreground text-background rounded-full w-[18px] h-[18px] flex justify-center items-center"
+      >
+        <XIcon size={14} />
+      </button>
+    </div>
   );
 };
 
