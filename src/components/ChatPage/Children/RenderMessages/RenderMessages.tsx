@@ -55,8 +55,10 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
         } else if (message.type === "file") {
           const obj = recursiveParseJson(message.content as string) as {
             fileEntry: FileEntry;
-            content: any;
+            content: string;
             instruction: string;
+            summary: string;
+            type: "rag" | "full";
           };
           const fileEntry = obj.fileEntry;
           return (
