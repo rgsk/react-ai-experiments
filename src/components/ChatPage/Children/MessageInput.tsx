@@ -201,10 +201,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
             if (e.key === "e") {
               const textarea = textAreaInputRef.current;
               if (textarea) {
-                const selection = text.substring(
-                  textarea.selectionStart,
-                  textarea.selectionEnd
-                );
+                const selection = text
+                  .substring(textarea.selectionStart, textarea.selectionEnd)
+                  .trim();
                 if (selection.startsWith("\\(") && selection.endsWith("\\)")) {
                   // user has performed edit action on latex
                   e.preventDefault();
