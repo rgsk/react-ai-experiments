@@ -5196,6 +5196,11 @@ react-markdown@^10.1.0:
     unist-util-visit "^5.0.0"
     vfile "^6.0.0"
 
+react-mathquill@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/react-mathquill/-/react-mathquill-1.0.3.tgz#fe893a1a360a26f19b624cd9859bf2543bbd4bf4"
+  integrity sha512-H0z0FJsrjgKzXA1kR3rxcQyO28bXyeyMUM13VJ9jAn5cA9SJ35eScE5AK46R0O/H5zRyycGlSo2u+Pdxakbpkg==
+
 react-pdf@^9.2.1:
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/react-pdf/-/react-pdf-9.2.1.tgz#35294da1232d310243ffe5e54f39281e6c98d8d4"
