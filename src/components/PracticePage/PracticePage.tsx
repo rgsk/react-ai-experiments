@@ -1,69 +1,14 @@
+import MermaidChart from "../ChatPage/Children/MermaidChart";
+
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <App />
+      <MermaidChart chart={chartDef} />
     </div>
   );
 };
 export default PracticePage;
-import mermaid from "mermaid";
-import panzoom, { PanZoom } from "panzoom";
-import React, { useEffect, useRef } from "react";
-import { Button } from "../ui/button";
-
-// Initialize mermaid with your desired settings
-mermaid.initialize({
-  startOnLoad: true,
-});
-
-interface MermaidChartProps {
-  chart: string;
-}
-
-const MermaidChart: React.FC<MermaidChartProps> = ({ chart }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const panzoomInstance = useRef<PanZoom>();
-
-  // Re-render the mermaid diagram and reinitialize panzoom when the chart changes
-  useEffect(() => {
-    if (containerRef.current) {
-      // Render the diagram
-      mermaid.contentLoaded();
-
-      // Dispose the previous panzoom instance if it exists
-      if (panzoomInstance.current) {
-        panzoomInstance.current.dispose();
-      }
-      // Initialize panzoom on the outer container
-      panzoomInstance.current = panzoom(containerRef.current, {
-        smoothScroll: false,
-      });
-    }
-  }, [chart]);
-
-  const resetZoom = () => {
-    if (panzoomInstance.current) {
-      // panzoomInstance.current.reset();
-      panzoomInstance.current.moveTo(0, 0);
-      panzoomInstance.current.zoomAbs(0, 0, 1);
-    }
-  };
-
-  return (
-    <div>
-      <div style={{ marginBottom: "10px" }}>
-        <Button onClick={resetZoom}>Reset</Button>
-      </div>
-      {/* Use an outer container that remains stable */}
-      <div className="border border-red-500 overflow-hidden w-full h-[50vh]">
-        <div className="mermaid" ref={containerRef}>
-          {chart}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const chartDef = `
 graph TD;
@@ -121,20 +66,3 @@ graph TD;
     A --> X
 
 `;
-const App: React.FC = () => {
-  const chartDefinition = `
-    graph LR
-      A[Start] --> B{Decision}
-      B --> Yes --> C[Option 1]
-      B --> No --> D[Option 2]
-      C --> E[End]
-      D --> E
-  `;
-
-  return (
-    <div>
-      <h1>Mermaid Flowchart in React (Single File)</h1>
-      <MermaidChart chart={chartDef} />
-    </div>
-  );
-};

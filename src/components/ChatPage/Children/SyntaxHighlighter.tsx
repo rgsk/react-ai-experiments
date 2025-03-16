@@ -30,6 +30,7 @@ import { cn, getCsvFile } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
 import JsxPreview from "./JsxPreview";
+import MermaidChart from "./MermaidChart";
 import SingleGrid from "./SingleGrid";
 interface SyntaxHighlighterProps {
   language: string;
@@ -67,7 +68,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
 
   const { currentExecuteCodeRef } = useGlobalContext();
   const codeExecutionAllowed = useMemo(
-    () => [...codeRunnerSupportedLanguages, "latex"].includes(language as any),
+    () =>
+      [...codeRunnerSupportedLanguages, "latex", "mermaid"].includes(
+        language as any
+      ),
     [language]
   );
   const executeCode = async () => {
@@ -94,6 +98,8 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           code: code,
         });
         setExecuteCodeDetails({ loading: false, output: pdfUrl, error: "" });
+      } else if (language === "mermaid") {
+        setExecuteCodeDetails({ loading: false, output: code, error: "" });
       } else {
         alert(`${language} isn't supported for code execution`);
       }
@@ -336,6 +342,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             {language === "latex" ? (
               <>
                 <PDFReader pdfUrl={executeCodeDetails.output} />
+              </>
+            ) : language === "mermaid" ? (
+              <>
+                <MermaidChart chart={executeCodeDetails.output} />
               </>
             ) : (
               <>
