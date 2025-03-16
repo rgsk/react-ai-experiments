@@ -14,7 +14,7 @@ self.onmessage = async (event) => {
     self.postMessage({ type: "loaded", namespace: "pyodideWorker" });
   } else if (type === "run" && namespace === "pyodideWorker") {
     try {
-      const result = self.pyodide.runPython(code);
+      const result = await self.pyodide.runPythonAsync(code);
       self.postMessage({ type: "result", namespace: "pyodideWorker", result });
     } catch (error) {
       self.postMessage({
