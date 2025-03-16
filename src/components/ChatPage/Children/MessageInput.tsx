@@ -126,16 +126,30 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 setLatex(mathField.latex());
               }}
               onKeyDown={(e) => {
+                const textarea = textAreaInputRef.current;
+                if (!textarea) return;
                 if (e.key === "Escape") {
                   setLatex("");
                   setLatexActive(false);
-                  textAreaInputRef.current?.focus();
+                  textarea.focus();
                 } else if (e.key === "Enter") {
                   e.preventDefault();
-                  setText((prev) => prev + `\\(${latex}\\)`);
+
+                  if (text.includes("/^math")) {
+                    const newLatex = `\\(${latex}\\)`;
+                    const newText = text.replace("/^math", newLatex);
+                    setText(newText);
+                    textarea.focus();
+                    setTimeout(() => {
+                      const idx = newText.indexOf(newLatex);
+                      textarea.setSelectionRange(idx, idx + newLatex.length);
+                    });
+                  } else {
+                    setText(text + `\\(${latex}\\)`);
+                    textarea.focus();
+                  }
                   setLatex("");
                   setLatexActive(false);
-                  textAreaInputRef.current?.focus();
                 }
               }}
             />
@@ -184,6 +198,22 @@ const MessageInput: React.FC<MessageInputProps> = ({
           }}
           autoFocus
           onKeyDown={(e) => {
+            if (e.key === "e") {
+              const textarea = textAreaInputRef.current;
+              if (textarea) {
+                const selection = text.substring(
+                  textarea.selectionStart,
+                  textarea.selectionEnd
+                );
+                if (selection.startsWith("\\(") && selection.endsWith("\\)")) {
+                  // user has performed edit action on latex
+                  e.preventDefault();
+                  setText((prev) => prev.replace(selection, "/^math"));
+                  setLatex(selection.substring(3, selection.length - 3));
+                  setLatexActive(true);
+                }
+              }
+            }
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               handleSubmit();
