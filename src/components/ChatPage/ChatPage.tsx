@@ -401,6 +401,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const chatRef = useRef(chat);
   chatRef.current = chat;
   useEffect(() => {
+    refetchChatHistory();
+  }, [chatId, refetchChatHistory]);
+  useEffect(() => {
     if (chat?.title && !chatUpdating) {
       refetchChatHistory();
     }
@@ -428,7 +431,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               });
             }
           }
-        })
+        }),
+        openNewChatLoadingRef.current
       );
       await safeSleep(100, true);
       if (!chatRef.current?.title) {
@@ -461,8 +465,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               };
             }
             return prev;
-          });
-          await safeSleep(100, true);
+          }, openNewChatLoadingRef.current);
         }
       }
       if (openNewChatLoadingRef.current) {

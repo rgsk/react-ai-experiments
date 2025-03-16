@@ -34,7 +34,8 @@ function useJsonData<T>(
     (
       valueOrFunction:
         | (T | undefined)
-        | ((prev: T | undefined) => T | undefined)
+        | ((prev: T | undefined) => T | undefined),
+      mandatorySetKey = false
     ) => {
       // Allow value to be a function so we have same API as useState
       const newState =
@@ -46,13 +47,23 @@ function useJsonData<T>(
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
-      timerRef.current = setTimeout(async () => {
-        await jsonDataService.setKey({
-          key: keyRef.current,
-          value: newState,
-        });
-        setUpdating(false);
-      }, 1000);
+      if (mandatorySetKey) {
+        (async () => {
+          await jsonDataService.setKey({
+            key: keyRef.current,
+            value: newState,
+          });
+          setUpdating(false);
+        })();
+      } else {
+        timerRef.current = setTimeout(async () => {
+          await jsonDataService.setKey({
+            key: keyRef.current,
+            value: newState,
+          });
+          setUpdating(false);
+        }, 1000);
+      }
     },
     [setLocalValue]
   );
