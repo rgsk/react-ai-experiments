@@ -99,7 +99,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
         });
         setExecuteCodeDetails({ loading: false, output: pdfUrl, error: "" });
       } else if (language === "mermaid") {
-        setExecuteCodeDetails({ loading: false, output: code, error: "" });
+        setExecuteCodeDetails({ loading: true, output: "", error: "" });
+        setTimeout(() => {
+          setExecuteCodeDetails({ loading: false, output: code, error: "" });
+        });
       } else {
         alert(`${language} isn't supported for code execution`);
       }

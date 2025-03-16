@@ -1,3 +1,4 @@
+import { RotateCcw } from "lucide-react";
 import mermaid from "mermaid";
 import panzoom, { PanZoom } from "panzoom";
 import React, { useCallback, useEffect, useRef } from "react";
@@ -63,11 +64,11 @@ const MermaidChart: React.FC<MermaidChartProps> = ({ chart }) => {
   return (
     <div className="border border-muted-foreground rounded-lg overflow-hidden">
       <div className="flex justify-between items-center px-4 py-2 bg-gray-500">
-        <div className="flex gap-2 items-center">
-          <Button variant="outline" onClick={resetZoom}>
-            Reset
-          </Button>
-        </div>
+        <div className="flex-1"></div>
+        <Button variant="outline" onClick={resetZoom}>
+          <RotateCcw />
+          Reset
+        </Button>
       </div>
       <div ref={outerContainerRef} className="overflow-hidden w-full h-[50vh]">
         <div className="mermaid" ref={containerRef}>
