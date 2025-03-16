@@ -302,6 +302,22 @@ const experimentsService = {
       },
     };
   },
+  processFileMessage: async ({
+    s3Url,
+    collectionName,
+  }: {
+    s3Url: string;
+    collectionName: string;
+  }) => {
+    const response = await axiosExperimentsInstance.post<
+      | { summary: string; embeddingCount: number; type: "rag" }
+      | { content: string; type: "full" }
+    >(`/process-file-message`, {
+      s3Url,
+      collectionName,
+    });
+    return response.data;
+  },
 };
 export default experimentsService;
 

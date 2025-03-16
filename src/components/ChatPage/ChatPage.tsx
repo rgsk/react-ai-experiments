@@ -729,10 +729,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               s3Url: fileEntry.s3Url!,
             },
             content: "",
-            instruction: html`
-              for this file entry, this is the parsed content, user has attached
-              this file, use the file file contents to answer the user query
-            `,
+            instruction: "",
+            summary: "",
+            type: "",
           };
           message = {
             role: "user",
@@ -742,11 +741,35 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             type: "file",
           };
           await addMessage(message);
-          const result = await experimentsService
-            .getUrlContent({ url: fileEntry.s3Url! })
-            .fn();
+          const result = await experimentsService.processFileMessage({
+            s3Url: fileEntry.s3Url!,
+            collectionName: chatId!,
+          });
+          contentObj.type = result.type;
+          if (result.type === "full") {
+            contentObj.content = result.content;
+            contentObj.instruction = html`
+              for this file entry, this is the parsed content, user has attached
+              this file, use the file contents to answer the user query
+            `;
+          } else if (result.type === "rag") {
+            contentObj.summary = result.summary;
+            contentObj.instruction = html`
+              <span>
+                this file is attached by the user in this chat, based on the
+                summary of this file, you can decide to perform rag on this file
+                or not
+              </span>
+
+              here are it's creds that you can use to call the tool
+              retrieveRelevantDocs:
+              ${JSON.stringify({
+                source: fileEntry.s3Url!,
+                collectionName: chatId!,
+              })}
+            `;
+          }
           // return result;
-          contentObj.content = result;
           message.content = JSON.stringify(contentObj);
           message.status = "completed";
           await addMessage(message);

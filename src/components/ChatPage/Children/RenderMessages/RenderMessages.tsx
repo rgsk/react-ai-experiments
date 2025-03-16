@@ -11,7 +11,7 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
-import { cn, extractTagContent } from "~/lib/utils";
+import { cn, extractTagContent, recursiveParseJson } from "~/lib/utils";
 import { FileEntry, HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
@@ -53,14 +53,12 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
         if (!message.content) {
           return null;
         } else if (message.type === "file") {
-          const { fileEntry, content } = JSON.parse(
-            message.content as string
-          ) as {
+          const obj = recursiveParseJson(message.content as string) as {
             fileEntry: FileEntry;
             content: any;
             instruction: string;
           };
-          console.log({ content });
+          const fileEntry = obj.fileEntry;
           return (
             <div key={key} id={`message-${message.id}`} className="w-full">
               <div className="flex justify-end">
@@ -118,13 +116,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     loading={message.status === "in_progress"}
                   >
                     <div className="pr-4">
-                      {typeof content === "string" ? (
-                        <p className="whitespace-pre-wrap">{content}</p>
-                      ) : (
-                        <p className="whitespace-pre-wrap break-words w-[640px]">
-                          {JSON.stringify(content, null, 4)}
-                        </p>
-                      )}
+                      <p className="whitespace-pre-wrap break-words w-[640px]">
+                        {JSON.stringify(obj, null, 4)}
+                      </p>
                     </div>
                   </CollapsibleWrapper>
                 </div>
