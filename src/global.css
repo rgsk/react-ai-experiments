@@ -65,7 +65,6 @@
   }
 }
 .messageContent {
-  @apply whitespace-pre-wrap;
   hr {
     margin: 30px 0px;
   }

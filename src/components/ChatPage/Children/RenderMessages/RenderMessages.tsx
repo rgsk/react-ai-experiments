@@ -325,7 +325,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             <div
               key={key}
               id={`message-${message.id}`}
-              className="w-full flex group"
+              className="w-full flex group whitespace-pre-wrap"
             >
               <div
                 className={cn(
