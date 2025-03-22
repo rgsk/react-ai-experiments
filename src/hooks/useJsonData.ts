@@ -68,7 +68,10 @@ function useJsonData<T>(
     [setLocalValue]
   );
   const populateState = useCallback(async () => {
-    if (!enabled) return;
+    if (!enabled) {
+      setLocalValue(undefined);
+      return;
+    }
     setLocalValue(undefined);
     setLoading(true);
     try {
