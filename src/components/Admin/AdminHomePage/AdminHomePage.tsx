@@ -10,9 +10,9 @@ interface AdminHomePageProps {}
 const AdminHomePage: React.FC<AdminHomePageProps> = ({}) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
   const { token } = useGlobalContext();
-  const { data: creditDetailsEntries } = useJsonDataKeysLike<CreditDetails>(
-    "admin/public/creditDetails/%"
-  );
+  const { data: creditDetailsEntries } = useJsonDataKeysLike<CreditDetails>({
+    key: "admin/public/creditDetails/%",
+  });
 
   return (
     <div className="p-[32px]">
@@ -35,7 +35,7 @@ const AdminHomePage: React.FC<AdminHomePageProps> = ({}) => {
       </Button>
       <div className="h-[30px]"></div>
       <div className="space-y-2">
-        {creditDetailsEntries?.map((creditDetails) => {
+        {creditDetailsEntries?.data?.map(({ value: creditDetails }) => {
           return (
             <div key={creditDetails.id} className="flex justify-between">
               {creditDetails.userEmail}: {creditDetails.balance}

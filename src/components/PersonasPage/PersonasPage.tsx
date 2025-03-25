@@ -23,7 +23,7 @@ import { Button } from "../ui/button";
 interface PersonasPageProps {}
 const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
   const { data: personas, refetch: refetchPersonas } =
-    useJsonDataKeysLike<Persona>(`personas/${uuidPlaceholder}`);
+    useJsonDataKeysLike<Persona>({ key: `personas/${uuidPlaceholder}` });
   const navigate = useNavigate();
   const [personasDeleteInProgressIds, setPersonasDeleteInProgressIds] =
     useState<string[]>([]);
@@ -60,7 +60,7 @@ const PersonasPage: React.FC<PersonasPageProps> = ({}) => {
       </div>{" "}
       <div className="h-[30px]"></div>
       <div className="flex flex-wrap gap-4 items-stretch">
-        {personas.map((persona) => (
+        {personas.data.map(({ value: persona }) => (
           <Card className="w-[350px] flex flex-col" key={persona.id}>
             <CardHeader>
               <CardTitle className="flex justify-between items-center">

@@ -26,14 +26,32 @@ const jsonDataService = {
     );
     return result.data;
   },
-  getKeysLike: <T>({ key }: { key: string }) => {
-    const path = `/json-data/key-like?${encodeQueryParams({
+  getKeysLike: <T>({
+    key,
+    page,
+    perPage,
+    childEndpoint = "",
+    additionalParams = {},
+  }: {
+    key: string;
+    page?: number;
+    perPage?: number;
+    childEndpoint?: string;
+    additionalParams?: Record<string, string>;
+  }) => {
+    const path = `/json-data/key-like${childEndpoint}?${encodeQueryParams({
       key: addPrefixToKey(key),
+      page,
+      perPage,
+      ...additionalParams,
     })}`;
     return {
       queryKey: [path],
       queryFn: async () => {
-        const result = await axiosExperimentsInstance.get<JsonData<T>[]>(path);
+        const result = await axiosExperimentsInstance.get<{
+          data: JsonData<T>[];
+          count: number;
+        }>(path);
         return result.data;
       },
     };

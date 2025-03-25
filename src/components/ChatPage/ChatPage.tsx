@@ -368,9 +368,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     console.log({ preferences });
   }, [preferences]);
   const { data: chatHistory, refetch: refetchChatHistory } =
-    useJsonDataKeysLike<Chat>(
-      attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`)
-    );
+    useJsonDataKeysLike<Chat>({
+      key: attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`),
+    });
   const [persona] = useJsonData<Persona>(`personas/${personaId}`);
 
   const navigate = useNavigate();
@@ -942,7 +942,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const openNewChatRef = useRef(openNewChat);
   openNewChatRef.current = openNewChat;
   const historyBlocks = useMemo(() => {
-    return getHistoryBlocks(chatHistory || []);
+    return getHistoryBlocks(chatHistory?.data.map(({ value }) => value) || []);
   }, [chatHistory]);
 
   const renderMessageInput = () => {

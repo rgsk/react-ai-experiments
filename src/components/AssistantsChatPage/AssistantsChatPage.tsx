@@ -334,14 +334,16 @@ const AssistantsChatPage: React.FC<AssistantsChatPageProps> = ({}) => {
     onFilesChange: handleFilesChange,
   });
   const { data: conversations, refetch: refetchConversations } =
-    useJsonDataKeysLike<Conversation>(
-      `${assistantOrPersonaPrefix}/conversations/${uuidPlaceholder}`
-    );
+    useJsonDataKeysLike<Conversation>({
+      key: `${assistantOrPersonaPrefix}/conversations/${uuidPlaceholder}`,
+    });
 
-  const conversation = conversations?.find((c) => c.threadId === threadId);
+  const conversation = conversations?.data?.find(
+    ({ value: c }) => c.threadId === threadId
+  )?.value;
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const historyBlocks = useMemo(() => {
-    return getHistoryBlocks(conversations || []);
+    return getHistoryBlocks(conversations?.data.map((c) => c.value) || []);
   }, [conversations]);
   const assistantMessageInProgress =
     messages[messages.length - 1]?.role === "assistant" &&
