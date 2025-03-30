@@ -13,12 +13,13 @@ import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
-import { cn, extractTagContent, recursiveParseJson } from "~/lib/utils";
-import { FileEntry, HandleSend } from "../../ChatPage";
+import { cn, extractTagContent } from "~/lib/utils";
+import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
 import RenderToolCall from "./RenderToolCall";
+import messageContentParsers from "./messageContentParsers";
 interface RenderMessagesProps {
   messages: Message[];
   handleSend: HandleSend;
@@ -67,14 +68,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           if (!message.content) {
             return null;
           } else if (message.type === "file") {
-            const obj = recursiveParseJson(message.content as string) as {
-              fileEntry: FileEntry;
-              content: string;
-              instruction: string;
-              summary: string;
-              type: "rag" | "full";
-            };
-            const fileEntry = obj.fileEntry;
+            const { fileEntry, parsedContent } = messageContentParsers.file(
+              message.content
+            );
             return (
               <div key={key} id={`message-${message.id}`} className="w-full">
                 <div className="flex justify-end">
@@ -135,7 +131,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                         >
                           <div className="pr-4">
                             <p className="whitespace-pre-wrap break-words w-[640px]">
-                              {JSON.stringify(obj, null, 4)}
+                              {JSON.stringify(parsedContent, null, 4)}
                             </p>
                           </div>
                         </CollapsibleWrapper>
@@ -146,8 +142,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               </div>
             );
           } else if (message.type === "image_url") {
-            const fileName = (message as any).content[0].text;
-            const url = (message as any).content[1].image_url.url;
+            const { url } = messageContentParsers.image_url(message.content);
             return (
               <div key={key} id={`message-${message.id}`} className="w-full">
                 <div className="flex justify-end">
@@ -164,14 +159,8 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               </div>
             );
           } else if (message.type === "image_ocr") {
-            const { fileName, url, content } = JSON.parse(
-              message.content as string
-            ) as {
-              fileName: string;
-              url: string;
-              content: string;
-            };
-            const { imageModelOutput, imageOCROutput } = content as any;
+            const { fileName, imageModelOutput, imageOCROutput, url } =
+              messageContentParsers.image_ocr(message.content);
             return (
               <div key={key} id={`message-${message.id}`} className="w-full">
                 <div className="flex justify-end">

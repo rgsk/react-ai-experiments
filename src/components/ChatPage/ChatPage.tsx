@@ -45,7 +45,6 @@ import {
   downloadContentFile,
   getCsvFile,
   html,
-  recursiveParseJson,
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
@@ -57,6 +56,7 @@ import { Button } from "../ui/button";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import LeftPanel from "./Children/LeftPanel/LeftPanel";
 import MessageInput from "./Children/MessageInput";
+import messageContentParsers from "./Children/RenderMessages/messageContentParsers";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import RightPanel from "./Children/RightPanel/RightPanel";
 import TopPanel from "./Children/TopPanel/TopPanel";
@@ -137,33 +137,22 @@ function createMarkdownContent(messages: Message[]): string {
       ) {
         markdownContent += `## ${role}\n\n`;
         if (message.type === "image_url") {
-          const fileName = (message as any).content[0].text;
-          const url = (message as any).content[1].image_url.url;
-          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>\n\n`;
+          const { fileName, url } = messageContentParsers.image_url(
+            message.content
+          );
+          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>`;
         } else if (message.type === "file") {
-          const obj = recursiveParseJson(message.content as string) as {
-            fileEntry: FileEntry;
-            content: string;
-            instruction: string;
-            summary: string;
-            type: "rag" | "full";
-          };
-          const fileEntry = obj.fileEntry;
-          const fileName = fileEntry.fileMetadata?.name;
-          const url = fileEntry.s3Url;
-          markdownContent += `[📄 ${fileName}](${url})\n\n`;
+          const { fileName, url } = messageContentParsers.file(message.content);
+          markdownContent += `[📄 ${fileName}](${url})`;
         } else if (message.type === "image_ocr") {
-          const { fileName, url, content } = JSON.parse(
-            message.content as string
-          ) as {
-            fileName: string;
-            url: string;
-            content: string;
-          };
-          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>\n\n`;
+          const { fileName, url } = messageContentParsers.image_ocr(
+            message.content
+          );
+          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>`;
         } else {
-          markdownContent += `${message.content}\n\n`;
+          markdownContent += `${message.content}`;
         }
+        markdownContent += `\n\n`;
       }
     }
   });
