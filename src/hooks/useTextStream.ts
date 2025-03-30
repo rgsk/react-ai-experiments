@@ -74,6 +74,7 @@ const useTextStream = ({
         model,
       });
       setLoading(false);
+      setToolCallsInProgress(false);
       await onComplete?.({ toolCalls: result.toolCalls });
     },
     [socketRef]

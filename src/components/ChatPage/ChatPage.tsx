@@ -221,7 +221,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     } else if (toolCall.variant === ToolVariant.clientSide) {
       if (toolCall.function.name === "executeCode") {
         const { code, language } = toolCall.function.arguments;
-        const output = await runCode({ code, language });
+        let output = "";
+        try {
+          output = await runCode({ code, language });
+        } catch (err: any) {
+          // console.error(err);
+          output = `Error: ${err.message}`;
+        }
         const lines = output.split("\n") as string[];
         const newLines = await Promise.all(
           lines.map(async (line) => {
