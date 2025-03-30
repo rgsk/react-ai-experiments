@@ -1,7 +1,9 @@
-import { Message } from "./typesJsonData";
+import { Chat, Message, SharedChat } from "./typesJsonData";
 
+import { v4 } from "uuid";
 import { FileEntry } from "~/components/ChatPage/ChatPage";
-import { recursiveParseJson } from "~/lib/utils";
+import { memoizeFn, recursiveParseJson } from "~/lib/utils";
+import jsonDataService from "~/services/jsonDataService";
 
 export function createMarkdownContent(messages: Message[]): string {
   let markdownContent = "# Chat Export\n\n";
@@ -72,3 +74,21 @@ export const messageContentParsers = {
     return { fileEntry, parsedContent, fileName, url };
   },
 };
+
+export const getSharedChatLink = memoizeFn(
+  async ({ messages, chat }: { messages: Message[]; chat: Chat }) => {
+    const sharedChatId = v4();
+    const key = `admin/public/sharedChats/${sharedChatId}`;
+    const sharedChat = await jsonDataService.setKey<SharedChat>({
+      key,
+      value: {
+        id: sharedChatId,
+        chat,
+        messages,
+        createdAt: new Date().toISOString(),
+      },
+    });
+    const link = `${window.location.origin}/shared-chat/${sharedChatId}`;
+    return link;
+  }
+);

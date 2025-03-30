@@ -20,7 +20,7 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
-import { createMarkdownContent } from "~/lib/chatUtils";
+import { createMarkdownContent, getSharedChatLink } from "~/lib/chatUtils";
 import clientTools from "~/lib/clientTools";
 import {
   defaultModel,
@@ -35,7 +35,6 @@ import {
   Message,
   Persona,
   Preferences,
-  SharedChat,
   Tool,
   ToolCall,
   ToolSource,
@@ -50,7 +49,6 @@ import {
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
-import jsonDataService from "~/services/jsonDataService";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
@@ -635,19 +633,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
   const shareChat = async () => {
     if (!messages || !chat) return;
-    const sharedChatId = v4();
-    const key = `admin/public/sharedChats/${sharedChatId}`;
-    const sharedChat = await jsonDataService.setKey<SharedChat>({
-      key,
-      value: {
-        id: sharedChatId,
-        chat,
-        messages,
-        createdAt: new Date().toISOString(),
-      },
-    });
-    const link = `${window.location.origin}/shared-chat/${sharedChatId}`;
-    return link;
+
+    return getSharedChatLink({ messages, chat });
   };
 
   const processAttachedFiles = async (userMessage: Message) => {

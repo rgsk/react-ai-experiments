@@ -194,3 +194,21 @@ export function downloadContentFile({
     window.URL.revokeObjectURL(url);
   }, 0);
 }
+
+export function memoizeFn<T extends (...args: any[]) => any>(fn: T): T {
+  const cache = new Map<string, Promise<ReturnType<T>> | ReturnType<T>>();
+
+  return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) {
+      return cache.get(key) as Promise<ReturnType<T>> | ReturnType<T>;
+    }
+    const result = fn(...args);
+    if (result instanceof Promise) {
+      cache.set(key, result);
+      return await result;
+    }
+    cache.set(key, result);
+    return result;
+  }) as T;
+}
