@@ -1,5 +1,6 @@
 import { addSeconds } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SetSharedState } from "./useJsonData";
 import useRunOnWindowFocus from "./useRunOnWindowFocus";
 import useWindowMessageAndBroadcastChannelState from "./useWindowMessageAndBroadcastChannelState";
 
@@ -101,12 +102,8 @@ const useLocalStorageState = <T>(
   // that change is visible
   useRunOnWindowFocus(populateStateFromLocalStorage);
 
-  const setSharedState = useCallback(
-    (
-      valueOrFunction:
-        | (T | undefined)
-        | ((prev: T | undefined) => T | undefined)
-    ) => {
+  const setSharedState: SetSharedState<T> = useCallback(
+    (valueOrFunction) => {
       // Allow value to be a function so we have same API as useState
       const newState =
         valueOrFunction instanceof Function

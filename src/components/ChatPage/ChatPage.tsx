@@ -1,14 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { produce } from "immer";
-import { ArrowDown, Home, PanelLeft, PanelRight } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
@@ -46,18 +41,17 @@ import {
 } from "~/lib/typesJsonData";
 import { cn, dataURLtoFile, getCsvFile, html, safeSleep } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
-import NewChatIcon from "../Icons/NewChatIcon";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
-import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import LeftPanel from "./Children/LeftPanel/LeftPanel";
 import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import RightPanel from "./Children/RightPanel/RightPanel";
+import TopPanel from "./Children/TopPanel/TopPanel";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
 export type FileEntry = {
@@ -985,48 +979,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         {...dropAreaProps}
       >
         {isDragging && <DraggingBackdrop />}
-        <div className="border-b border-b-input p-4 flex justify-between items-center">
-          <span className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                setLeftPanelOpen((prev) => !prev);
-              }}
-            >
-              <PanelLeft />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={openNewChatLoading}
-              onClick={() => {
-                openNewChat();
-              }}
-            >
-              <NewChatIcon />
-            </Button>
-            <Link to="/">
-              <Button variant="outline" size="icon">
-                <Home />
-              </Button>
-            </Link>
-          </span>
-          <span>{chat?.title || "New Chat"}</span>
-          <span className="flex gap-2">
-            <ModeToggle />
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                setRightPanelOpen((prev) => !prev);
-              }}
-            >
-              <PanelRight />
-            </Button>
-          </span>
-        </div>
+        <TopPanel
+          openNewChat={openNewChat}
+          openNewChatLoading={openNewChatLoading}
+          setLeftPanelOpen={setLeftPanelOpen}
+          setRightPanelOpen={setRightPanelOpen}
+          chat={chat}
+        />
         {messagesLoading ? (
           <>
             <Container centerContent={true}>
