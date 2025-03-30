@@ -34,7 +34,7 @@ const SharedChatPage: React.FC<SharedChatPageProps> = ({}) => {
   }
 
   return (
-    <div>
+    <div className="h-screen flex flex-col">
       <div className="border-b border-b-input p-4 flex justify-between items-center">
         <span className="flex gap-2">
           <Link to="/">
@@ -60,9 +60,11 @@ const SharedChatPage: React.FC<SharedChatPageProps> = ({}) => {
           <ModeToggle />
         </span>
       </div>
-      <Container>
-        <RenderMessages messages={sharedChat.messages} type="shared-chat" />
-      </Container>
+      <div className="flex-1 overflow-auto">
+        <Container>
+          <RenderMessages messages={sharedChat.messages} type="shared-chat" />
+        </Container>
+      </div>
     </div>
   );
 };
