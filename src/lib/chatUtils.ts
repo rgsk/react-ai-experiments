@@ -1,0 +1,74 @@
+import { Message } from "./typesJsonData";
+
+import { FileEntry } from "~/components/ChatPage/ChatPage";
+import { recursiveParseJson } from "~/lib/utils";
+
+export function createMarkdownContent(messages: Message[]): string {
+  let markdownContent = "# Chat Export\n\n";
+  messages.forEach((message) => {
+    const role = message.role.charAt(0).toUpperCase() + message.role.slice(1);
+    if (message.role === "user" || message.role === "assistant") {
+      if (
+        !(
+          typeof message.content === "string" &&
+          message.content.startsWith("calling tools - ")
+        )
+      ) {
+        markdownContent += `## ${role}\n\n`;
+        if (message.type === "image_url") {
+          const { fileName, url } = messageContentParsers.image_url(
+            message.content
+          );
+          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>`;
+        } else if (message.type === "file") {
+          const { fileName, url } = messageContentParsers.file(message.content);
+          markdownContent += `[📄 ${fileName}](${url})`;
+        } else if (message.type === "image_ocr") {
+          const { fileName, url } = messageContentParsers.image_ocr(
+            message.content
+          );
+          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>`;
+        } else {
+          markdownContent += `${message.content}`;
+        }
+        markdownContent += `\n\n`;
+      }
+    }
+  });
+  return markdownContent;
+}
+
+export const messageContentParsers = {
+  image_url: (messageContent: any) => {
+    const fileName = messageContent[0].text;
+    const url = messageContent[1].image_url.url;
+    return { fileName, url };
+  },
+  image_ocr: (messageContent: any) => {
+    const { fileName, url, content } = JSON.parse(messageContent) as {
+      fileName: string;
+      url: string;
+      content: string;
+    };
+    const { imageModelOutput, imageOCROutput } = content as any;
+    return {
+      fileName,
+      url,
+      imageModelOutput,
+      imageOCROutput,
+    };
+  },
+  file: (messageContent: any) => {
+    const parsedContent = recursiveParseJson(messageContent as string) as {
+      fileEntry: FileEntry;
+      content: string;
+      instruction: string;
+      summary: string;
+      type: "rag" | "full";
+    };
+    const fileEntry = parsedContent.fileEntry;
+    const fileName = fileEntry.fileMetadata?.name;
+    const url = fileEntry.s3Url;
+    return { fileEntry, parsedContent, fileName, url };
+  },
+};

@@ -6,8 +6,10 @@ import {
   PanelRight,
   Share,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import NewChatIcon from "~/components/Icons/NewChatIcon";
+import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { ModeToggle } from "~/components/Shared/ModeToggle";
 import { Button } from "~/components/ui/button";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
@@ -33,6 +35,7 @@ const TopPanel: React.FC<TopPanelProps> = ({
   chat,
 }) => {
   const { copy, copied } = useCopyToClipboard();
+  const [shareChatLoading, setShareChatLoading] = useState(false);
 
   return (
     <div className="border-b border-b-input p-4 flex justify-between items-center">
@@ -67,14 +70,22 @@ const TopPanel: React.FC<TopPanelProps> = ({
         <Button
           variant="outline"
           onClick={async () => {
+            setShareChatLoading(true);
             const sharedChatLink = await shareChat();
             if (sharedChatLink) {
               copy(sharedChatLink);
             }
+            setShareChatLoading(false);
           }}
           size="icon"
         >
-          {copied ? <Check /> : <Share />}
+          {shareChatLoading ? (
+            <LoadingSpinner />
+          ) : copied ? (
+            <Check />
+          ) : (
+            <Share />
+          )}
         </Button>
         <Button variant="outline" onClick={exportChat} size="icon">
           <Download />

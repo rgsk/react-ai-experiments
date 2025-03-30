@@ -11,6 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
+import { messageContentParsers } from "~/lib/chatUtils";
 import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
 import { cn, extractTagContent } from "~/lib/utils";
@@ -19,7 +20,6 @@ import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
 import RenderToolCall from "./RenderToolCall";
-import messageContentParsers from "./messageContentParsers";
 export type DisplayMessagesType = "chat" | "shared-chat";
 interface RenderMessagesProps {
   messages: Message[];

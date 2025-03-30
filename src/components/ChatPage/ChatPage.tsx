@@ -20,6 +20,7 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
+import { createMarkdownContent } from "~/lib/chatUtils";
 import clientTools from "~/lib/clientTools";
 import {
   defaultModel,
@@ -58,7 +59,6 @@ import { Button } from "../ui/button";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import LeftPanel from "./Children/LeftPanel/LeftPanel";
 import MessageInput from "./Children/MessageInput";
-import messageContentParsers from "./Children/RenderMessages/messageContentParsers";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import RightPanel from "./Children/RightPanel/RightPanel";
 import TopPanel from "./Children/TopPanel/TopPanel";
@@ -124,41 +124,6 @@ function mergeUserMessages(messages: Message[]): Message[] {
   }
 
   return result;
-}
-
-function createMarkdownContent(messages: Message[]): string {
-  let markdownContent = "# Chat Export\n\n";
-  messages.forEach((message) => {
-    const role = message.role.charAt(0).toUpperCase() + message.role.slice(1);
-    if (message.role === "user" || message.role === "assistant") {
-      if (
-        !(
-          typeof message.content === "string" &&
-          message.content.startsWith("calling tools - ")
-        )
-      ) {
-        markdownContent += `## ${role}\n\n`;
-        if (message.type === "image_url") {
-          const { fileName, url } = messageContentParsers.image_url(
-            message.content
-          );
-          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>`;
-        } else if (message.type === "file") {
-          const { fileName, url } = messageContentParsers.file(message.content);
-          markdownContent += `[📄 ${fileName}](${url})`;
-        } else if (message.type === "image_ocr") {
-          const { fileName, url } = messageContentParsers.image_ocr(
-            message.content
-          );
-          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>`;
-        } else {
-          markdownContent += `${message.content}`;
-        }
-        markdownContent += `\n\n`;
-      }
-    }
-  });
-  return markdownContent;
 }
 
 interface ChatPageProps {}
