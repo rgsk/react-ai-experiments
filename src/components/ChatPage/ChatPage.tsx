@@ -11,6 +11,14 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { v4 } from "uuid";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import {
@@ -20,7 +28,7 @@ import {
 } from "~/hooks/codeRunners/usePythonRunner";
 import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
-import useGlobalContext from "~/hooks/useGlobalContext";
+import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
@@ -143,6 +151,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     "rightPanelOpen",
     true
   );
+  const { logLevel, setLogLevel } = useGlobalContext();
   const { id: chatId } = useParams<{ id: string }>();
   const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
@@ -1284,6 +1293,26 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             <div>
               <ModelSelector model={model} setModel={setModel} />
             </div>
+            <div className="h-4"></div>
+            <Select
+              value={logLevel}
+              onValueChange={(value) => {
+                setLogLevel(value as LogLevel);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Log Level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {[LogLevel.DEBUG, LogLevel.INFO].map((o) => (
+                    <SelectItem key={o} value={o}>
+                      {o}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}

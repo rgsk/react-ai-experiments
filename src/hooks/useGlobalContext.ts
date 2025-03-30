@@ -26,11 +26,24 @@ export const getToken = () => {
   }
   return token;
 };
+export enum LogLevel {
+  // TRACE = "TRACE",
+  DEBUG = "DEBUG",
+  INFO = "INFO",
+  // WARN = "WARN",
+  // ERROR = "ERROR",
+  // FATAL = "FATAL"
+}
+
 export const useGlobalContextValue = () => {
   const [token, setToken] = useLocalStorageState<string>("token");
   const [tokenLoading, setTokenLoading] = useState(true);
   const [firebaseUser, setFirebaseUser] = useState<User>();
   const [isFirstHistoryRender, setIsFirstHistoryRender] = useState(true);
+  const [logLevel, setLogLevel] = useLocalStorageState<LogLevel>(
+    "logLevel",
+    LogLevel.DEBUG
+  );
 
   const [
     creditDetails,
@@ -125,6 +138,8 @@ export const useGlobalContextValue = () => {
     setCreditsOverMessage,
     isFirstHistoryRender,
     setIsFirstHistoryRender,
+    logLevel,
+    setLogLevel,
   };
 };
 

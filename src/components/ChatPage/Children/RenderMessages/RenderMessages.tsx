@@ -10,6 +10,7 @@ import PDFReader from "~/components/Shared/PDFReader/PDFReader";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
+import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
 import { cn, extractTagContent, recursiveParseJson } from "~/lib/utils";
@@ -34,6 +35,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
 }) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
   const [previewedImageUrl, setPreviewedImageUrl] = useState<string>();
+  const { logLevel } = useGlobalContext();
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -90,53 +92,57 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     </a>
                   </FilePreview>
                 </div>
-                <div className="h-4"></div>
-                <div>
-                  <CollapsibleWrapper
-                    scrollContainerRef={scrollContainerRef}
-                    heading={`View - ${fileEntry.fileMetadata!.name}`}
-                    type="right"
-                    loading={false}
-                  >
-                    <div className="pr-4 w-[784px]">
-                      {fileEntry.s3Url!.endsWith(".pdf") ? (
-                        <PDFReader
-                          pdfUrl={fileEntry.s3Url!}
-                          fileName={fileEntry.fileMetadata!.name}
-                        />
-                      ) : fileEntry.s3Url!.endsWith(".csv") ? (
-                        <CsvRenderer
-                          url={fileEntry.s3Url!}
-                          fileName={fileEntry.fileMetadata!.name}
-                        />
-                      ) : (
-                        <p>
-                          Rendering the file {fileEntry.fileMetadata!.name} is
-                          not supported.
-                        </p>
-                      )}
+                {logLevel === LogLevel.DEBUG && (
+                  <>
+                    <div className="h-4"></div>
+                    <div>
+                      <CollapsibleWrapper
+                        scrollContainerRef={scrollContainerRef}
+                        heading={`View - ${fileEntry.fileMetadata!.name}`}
+                        type="right"
+                        loading={false}
+                      >
+                        <div className="pr-4 w-[784px]">
+                          {fileEntry.s3Url!.endsWith(".pdf") ? (
+                            <PDFReader
+                              pdfUrl={fileEntry.s3Url!}
+                              fileName={fileEntry.fileMetadata!.name}
+                            />
+                          ) : fileEntry.s3Url!.endsWith(".csv") ? (
+                            <CsvRenderer
+                              url={fileEntry.s3Url!}
+                              fileName={fileEntry.fileMetadata!.name}
+                            />
+                          ) : (
+                            <p>
+                              Rendering the file {fileEntry.fileMetadata!.name}{" "}
+                              is not supported.
+                            </p>
+                          )}
+                        </div>
+                      </CollapsibleWrapper>
                     </div>
-                  </CollapsibleWrapper>
-                </div>
-                <div className="h-4"></div>
-                <div className="flex justify-end">
-                  <div className="w-[640px]">
-                    <CollapsibleWrapper
-                      scrollContainerRef={scrollContainerRef}
-                      heading={`File Parsing Result - ${
-                        fileEntry.fileMetadata!.name
-                      }`}
-                      type="right"
-                      loading={message.status === "in_progress"}
-                    >
-                      <div className="pr-4">
-                        <p className="whitespace-pre-wrap break-words w-[640px]">
-                          {JSON.stringify(obj, null, 4)}
-                        </p>
+                    <div className="h-4"></div>
+                    <div className="flex justify-end">
+                      <div className="w-[640px]">
+                        <CollapsibleWrapper
+                          scrollContainerRef={scrollContainerRef}
+                          heading={`File Parsing Result - ${
+                            fileEntry.fileMetadata!.name
+                          }`}
+                          type="right"
+                          loading={message.status === "in_progress"}
+                        >
+                          <div className="pr-4">
+                            <p className="whitespace-pre-wrap break-words w-[640px]">
+                              {JSON.stringify(obj, null, 4)}
+                            </p>
+                          </div>
+                        </CollapsibleWrapper>
                       </div>
-                    </CollapsibleWrapper>
-                  </div>
-                </div>
+                    </div>
+                  </>
+                )}
               </div>
             );
           } else if (message.type === "image_url") {
@@ -179,30 +185,35 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     onLoad={scrollToBottom}
                   />
                 </div>
-                <div className="h-4"></div>
-                <div className="flex justify-end">
-                  <div className="max-w-[640px]">
-                    <CollapsibleWrapper
-                      scrollContainerRef={scrollContainerRef}
-                      heading={`Image Parsing Result - ${fileName}`}
-                      type="right"
-                      loading={message.status === "in_progress"}
-                    >
-                      <div className="pr-4">
-                        <p>Image Model Output:</p>
-                        <p>{imageModelOutput}</p>
+                {logLevel === LogLevel.DEBUG && (
+                  <>
+                    <div className="h-4"></div>
+                    <div className="flex justify-end">
+                      <div className="max-w-[640px]">
+                        <CollapsibleWrapper
+                          scrollContainerRef={scrollContainerRef}
+                          heading={`Image Parsing Result - ${fileName}`}
+                          type="right"
+                          loading={message.status === "in_progress"}
+                        >
+                          <div className="pr-4">
+                            <p>Image Model Output:</p>
+                            <p>{imageModelOutput}</p>
+                          </div>
+                          <Separator className="my-4 h-[2px]" />
+                          <div className="pr-4">
+                            <p>Image OCR Output:</p>
+                            <p>{imageOCROutput}</p>
+                          </div>
+                        </CollapsibleWrapper>
                       </div>
-                      <Separator className="my-4 h-[2px]" />
-                      <div className="pr-4">
-                        <p>Image OCR Output:</p>
-                        <p>{imageOCROutput}</p>
-                      </div>
-                    </CollapsibleWrapper>
-                  </div>
-                </div>
+                    </div>
+                  </>
+                )}
               </div>
             );
           } else if (message.role === "tool") {
+            if (logLevel !== LogLevel.DEBUG) return null;
             const toolCall = messages
               .slice(0, i)
               .reverse()
@@ -233,6 +244,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             );
           } else if (message.role === "assistant") {
             if (typeof message.content !== "string") return null;
+            if (logLevel !== LogLevel.DEBUG) {
+              if (message.content.startsWith("calling tools - ")) return null;
+            }
             const reasoningContent = extractTagContent(
               message.content,
               "reasoning_content",
@@ -300,7 +314,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     </div>
                   )}
                   <div className="h-4"></div>
-                  {message.tool_calls && (
+                  {message.tool_calls && logLevel === LogLevel.DEBUG && (
                     <div>
                       <CollapsibleWrapper
                         scrollContainerRef={scrollContainerRef}
