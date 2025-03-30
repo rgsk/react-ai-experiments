@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+
 interface SimpleModalProps {
   onClose: () => void;
   children: any;
@@ -12,9 +14,15 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
     <div>
       <div className="fixed inset-0 z-[100]">
         <div
-          className="fixed h-full w-full bg-[#000] bg-opacity-20 backdrop-filter backdrop-blur-[2px]"
+          className="fixed h-full w-full bg-[#000] bg-opacity-80"
           onClick={onClose}
-        ></div>
+        >
+          <div className="flex justify-end">
+            <button className="p-[20px]">
+              <X />
+            </button>
+          </div>
+        </div>
         <div className="flex items-center justify-center h-screen">
           <div
             className="w-[80%] z-[1000] relative"

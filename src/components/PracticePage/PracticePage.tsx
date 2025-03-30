@@ -2,49 +2,14 @@ interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <p>hii</p>
-      <App />
+      {/* <ImagePreview
+        url={
+          // "https://pubbuckrah.s3.us-east-1.amazonaws.com/049a4048-84de-4a5e-924d-9ab8954c2f9c/download.png"
+          // "https://pubbuckrah.s3.us-east-1.amazonaws.com/8e14d549-f64f-4135-9bb9-8bcf621d306c/image.png"
+          "https://pubbuckrah.s3.us-east-1.amazonaws.com/fde7345e-d30e-4018-9559-2ea3f7ac4a5e/image.png"
+        }
+      /> */}
     </div>
   );
 };
 export default PracticePage;
-
-import React, { useState } from "react";
-import { addStyles, EditableMathField, StaticMathField } from "react-mathquill";
-import { Button } from "../ui/button";
-
-// inserts the required css to the <head> block.
-// you can skip this, if you want to do that by yourself.
-addStyles();
-
-const EditableMathExample = () => {
-  const [latex, setLatex] = useState("\\frac{1}{\\sqrt{2}}\\cdot 2");
-
-  return (
-    <div>
-      <EditableMathField
-        latex={latex}
-        onChange={(mathField) => {
-          setLatex(mathField.latex());
-        }}
-      />
-      <p>{latex}</p>
-      <StaticMathField>{latex}</StaticMathField>
-      <Button>Execute</Button>
-    </div>
-  );
-};
-
-const StaticMathExample = () => {
-  return <StaticMathField>{"\\frac{1}{\\sqrt{2}}\\cdot 2"}</StaticMathField>;
-};
-
-const App = () => (
-  <div>
-    <h2>Editable Math Field</h2>
-    <EditableMathExample />
-    <br />
-    <h2>Static Math Field</h2>
-    <StaticMathExample />
-  </div>
-);
