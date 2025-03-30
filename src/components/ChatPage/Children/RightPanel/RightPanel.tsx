@@ -14,7 +14,7 @@ import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { SetSharedState } from "~/hooks/useJsonData";
 import { Model } from "~/lib/constants";
 import { Persona, Preferences } from "~/lib/typesJsonData";
-import ModelSelector from "./ModelSelector";
+import ModelSelector from "../ModelSelector";
 interface RightPanelProps {
   preferences: Preferences;
   setPreferences: SetSharedState<Preferences>;

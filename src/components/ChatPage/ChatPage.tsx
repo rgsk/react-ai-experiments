@@ -65,7 +65,7 @@ import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBloc
 import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
-import RightPanel from "./Children/RightPanel";
+import RightPanel from "./Children/RightPanel/RightPanel";
 import { SearchDialog } from "./Children/SearchDialog";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
