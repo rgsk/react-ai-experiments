@@ -39,7 +39,14 @@ import {
   ToolSource,
   ToolVariant,
 } from "~/lib/typesJsonData";
-import { cn, dataURLtoFile, getCsvFile, html, safeSleep } from "~/lib/utils";
+import {
+  cn,
+  dataURLtoFile,
+  downloadContentFile,
+  getCsvFile,
+  html,
+  safeSleep,
+} from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
@@ -114,6 +121,24 @@ function mergeUserMessages(messages: Message[]): Message[] {
   }
 
   return result;
+}
+
+function createMarkdownContent(messages: Message[]): string {
+  let markdownContent = "# Chat Export\n\n";
+  messages.forEach((message) => {
+    const role = message.role.charAt(0).toUpperCase() + message.role.slice(1);
+    if (message.role === "user" || message.role === "assistant") {
+      if (
+        !(
+          typeof message.content === "string" &&
+          message.content.startsWith("calling tools - ")
+        )
+      ) {
+        markdownContent += `## ${role}\n\n${message.content}\n\n`;
+      }
+    }
+  });
+  return markdownContent;
 }
 
 interface ChatPageProps {}
@@ -615,6 +640,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { dropAreaProps, isDragging } = useDropArea({
     onFilesChange: handleFilesChange,
   });
+  const exportChat = () => {
+    if (!messages || !chat || !chat.title) return;
+    const markdown = createMarkdownContent(messages);
+    downloadContentFile({
+      content: markdown,
+      filename: `Chat: ${chat.title}.md`,
+    });
+  };
 
   const processAttachedFiles = async (userMessage: Message) => {
     setProcessAttachedFilesLoading(true);
@@ -984,8 +1017,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           openNewChatLoading={openNewChatLoading}
           setLeftPanelOpen={setLeftPanelOpen}
           setRightPanelOpen={setRightPanelOpen}
+          exportChat={exportChat}
           chat={chat}
         />
+
         {messagesLoading ? (
           <>
             <Container centerContent={true}>

@@ -169,3 +169,28 @@ export const fetchCSV = async (url: string): Promise<string> => {
     throw new Error(`Failed to fetch CSV content: ${error}`);
   }
 };
+
+// Function to trigger a download of a file created from a string
+export function downloadContentFile({
+  content,
+  filename,
+}: {
+  content: string;
+  filename: string;
+}) {
+  // Create a new Blob with the markdown content
+  const blob = new Blob([content]);
+  // Create a URL for the Blob
+  const url = window.URL.createObjectURL(blob);
+  // Create an anchor element and trigger a click to download the file
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  // Clean up the DOM and release the object URL
+  setTimeout(() => {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 0);
+}

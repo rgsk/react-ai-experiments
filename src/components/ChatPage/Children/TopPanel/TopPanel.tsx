@@ -1,4 +1,4 @@
-import { Home, PanelLeft, PanelRight } from "lucide-react";
+import { Download, Home, PanelLeft, PanelRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import NewChatIcon from "~/components/Icons/NewChatIcon";
 import { ModeToggle } from "~/components/Shared/ModeToggle";
@@ -12,12 +12,14 @@ interface TopPanelProps {
   openNewChat: () => void;
   openNewChatLoading: boolean;
   chat?: Chat;
+  exportChat: () => void;
 }
 const TopPanel: React.FC<TopPanelProps> = ({
   setLeftPanelOpen,
   setRightPanelOpen,
   openNewChat,
   openNewChatLoading,
+  exportChat,
   chat,
 }) => {
   return (
@@ -50,6 +52,9 @@ const TopPanel: React.FC<TopPanelProps> = ({
       </span>
       <span>{chat?.title || "New Chat"}</span>
       <span className="flex gap-2">
+        <Button variant="outline" onClick={exportChat} size="icon">
+          <Download />
+        </Button>
         <ModeToggle />
 
         <Button
