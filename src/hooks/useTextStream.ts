@@ -25,6 +25,7 @@ const useTextStream = ({
   handleToolCallRef.current = handleToolCall;
   const handleToolCallOutputRef = useRef(handleToolCallOutput);
   handleToolCallOutputRef.current = handleToolCallOutput;
+  const [toolCallsInProgress, setToolCallsInProgress] = useState(false);
   useEffect(() => {
     const socket = socketRef.current;
     if (socket) {
@@ -36,6 +37,9 @@ const useTextStream = ({
       });
       socket.on("content", (content) => {
         setText((prev) => prev + content);
+      });
+      socket.on("tool_calls", () => {
+        setToolCallsInProgress(true);
       });
       socket.on("reasoning_content", (content) => {
         setReasoningText((prev) => prev + content);
@@ -86,6 +90,7 @@ const useTextStream = ({
     reset,
     reasoningText,
     handleStop,
+    toolCallsInProgress,
   };
 };
 export default useTextStream;

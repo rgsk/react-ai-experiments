@@ -270,6 +270,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     text,
     reasoningText,
     handleStop,
+    toolCallsInProgress,
   } = useTextStream({
     handleToolCall,
     handleToolCallOutput,
@@ -406,6 +407,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     observerDeps: [(messages?.length ?? 0) > 0],
     scrollBottomDeps: [messages],
   });
+  const [processAttachedFilesLoading, setProcessAttachedFilesLoading] =
+    useState(false);
 
   const chatRef = useRef(chat);
   chatRef.current = chat;
@@ -634,6 +637,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   });
 
   const processAttachedFiles = async (userMessage: Message) => {
+    setProcessAttachedFilesLoading(true);
     if (!model) {
       alert("Please select a model first");
       return;
@@ -785,6 +789,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         }
       })
     );
+    setProcessAttachedFilesLoading(false);
   };
 
   const getCurrentMessages = () => {
@@ -954,11 +959,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     return getHistoryBlocks(chatHistory?.data.map(({ value }) => value) || []);
   }, [chatHistory]);
 
+  const assistantMessageLoading =
+    toolCallsInProgress ||
+    toolCallsAndOutputs.length > 0 ||
+    processAttachedFilesLoading ||
+    (textStreamLoading && !text && !reasoningText);
+
   const renderMessageInput = () => {
     return (
       <MessageInput
         handleSend={handleSend}
-        loading={toolCallsAndOutputs.length > 0 || textStreamLoading}
+        loading={toolCallsInProgress || textStreamLoading}
         interrupt={localHandleStop}
         disabled={!model}
         placeholder="Message"
@@ -1106,10 +1117,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                     scrollToBottom={scrollToBottom}
                     messages={messages ?? []}
                     handleSend={handleSend}
-                    loading={
-                      toolCallsAndOutputs.length > 0 ||
-                      (textStreamLoading && !text && !reasoningText)
-                    }
+                    loading={assistantMessageLoading}
                     scrollContainerRef={scrollContainerRef}
                   />
                 </Container>
