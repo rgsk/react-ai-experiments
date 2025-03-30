@@ -134,7 +134,13 @@ function createMarkdownContent(messages: Message[]): string {
           message.content.startsWith("calling tools - ")
         )
       ) {
-        markdownContent += `## ${role}\n\n${message.content}\n\n`;
+        if (message.type === "image_url") {
+          const fileName = (message as any).content[0].text;
+          const url = (message as any).content[1].image_url.url;
+          markdownContent += `## ${role}\n\n<img src="${url}" alt="${fileName}" width="500"/>\n\n`;
+        } else {
+          markdownContent += `## ${role}\n\n${message.content}\n\n`;
+        }
       }
     }
   });
