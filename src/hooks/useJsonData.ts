@@ -30,13 +30,8 @@ function useJsonData<T>(
   const lastFetchedValueRef = useRef<T | undefined>();
   const migrationRef = useRef(migration);
   migrationRef.current = migration;
-  const setSharedState = useCallback(
-    (
-      valueOrFunction:
-        | (T | undefined)
-        | ((prev: T | undefined) => T | undefined),
-      mandatorySetKey = false
-    ) => {
+  const setSharedState: SetSharedState<T> = useCallback(
+    (valueOrFunction, mandatorySetKey = false) => {
       // Allow value to be a function so we have same API as useState
       const newState =
         valueOrFunction instanceof Function
@@ -146,3 +141,8 @@ function useJsonData<T>(
   ] as const;
 }
 export default useJsonData;
+
+export type SetSharedState<T> = (
+  valueOrFunction: (T | undefined) | ((prev: T | undefined) => T | undefined),
+  mandatorySetKey?: boolean
+) => void;

@@ -70,6 +70,29 @@ export type UserData = {
   avatarUrl: string;
   createdAt: ISODateString;
 };
+export type Preferences = {
+  instructions: {
+    enabled: boolean;
+    children: {
+      userDetails: {
+        enabled: boolean;
+      };
+      memory: {
+        enabled: boolean;
+      };
+      currentDate: {
+        enabled: boolean;
+      };
+      persona: {
+        enabled: boolean;
+      };
+      relatedQuestion: {
+        enabled: boolean;
+        count: number;
+      };
+    };
+  };
+};
 export type Memory = {
   id: string;
   statement: string;

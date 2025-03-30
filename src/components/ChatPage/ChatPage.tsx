@@ -1,4 +1,3 @@
-import { Label } from "@radix-ui/react-label";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { produce } from "immer";
@@ -11,14 +10,6 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { v4 } from "uuid";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import {
@@ -28,7 +19,7 @@ import {
 } from "~/hooks/codeRunners/usePythonRunner";
 import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
-import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
+import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
@@ -48,6 +39,7 @@ import {
   Memory,
   Message,
   Persona,
+  Preferences,
   Tool,
   ToolCall,
   ToolSource,
@@ -69,13 +61,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Input } from "../ui/input";
-import { Switch } from "../ui/switch";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
 import MessageInput from "./Children/MessageInput";
-import ModelSelector from "./Children/ModelSelector";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
+import RightPanel from "./Children/RightPanel";
 import { SearchDialog } from "./Children/SearchDialog";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
@@ -151,7 +141,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     "rightPanelOpen",
     true
   );
-  const { logLevel, setLogLevel } = useGlobalContext();
   const { id: chatId } = useParams<{ id: string }>();
   const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
@@ -362,7 +351,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     }
     return key;
   };
-  const [preferences, setPreferences] = useJsonData(
+  const [preferences, setPreferences] = useJsonData<Preferences>(
     attachPersonaPrefixIfPresent(`preferences`),
     () => {
       return {
@@ -1158,177 +1147,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         )}
       </div>
       {rightPanelOpen && preferences && model && (
-        <div className="w-[260px] border-l border-l-input h-full flex flex-col">
-          <div className="p-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="instructions"
-                checked={preferences.instructions.enabled}
-                onCheckedChange={(value) => {
-                  setPreferences(
-                    produce((draft) => {
-                      if (!draft) return;
-                      draft.instructions.enabled = value;
-                    })
-                  );
-                }}
-              />
-              <Label htmlFor="instructions">Instructions</Label>
-            </div>
-            {preferences.instructions.enabled && (
-              <div className="pl-4 pt-2 space-y-2 scale-90 origin-top-left">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="userDetails"
-                    checked={
-                      preferences.instructions.children.userDetails.enabled
-                    }
-                    onCheckedChange={(value) => {
-                      setPreferences(
-                        produce((draft) => {
-                          if (!draft) return;
-                          draft.instructions.children.userDetails.enabled =
-                            value;
-                        })
-                      );
-                    }}
-                  />
-                  <Label htmlFor="userDetails">User Details</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="memory"
-                    checked={preferences.instructions.children.memory.enabled}
-                    onCheckedChange={(value) => {
-                      setPreferences(
-                        produce((draft) => {
-                          if (!draft) return;
-                          draft.instructions.children.memory.enabled = value;
-                        })
-                      );
-                    }}
-                  />
-                  <Label htmlFor="memory">Memory</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="currentDate"
-                    checked={
-                      preferences.instructions.children.currentDate.enabled
-                    }
-                    onCheckedChange={(value) => {
-                      setPreferences(
-                        produce((draft) => {
-                          if (!draft) return;
-                          draft.instructions.children.currentDate.enabled =
-                            value;
-                        })
-                      );
-                    }}
-                  />
-                  <Label htmlFor="currentDate">Current Date</Label>
-                </div>
-                {persona && (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="persona"
-                      checked={
-                        preferences.instructions.children.persona.enabled
-                      }
-                      onCheckedChange={(value) => {
-                        setPreferences(
-                          produce((draft) => {
-                            if (!draft) return;
-                            draft.instructions.children.persona.enabled = value;
-                          })
-                        );
-                      }}
-                    />
-                    <Label htmlFor="persona">Persona</Label>
-                  </div>
-                )}
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="related-questions"
-                      checked={
-                        preferences.instructions.children.relatedQuestion
-                          .enabled
-                      }
-                      onCheckedChange={(value) => {
-                        setPreferences(
-                          produce((draft) => {
-                            if (!draft) return;
-                            draft.instructions.children.relatedQuestion.enabled =
-                              value;
-                          })
-                        );
-                      }}
-                    />
-                    <Label htmlFor="related-questions">Related Questions</Label>
-                  </div>
-                  {preferences.instructions.children.relatedQuestion
-                    .enabled && (
-                    <>
-                      <div className="h-4"></div>
-                      <div>
-                        <Input
-                          type="number"
-                          placeholder="3"
-                          min={1}
-                          max={5}
-                          value={
-                            preferences.instructions.children.relatedQuestion
-                              .count === 0
-                              ? ""
-                              : preferences.instructions.children
-                                  .relatedQuestion.count
-                          }
-                          onChange={(e) => {
-                            setPreferences(
-                              produce((draft) => {
-                                if (!draft) return;
-                                const value = +e.target.value;
-                                if (value > 5) return;
-                                draft.instructions.children.relatedQuestion.count =
-                                  value;
-                              })
-                            );
-                          }}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="h-4"></div>
-            <div>
-              <ModelSelector model={model} setModel={setModel} />
-            </div>
-            <div className="h-4"></div>
-            <Select
-              value={logLevel}
-              onValueChange={(value) => {
-                setLogLevel(value as LogLevel);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Log Level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[LogLevel.DEBUG, LogLevel.INFO].map((o) => (
-                    <SelectItem key={o} value={o}>
-                      {o}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <RightPanel
+          model={model}
+          preferences={preferences}
+          setModel={setModel}
+          setPreferences={setPreferences}
+          persona={persona}
+        />
       )}
     </div>
   );
