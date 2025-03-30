@@ -25,7 +25,6 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
-import authService from "~/lib/authService";
 import clientTools from "~/lib/clientTools";
 import {
   defaultModel,
@@ -48,25 +47,17 @@ import {
 import { cn, dataURLtoFile, getCsvFile, html, safeSleep } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import NewChatIcon from "../Icons/NewChatIcon";
-import ProfileInfo from "../ProfileInfo/ProfileInfo";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
-import HistoryBlock from "./Children/History/HistoryBlock/HistoryBlock";
+import LeftPanel from "./Children/LeftPanel/LeftPanel";
 import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import RightPanel from "./Children/RightPanel/RightPanel";
-import { SearchDialog } from "./Children/SearchDialog";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
 export type FileEntry = {
@@ -978,39 +969,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   return (
     <div className="h-screen flex">
       {leftPanelOpen && (
-        <div className="w-[260px] border-r border-r-input h-full flex flex-col">
-          <div className="p-[16px] flex justify-between items-center">
-            <Button
-              onClick={() => {
-                openNewChat();
-              }}
-              disabled={openNewChatLoading}
-            >
-              <NewChatIcon />
-              <span>New Chat</span>
-            </Button>
-            <SearchDialog />
-          </div>
-          <div className="flex-1 overflow-auto space-y-[20px] px-[16px]">
-            {historyBlocks.map(([date, items], i) => (
-              <HistoryBlock key={i} date={date} chats={items} />
-            ))}
-          </div>
-          <div className="p-[16px]">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <span>
-                  <ProfileInfo />
-                </span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent avoidCollisions align="start" side="top">
-                <DropdownMenuItem onClick={authService.logout}>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+        <LeftPanel
+          openNewChat={openNewChat}
+          openNewChatLoading={openNewChatLoading}
+          historyBlocks={historyBlocks}
+        />
       )}
       <div
         className="flex-1 h-full flex flex-col relative"
