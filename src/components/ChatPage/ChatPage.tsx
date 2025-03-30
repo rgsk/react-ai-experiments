@@ -45,6 +45,7 @@ import {
   downloadContentFile,
   getCsvFile,
   html,
+  recursiveParseJson,
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
@@ -134,12 +135,25 @@ function createMarkdownContent(messages: Message[]): string {
           message.content.startsWith("calling tools - ")
         )
       ) {
+        markdownContent += `## ${role}\n\n`;
         if (message.type === "image_url") {
           const fileName = (message as any).content[0].text;
           const url = (message as any).content[1].image_url.url;
-          markdownContent += `## ${role}\n\n<img src="${url}" alt="${fileName}" width="500"/>\n\n`;
+          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>\n\n`;
+        } else if (message.type === "file") {
+          const obj = recursiveParseJson(message.content as string) as {
+            fileEntry: FileEntry;
+            content: string;
+            instruction: string;
+            summary: string;
+            type: "rag" | "full";
+          };
+          const fileEntry = obj.fileEntry;
+          const fileName = fileEntry.fileMetadata?.name;
+          const url = fileEntry.s3Url;
+          markdownContent += `[📄 ${fileName}](${url})\n\n`;
         } else {
-          markdownContent += `## ${role}\n\n${message.content}\n\n`;
+          markdownContent += `${message.content}\n\n`;
         }
       }
     }
