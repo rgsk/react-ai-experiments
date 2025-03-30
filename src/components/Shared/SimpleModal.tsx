@@ -19,7 +19,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
         >
           <div className="flex justify-end">
             <button className="p-[20px]">
-              <X />
+              <X className="text-white" />
             </button>
           </div>
         </div>
