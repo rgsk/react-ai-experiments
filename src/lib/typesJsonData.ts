@@ -63,6 +63,12 @@ export type Chat = {
   title: string;
   createdAt: ISODateString;
 };
+export type SharedChat = {
+  id: string;
+  chat: Chat;
+  messages: Message[];
+  createdAt: ISODateString;
+};
 export type UserData = {
   id: string;
   name: string;

@@ -10,16 +10,19 @@ import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { Message, MessageFeedback } from "~/lib/typesJsonData";
 import jsonDataService from "~/services/jsonDataService";
 import { HandleSend } from "../../ChatPage";
+import { DisplayMessagesType } from "../RenderMessages/RenderMessages";
 
 interface MessageActionsProps {
-  handleSend: HandleSend;
+  handleSend?: HandleSend;
   messages: Message[];
   index: number;
+  type: DisplayMessagesType;
 }
 const MessageActions: React.FC<MessageActionsProps> = ({
   handleSend,
   messages,
   index,
+  type,
 }) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
   const lastUserMessage = messages
@@ -68,39 +71,47 @@ const MessageActions: React.FC<MessageActionsProps> = ({
           <Copy size={18} />
         )}
       </ActionButton>
-      <ActionButton
-        tooltip="Regenerate"
-        onClick={() => {
-          // rerun the last user message
-          handleSend({
-            text: lastUserMessageText,
-          });
-        }}
-      >
-        <ArrowRotateRight size={18} />
-      </ActionButton>
-      <ActionButton
-        disabled={feedback?.type === "like"}
-        tooltip="Like"
-        onClick={() => {
-          onLikeDislike({ type: "like" });
-        }}
-      >
-        {feedback?.type === "like" ? <LikeFilledIcon /> : <Like1 size={18} />}
-      </ActionButton>
-      <ActionButton
-        disabled={feedback?.type === "dislike"}
-        tooltip="Dislike"
-        onClick={() => {
-          onLikeDislike({ type: "dislike" });
-        }}
-      >
-        {feedback?.type === "dislike" ? (
-          <DislikeFilledIcon />
-        ) : (
-          <Dislike size={18} />
-        )}
-      </ActionButton>
+      {type === "chat" && (
+        <>
+          <ActionButton
+            tooltip="Regenerate"
+            onClick={() => {
+              // rerun the last user message
+              handleSend?.({
+                text: lastUserMessageText,
+              });
+            }}
+          >
+            <ArrowRotateRight size={18} />
+          </ActionButton>
+          <ActionButton
+            disabled={feedback?.type === "like"}
+            tooltip="Like"
+            onClick={() => {
+              onLikeDislike({ type: "like" });
+            }}
+          >
+            {feedback?.type === "like" ? (
+              <LikeFilledIcon />
+            ) : (
+              <Like1 size={18} />
+            )}
+          </ActionButton>
+          <ActionButton
+            disabled={feedback?.type === "dislike"}
+            tooltip="Dislike"
+            onClick={() => {
+              onLikeDislike({ type: "dislike" });
+            }}
+          >
+            {feedback?.type === "dislike" ? (
+              <DislikeFilledIcon />
+            ) : (
+              <Dislike size={18} />
+            )}
+          </ActionButton>
+        </>
+      )}
     </div>
   );
 };

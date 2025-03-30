@@ -10,7 +10,7 @@ import SyntaxHighlighter from "../SyntaxHighlighter";
 interface RenderToolCallProps {
   toolCall: ChatCompletionMessageToolCall;
   message: Message;
-  scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
+  scrollContainerRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 const RenderToolCall: React.FC<RenderToolCallProps> = ({
   toolCall,

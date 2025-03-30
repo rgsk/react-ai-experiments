@@ -20,12 +20,14 @@ import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
 import RenderToolCall from "./RenderToolCall";
 import messageContentParsers from "./messageContentParsers";
+export type DisplayMessagesType = "chat" | "shared-chat";
 interface RenderMessagesProps {
   messages: Message[];
-  handleSend: HandleSend;
-  scrollToBottom: () => void;
-  loading: boolean;
-  scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
+  handleSend?: HandleSend;
+  scrollToBottom?: () => void;
+  loading?: boolean;
+  scrollContainerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  type: DisplayMessagesType;
 }
 const RenderMessages: React.FC<RenderMessagesProps> = ({
   messages,
@@ -33,6 +35,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
   scrollToBottom,
   loading,
   scrollContainerRef,
+  type,
 }) => {
   const { copy, copied, copiedText } = useCopyToClipboard();
   const [previewedImageUrl, setPreviewedImageUrl] = useState<string>();
@@ -45,7 +48,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
         const id = hashValue.substring(1);
         setTimeout(() => {
           document.getElementById(id)?.scrollIntoView();
-          scrollContainerRef.current?.scrollBy({ top: -16 });
+          scrollContainerRef?.current?.scrollBy({ top: -16 });
         }, 100);
       }
     }
@@ -299,6 +302,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                         handleSend={handleSend}
                         messages={messages}
                         index={i}
+                        type={type}
                       />
                     </div>
                   )}
@@ -330,7 +334,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                             <button
                               key={qs + i}
                               onClick={() => {
-                                handleSend({ text: qs });
+                                handleSend?.({ text: qs });
                               }}
                             >
                               {i === 0 && <Separator />}

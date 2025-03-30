@@ -34,6 +34,7 @@ import {
   Message,
   Persona,
   Preferences,
+  SharedChat,
   Tool,
   ToolCall,
   ToolSource,
@@ -48,6 +49,7 @@ import {
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
+import jsonDataService from "~/services/jsonDataService";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
@@ -666,6 +668,22 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       filename: `Chat: ${chat.title}.md`,
     });
   };
+  const shareChat = async () => {
+    if (!messages || !chat) return;
+    const sharedChatId = v4();
+    const key = `admin/public/sharedChats/${sharedChatId}`;
+    const sharedChat = await jsonDataService.setKey<SharedChat>({
+      key,
+      value: {
+        id: sharedChatId,
+        chat,
+        messages,
+        createdAt: new Date().toISOString(),
+      },
+    });
+    const link = `${window.location.origin}/shared-chat/${sharedChatId}`;
+    return link;
+  };
 
   const processAttachedFiles = async (userMessage: Message) => {
     setProcessAttachedFilesLoading(true);
@@ -1037,6 +1055,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           setRightPanelOpen={setRightPanelOpen}
           exportChat={exportChat}
           chat={chat}
+          shareChat={shareChat}
         />
 
         {messagesLoading ? (
@@ -1089,6 +1108,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                     handleSend={handleSend}
                     loading={assistantMessageLoading}
                     scrollContainerRef={scrollContainerRef}
+                    type="chat"
                   />
                 </Container>
                 <div className="relative">
