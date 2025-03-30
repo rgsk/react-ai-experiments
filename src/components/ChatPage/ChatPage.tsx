@@ -152,6 +152,15 @@ function createMarkdownContent(messages: Message[]): string {
           const fileName = fileEntry.fileMetadata?.name;
           const url = fileEntry.s3Url;
           markdownContent += `[📄 ${fileName}](${url})\n\n`;
+        } else if (message.type === "image_ocr") {
+          const { fileName, url, content } = JSON.parse(
+            message.content as string
+          ) as {
+            fileName: string;
+            url: string;
+            content: string;
+          };
+          markdownContent += `<img src="${url}" alt="${fileName}" width="500"/>\n\n`;
         } else {
           markdownContent += `${message.content}\n\n`;
         }
