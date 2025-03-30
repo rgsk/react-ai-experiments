@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface SimpleModalProps {
   onClose: () => void;
@@ -10,6 +11,19 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
   children,
   maxWidth = 300,
 }) => {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onCloseRef.current();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
   return (
     <div>
       <div className="fixed inset-0 z-[100]">
