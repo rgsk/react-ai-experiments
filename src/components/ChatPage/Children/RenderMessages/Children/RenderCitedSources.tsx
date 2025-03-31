@@ -16,7 +16,7 @@ const RenderCitedSources: React.FC<RenderCitedSourcesProps> = ({
   fetchedWebPages,
 }) => {
   return (
-    <div>
+    <div className="space-y-4">
       {(() => {
         const matchedSearchResults = sources
           .map((link, i) => {
@@ -50,6 +50,7 @@ const RenderCitedSources: React.FC<RenderCitedSourcesProps> = ({
           </>
         );
       })()}
+
       {(() => {
         const matchedWebPages = sources
           .map((link, i) => {

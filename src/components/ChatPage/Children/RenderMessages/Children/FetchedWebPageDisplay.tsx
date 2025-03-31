@@ -28,7 +28,7 @@ const FetchedWebPageDisplay: React.FC<FetchedWebPageDisplayProps> = ({
         </p>
         <p className="line-clamp-3">{fetchedWebPage.description}</p>
       </div>
-      {fetchedWebPage.og.image && (
+      {fetchedWebPage.og?.image && (
         <>
           <div className="flex-1"></div>
           <div>
