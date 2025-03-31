@@ -825,7 +825,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     const currentDateInstruction = html`
       <span>Current Date: ${currentDate}</span>
     `;
-    const googleSearchInstruction = html`
+    const googleSearchCurrentInstruction = html`
       <span
         >when the query is made to you, use Current Date to ensure you use the
         latest information from googleSearch tool
@@ -844,7 +844,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         initialInstructions.push(currentDateInstruction);
       }
       if (modelOptions[model].toolsSupport) {
-        initialInstructions.push(googleSearchInstruction);
+        initialInstructions.push(googleSearchCurrentInstruction);
       }
       if (persona) {
         if (preferences.instructions.children.persona.enabled) {
@@ -878,6 +878,28 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       };
     });
 
+    const googleSearchCiteSourcesInstruction = html`
+      <span>
+        when you have responded to user with googleSearch results, try to cite
+        sources in your response message, which can be link from Google Search
+        Results or link you used for getUrlContent
+      </span>
+      <span>
+        Apart from citing sources in your response message, return all the
+        sources used. Use this format - just list the links like below in hidden
+        tag
+        <hidden>
+          <cited-sources
+            ><source>
+            https://github.com/tashapais
+            </source>
+            <source>https://tashapais.com/</source>
+            <source>https://tashapais.medium.com/</source>
+            </cited-sources
+          >
+        </hidden>
+      </span>
+    `;
     const additionalInstructions: string[] = [];
     if (preferences.instructions.enabled) {
       if (preferences.instructions.children.relatedQuestion.enabled) {
@@ -886,6 +908,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             preferences.instructions.children.relatedQuestion.count || 3
           )
         );
+      }
+      if (modelOptions[model].toolsSupport) {
+        additionalInstructions.push(googleSearchCiteSourcesInstruction);
       }
     }
     const additionalMessages: Message[] = additionalInstructions.map(
