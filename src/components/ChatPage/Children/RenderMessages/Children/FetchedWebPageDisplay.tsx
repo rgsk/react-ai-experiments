@@ -28,13 +28,17 @@ const FetchedWebPageDisplay: React.FC<FetchedWebPageDisplayProps> = ({
         </p>
         <p className="line-clamp-3">{fetchedWebPage.description}</p>
       </div>
-      <div className="flex-1"></div>
-      <div>
-        <img
-          src={fetchedWebPage.og.image}
-          className="max-w-[100px] w-[100px] rounded-lg"
-        />
-      </div>
+      {fetchedWebPage.og.image && (
+        <>
+          <div className="flex-1"></div>
+          <div>
+            <img
+              src={fetchedWebPage.og.image}
+              className="max-w-[100px] w-[100px] rounded-lg"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

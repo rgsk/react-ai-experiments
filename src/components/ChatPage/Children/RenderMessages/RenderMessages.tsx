@@ -1,6 +1,6 @@
 import { Copy } from "iconsax-react";
 import { ArrowRight, Check, Download } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
@@ -12,13 +12,19 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { messageContentParsers } from "~/lib/messageContentParsers";
-import { Message } from "~/lib/typesJsonData";
+import toolCallParser from "~/lib/toolCallParser";
+import {
+  FetchedWebPage,
+  GoogleSearchResult,
+  Message,
+} from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
 import RenderCitedSources from "./Children/RenderCitedSources";
+import RenderMentionedUrls from "./Children/RenderMentionedUrls";
 import RenderToolCall from "./RenderToolCall";
 export type DisplayMessagesType = "chat" | "shared-chat";
 interface RenderMessagesProps {
@@ -43,6 +49,50 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
 
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+
+  const { googleSearchResults, fetchedWebPages } = useMemo(() => {
+    const [] = [loading];
+    let localGoogleSearchResults: GoogleSearchResult[] = [];
+    let localFetchedWebPages: { url: string; webPage: FetchedWebPage }[] = [];
+    const currentMessages = messagesRef.current;
+    for (let i = 0; i < currentMessages.length; i++) {
+      const message = currentMessages[i];
+      if (message.role === "tool" && message.status === "completed") {
+        const { toolCall } =
+          messageContentParsers.tool({ messages: currentMessages, index: i }) ??
+          {};
+        if (toolCall) {
+          if (toolCall.function.name === "googleSearch") {
+            const {
+              output: { googleSearchResults },
+            } = toolCallParser.googleSearch({
+              toolCall,
+              messageContent: message.content,
+            });
+            localGoogleSearchResults = [
+              ...localGoogleSearchResults,
+              ...googleSearchResults,
+            ];
+          } else if (toolCall.function.name === "getUrlContent") {
+            const {
+              arguments: { url, type },
+              output: { content },
+            } = toolCallParser.getUrlContent({
+              toolCall,
+              messageContent: message.content,
+            });
+
+            const page = content as FetchedWebPage;
+            localFetchedWebPages.push({ url, webPage: page });
+          }
+        }
+      }
+    }
+    return {
+      googleSearchResults: localGoogleSearchResults,
+      fetchedWebPages: localFetchedWebPages,
+    };
+  }, [loading]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -273,7 +323,8 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     <div className="py-4">
                       <RenderCitedSources
                         sources={citedSourcesResult?.sources}
-                        messages={messages}
+                        fetchedWebPages={fetchedWebPages}
+                        googleSearchResults={googleSearchResults}
                       />
                     </div>
                   )}
@@ -340,42 +391,52 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               </div>
             );
           } else if (message.role === "user") {
-            const { text } = messageContentParsers.user(message.content);
+            const { text, urls } = messageContentParsers.user(message.content);
             return (
-              <div
-                key={key}
-                id={`message-${message.id}`}
-                className="w-full flex group whitespace-pre-wrap"
-              >
+              <div key={key}>
                 <div
-                  className={cn(
-                    "rounded-lg bg-gray-100 dark:bg-gray-800 px-4 break-words ml-auto max-w-[640px] relative"
-                  )}
+                  id={`message-${message.id}`}
+                  className="w-full flex group whitespace-pre-wrap"
                 >
-                  <div className="absolute top-0 left-0 -translate-x-full group-hover:opacity-100 opacity-0 transition-all">
-                    <div className="p-4">
-                      <ActionButton
-                        onClick={() => {
-                          copy(text);
-                        }}
-                      >
-                        {copiedText === text && copied ? (
-                          <Check size={18} />
-                        ) : (
-                          <Copy size={18} />
-                        )}
-                      </ActionButton>
-                    </div>
-                  </div>
-                  <MemoizedMarkdownRenderer
-                    loading={message.status === "in_progress"}
-                    collapsibleWrapperTriggerClassname={
-                      "bg-gray-100 dark:bg-gray-800"
-                    }
+                  <div
+                    className={cn(
+                      "rounded-lg bg-gray-100 dark:bg-gray-800 px-4 break-words ml-auto max-w-[640px] relative"
+                    )}
                   >
-                    {text}
-                  </MemoizedMarkdownRenderer>
+                    <div className="absolute top-0 left-0 -translate-x-full group-hover:opacity-100 opacity-0 transition-all">
+                      <div className="p-4">
+                        <ActionButton
+                          onClick={() => {
+                            copy(text);
+                          }}
+                        >
+                          {copiedText === text && copied ? (
+                            <Check size={18} />
+                          ) : (
+                            <Copy size={18} />
+                          )}
+                        </ActionButton>
+                      </div>
+                    </div>
+                    <MemoizedMarkdownRenderer
+                      loading={message.status === "in_progress"}
+                      collapsibleWrapperTriggerClassname={
+                        "bg-gray-100 dark:bg-gray-800"
+                      }
+                    >
+                      {text}
+                    </MemoizedMarkdownRenderer>
+                  </div>
                 </div>
+                {urls.length > 0 && (
+                  <div className="py-4">
+                    <RenderMentionedUrls
+                      urls={urls}
+                      fetchedWebPages={fetchedWebPages}
+                      googleSearchResults={googleSearchResults}
+                    />
+                  </div>
+                )}
               </div>
             );
           } else {

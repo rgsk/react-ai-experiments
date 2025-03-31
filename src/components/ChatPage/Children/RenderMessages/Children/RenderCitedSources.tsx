@@ -1,63 +1,20 @@
 import { Label } from "@radix-ui/react-label";
-import { useMemo } from "react";
-import { messageContentParsers } from "~/lib/messageContentParsers";
-import toolCallParser from "~/lib/toolCallParser";
-import {
-  FetchedWebPage,
-  GoogleSearchResult,
-  Message,
-} from "~/lib/typesJsonData";
+import { FetchedWebPage, GoogleSearchResult } from "~/lib/typesJsonData";
 import CitedSourceLink from "./CitedSourceLink";
 
 interface RenderCitedSourcesProps {
   sources: string[];
-  messages: Message[];
+  googleSearchResults: GoogleSearchResult[];
+  fetchedWebPages: {
+    url: string;
+    webPage: FetchedWebPage;
+  }[];
 }
 const RenderCitedSources: React.FC<RenderCitedSourcesProps> = ({
   sources,
-  messages,
+  googleSearchResults,
+  fetchedWebPages,
 }) => {
-  const { googleSearchResults, fetchedWebPages } = useMemo(() => {
-    let localGoogleSearchResults: GoogleSearchResult[] = [];
-    let localFetchedWebPages: { url: string; webPage: FetchedWebPage }[] = [];
-    for (let i = 0; i < messages.length; i++) {
-      const message = messages[i];
-      if (message.role === "tool" && message.status === "completed") {
-        const { toolCall } =
-          messageContentParsers.tool({ messages: messages, index: i }) ?? {};
-        if (toolCall) {
-          if (toolCall.function.name === "googleSearch") {
-            const {
-              output: { googleSearchResults },
-            } = toolCallParser.googleSearch({
-              toolCall,
-              messageContent: message.content,
-            });
-            localGoogleSearchResults = [
-              ...localGoogleSearchResults,
-              ...googleSearchResults,
-            ];
-          } else if (toolCall.function.name === "getUrlContent") {
-            const {
-              arguments: { url, type },
-              output: { content },
-            } = toolCallParser.getUrlContent({
-              toolCall,
-              messageContent: message.content,
-            });
-
-            const page = content as FetchedWebPage;
-            localFetchedWebPages.push({ url, webPage: page });
-          }
-        }
-      }
-    }
-    return {
-      googleSearchResults: localGoogleSearchResults,
-      fetchedWebPages: localFetchedWebPages,
-    };
-  }, [messages]);
-
   return (
     <div>
       {(() => {

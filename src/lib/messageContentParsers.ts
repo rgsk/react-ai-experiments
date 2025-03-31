@@ -59,7 +59,8 @@ export const messageContentParsers = {
     };
   },
   user: (messageContent: any) => {
-    return { text: messageContent };
+    const urls = extractUrls(messageContent);
+    return { text: messageContent, urls };
   },
   tool: ({ messages, index }: { messages: Message[]; index: number }) => {
     const message = messages[index];
@@ -72,6 +73,11 @@ export const messageContentParsers = {
     return { toolCall };
   },
 };
+
+function extractUrls(text: string): string[] {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.match(urlRegex) || [];
+}
 
 const extractQuestionSuggestions = (text: string) => {
   let hasQuestionSuggestions = false;
