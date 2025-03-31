@@ -12,8 +12,13 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { messageContentParsers } from "~/lib/messageContentParsers";
-import { GoogleSearchResult, Message } from "~/lib/typesJsonData";
-import { cn, recursiveParseJson } from "~/lib/utils";
+import toolCallParser from "~/lib/toolCallParser";
+import {
+  FetchedWebPage,
+  GoogleSearchResult,
+  Message,
+} from "~/lib/typesJsonData";
+import { cn } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
@@ -57,10 +62,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
     }
   }, [messages.length, scrollContainerRef]);
 
-  const googleSearchResults = useMemo(() => {
+  const { googleSearchResults, fetchedWebPages } = useMemo(() => {
     const [] = [loading];
     const currentMessages = messagesRef.current;
-    let results: GoogleSearchResult[] = [];
+    let localGoogleSearchResults: GoogleSearchResult[] = [];
+    let localFetchedWebPages: { url: string; webPage: FetchedWebPage }[] = [];
     for (let i = 0; i < currentMessages.length; i++) {
       const message = currentMessages[i];
       if (message.role === "tool" && message.status === "completed") {
@@ -69,19 +75,40 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
           {};
         if (toolCall) {
           if (toolCall.function.name === "googleSearch") {
-            const entries = recursiveParseJson(message.content).content[0]
-              .text as GoogleSearchResult[];
-            results = [...results, ...entries];
+            const {
+              output: { googleSearchResults },
+            } = toolCallParser.googleSearch({
+              toolCall,
+              messageContent: message.content,
+            });
+            localGoogleSearchResults = [
+              ...localGoogleSearchResults,
+              ...googleSearchResults,
+            ];
+          } else if (toolCall.function.name === "getUrlContent") {
+            const {
+              arguments: { url, type },
+              output: { content },
+            } = toolCallParser.getUrlContent({
+              toolCall,
+              messageContent: message.content,
+            });
+
+            const page = content as FetchedWebPage;
+            localFetchedWebPages.push({ url, webPage: page });
           }
         }
       }
     }
-    return results;
+    return {
+      googleSearchResults: localGoogleSearchResults,
+      fetchedWebPages: localFetchedWebPages,
+    };
   }, [loading]);
 
   useEffect(() => {
-    console.log({ googleSearchResults });
-  }, [googleSearchResults]);
+    console.log({ googleSearchResults, fetchedWebPages });
+  }, [googleSearchResults, fetchedWebPages]);
 
   return (
     <div>
@@ -304,6 +331,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                               key={`${link}-${i}`}
                               link={link}
                               googleSearchResults={googleSearchResults}
+                              fetchedWebPages={fetchedWebPages}
                             ></CitedSourceLink>
                           );
                         })}

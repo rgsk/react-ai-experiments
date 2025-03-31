@@ -1,5 +1,6 @@
 import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
+import JSON5 from "json5";
 import { twMerge } from "tailwind-merge";
 import environmentVars from "./environmentVars";
 
@@ -103,7 +104,6 @@ export function dataURLtoFile(dataUrl: string, filename: string) {
   }
   return new File([u8arr], filename, { type: mime });
 }
-
 /**
  * Recursively attempts to parse JSON strings.
  * @param data - The input data to process.
@@ -113,7 +113,7 @@ export function recursiveParseJson(data: any): any {
   if (typeof data === "string") {
     try {
       // Attempt to parse the string.
-      const parsed = JSON.parse(data);
+      const parsed = JSON5.parse(data);
       // If parsed, recursively process the parsed result.
       return recursiveParseJson(parsed);
     } catch (err) {
@@ -212,3 +212,17 @@ export function memoizeFn<T extends (...args: any[]) => any>(fn: T): T {
     return result;
   }) as T;
 }
+
+export function getDomain(url: string): string {
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname;
+  } catch (e) {
+    console.error("Invalid URL:", e);
+    return "";
+  }
+}
+
+export const getFavicon = (domain: string) => {
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+};

@@ -3,7 +3,8 @@ import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Separator } from "~/components/ui/separator";
-import { GoogleSearchResult, Message } from "~/lib/typesJsonData";
+import toolCallParser from "~/lib/toolCallParser";
+import { Message } from "~/lib/typesJsonData";
 import { recursiveParseJson } from "~/lib/utils";
 import SyntaxHighlighter from "../SyntaxHighlighter";
 import GoogleSearchResultDisplay from "./Children/GoogleSearchResultDisplay";
@@ -85,9 +86,13 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
       </>
     );
   } else if (toolCall.function.name === "googleSearch") {
-    const { query } = toolCall.function.arguments as any;
-
-    const entries = parsedJsonContent.content[0].text as GoogleSearchResult[];
+    const {
+      arguments: { query },
+      output: { googleSearchResults },
+    } = toolCallParser.googleSearch({
+      toolCall,
+      messageContent: message.content,
+    });
     return (
       <>
         <div className="pl-4">
@@ -120,7 +125,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
             <p>Results:</p>
           </div>
           <div className="flex flex-col">
-            {entries.map((entry) => (
+            {googleSearchResults.map((entry) => (
               <TargetBlankLink href={entry.link} key={entry.title}>
                 <GoogleSearchResultDisplay
                   googleSearchResult={entry}

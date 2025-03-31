@@ -11,6 +11,8 @@ import {
   Message,
   Tool,
   ToolCall,
+  UrlContentType,
+  WebsiteMeta,
 } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
@@ -320,13 +322,3 @@ const experimentsService = {
   },
 };
 export default experimentsService;
-
-type UrlContentType =
-  | "pdf"
-  | "google_doc"
-  | "google_sheet"
-  | "web_page"
-  | "youtube_video"
-  | "image";
-
-export type WebsiteMeta = SampleResponseType["getMeta"];

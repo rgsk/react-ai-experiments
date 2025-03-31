@@ -160,3 +160,32 @@ export type GoogleSearchResult = {
   displayLink: string;
   image: string;
 };
+
+export type UrlContentType =
+  | "pdf"
+  | "google_doc"
+  | "google_sheet"
+  | "web_page"
+  | "youtube_video"
+  | "image";
+
+export type WebsiteMeta = {
+  title: string;
+  description: string;
+  image: string;
+  url: string;
+  bodyTextContent: string;
+};
+export type FetchedWebPage = {
+  title: string;
+  description: string;
+  og: {
+    site_name: string;
+    type: string;
+    title: string;
+    description: string;
+    image: string;
+    url: string;
+  };
+  content: string;
+};

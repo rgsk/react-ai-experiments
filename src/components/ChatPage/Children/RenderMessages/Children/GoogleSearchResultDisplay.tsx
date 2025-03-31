@@ -1,5 +1,5 @@
 import { GoogleSearchResult } from "~/lib/typesJsonData";
-import { cn } from "~/lib/utils";
+import { cn, getFavicon } from "~/lib/utils";
 
 interface GoogleSearchResultDisplayProps {
   googleSearchResult: GoogleSearchResult;
@@ -19,7 +19,7 @@ const GoogleSearchResultDisplay: React.FC<GoogleSearchResultDisplayProps> = ({
       <div>
         <div className="flex gap-3">
           <img
-            src={`https://www.google.com/s2/favicons?domain=${googleSearchResult.displayLink}&sz=64`}
+            src={getFavicon(googleSearchResult.displayLink)}
             className="w-[24px] h-[24px]"
           />
           <p>{googleSearchResult.displayLink}</p>
