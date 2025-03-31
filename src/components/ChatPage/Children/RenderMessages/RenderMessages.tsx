@@ -238,13 +238,8 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             if (logLevel !== LogLevel.DEBUG) {
               if (message.content.startsWith("calling tools - ")) return null;
             }
-            const {
-              reasoningContent,
-              text,
-              hasQuestionSuggestions,
-              questionSuggestions,
-              questionSuggestionsLoading,
-            } = messageContentParsers.assistant(message.content);
+            const { reasoningContent, text, questionSuggestionsResult } =
+              messageContentParsers.assistant(message.content);
             return (
               <div
                 key={key}
@@ -293,31 +288,36 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     </div>
                   )}
                 </div>
-                {hasQuestionSuggestions && (
+                {questionSuggestionsResult.hasQuestionSuggestions && (
                   <div className="p-4">
-                    {questionSuggestionsLoading && <LoadingSpinner size={20} />}
-                    {questionSuggestions.length > 0 && (
+                    {questionSuggestionsResult.questionSuggestionsLoading && (
+                      <LoadingSpinner size={20} />
+                    )}
+                    {questionSuggestionsResult.questionSuggestions.length >
+                      0 && (
                       <>
                         <div>
                           <p>Related Questions:</p>
                         </div>
                         <div className="h-2"></div>
                         <div className="flex flex-col">
-                          {questionSuggestions.map((qs, i) => (
-                            <button
-                              key={qs + i}
-                              onClick={() => {
-                                handleSend?.({ text: qs });
-                              }}
-                            >
-                              {i === 0 && <Separator />}
-                              <div className="py-2 text-left flex gap-2 items-center justify-between hover:bg-muted/50 transition-colors">
-                                <span>{qs}</span>
-                                <ArrowRight className="h-5 w-5" />
-                              </div>
-                              <Separator />
-                            </button>
-                          ))}
+                          {questionSuggestionsResult.questionSuggestions.map(
+                            (qs, i) => (
+                              <button
+                                key={qs + i}
+                                onClick={() => {
+                                  handleSend?.({ text: qs });
+                                }}
+                              >
+                                {i === 0 && <Separator />}
+                                <div className="py-2 text-left flex gap-2 items-center justify-between hover:bg-muted/50 transition-colors">
+                                  <span>{qs}</span>
+                                  <ArrowRight className="h-5 w-5" />
+                                </div>
+                                <Separator />
+                              </button>
+                            )
+                          )}
                         </div>
                       </>
                     )}

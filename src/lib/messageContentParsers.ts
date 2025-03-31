@@ -47,35 +47,42 @@ export const messageContentParsers = {
             "</reasoning_content>".length
         )
       : messageContent;
-    let hasQuestionSuggestions = false;
-    let questionSuggestions: string[] = [];
-    let questionSuggestionsLoading = false;
     const text = restContent;
-    const questionsCodeStartIndex = text.indexOf(`<questions>`);
-    const questionsCodeEndIndex = text.indexOf(`</questions>`);
-    if (questionsCodeStartIndex != -1) {
-      hasQuestionSuggestions = true;
-      questionSuggestionsLoading = true;
-    }
-    if (questionsCodeEndIndex !== -1) {
-      questionSuggestionsLoading = false;
-
-      questionSuggestions = text
-        .slice(
-          questionsCodeStartIndex + `<questions>`.length,
-          questionsCodeEndIndex
-        )
-        .split(separator);
-    }
+    const questionSuggestionsResult = extractQuestionSuggestions(text);
     return {
       reasoningContent,
-      hasQuestionSuggestions,
-      questionSuggestions,
-      questionSuggestionsLoading,
+      questionSuggestionsResult,
       text,
     };
   },
   user: (messageContent: any) => {
     return { text: messageContent };
   },
+};
+
+const extractQuestionSuggestions = (text: string) => {
+  let hasQuestionSuggestions = false;
+  let questionSuggestions: string[] = [];
+  let questionSuggestionsLoading = false;
+  const questionsCodeStartIndex = text.indexOf(`<questions>`);
+  const questionsCodeEndIndex = text.indexOf(`</questions>`);
+  if (questionsCodeStartIndex != -1) {
+    hasQuestionSuggestions = true;
+    questionSuggestionsLoading = true;
+  }
+  if (questionsCodeEndIndex !== -1) {
+    questionSuggestionsLoading = false;
+
+    questionSuggestions = text
+      .slice(
+        questionsCodeStartIndex + `<questions>`.length,
+        questionsCodeEndIndex
+      )
+      .split(separator);
+  }
+  return {
+    hasQuestionSuggestions,
+    questionSuggestions,
+    questionSuggestionsLoading,
+  };
 };
