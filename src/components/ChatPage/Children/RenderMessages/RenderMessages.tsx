@@ -326,6 +326,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               </div>
             );
           } else if (message.role === "user") {
+            const { text } = messageContentParsers.user(message.content);
             return (
               <div
                 key={key}
@@ -341,10 +342,10 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     <div className="p-4">
                       <ActionButton
                         onClick={() => {
-                          copy(message.content as string);
+                          copy(text);
                         }}
                       >
-                        {copiedText === message.content && copied ? (
+                        {copiedText === text && copied ? (
                           <Check size={18} />
                         ) : (
                           <Copy size={18} />
@@ -358,7 +359,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                       "bg-gray-100 dark:bg-gray-800"
                     }
                   >
-                    {(message.content ?? "") as string}
+                    {text}
                   </MemoizedMarkdownRenderer>
                 </div>
               </div>

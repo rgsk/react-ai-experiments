@@ -75,4 +75,7 @@ export const messageContentParsers = {
       text,
     };
   },
+  user: (messageContent: any) => {
+    return { text: messageContent };
+  },
 };
