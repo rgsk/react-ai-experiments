@@ -1,8 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import { useWindowSize } from "~/hooks/useWindowSize";
-import IFramePreview from "../ChatPage/Children/IFramePreview";
-import JsxPreview from "../ChatPage/Children/JsxPreview";
+import ShowPreview from "./ShowPreview";
 
 interface PreviewPageProps {}
 const PreviewPage: React.FC<PreviewPageProps> = ({}) => {
@@ -14,20 +13,6 @@ const PreviewPage: React.FC<PreviewPageProps> = ({}) => {
   if (!id || !code || !language) {
     return null;
   }
-  if (language === "html") {
-    return (
-      <div style={{ height: windowSize.height, width: windowSize.width }}>
-        <IFramePreview srcDoc={code}></IFramePreview>
-      </div>
-    );
-  } else if (language === "jsx") {
-    return (
-      <div className="messageContent">
-        <JsxPreview code={code} />
-      </div>
-    );
-  } else {
-    return <p>preview for langauge - {language} is not supported</p>;
-  }
+  return <ShowPreview language={language} code={code} />;
 };
 export default PreviewPage;

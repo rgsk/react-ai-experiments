@@ -18,6 +18,7 @@ import PersonasPage from "./components/PersonasPage/PersonasPage";
 import PracticePage from "./components/PracticePage/PracticePage";
 import PreviewPage from "./components/PreviewPage/PreviewPage";
 import SharedChatPage from "./components/SharedChatPage/SharedChatPage";
+import SharedPreviewPage from "./components/SharedPreviewPage/SharedPreviewPage";
 import YoutubeTranscriptPage from "./components/YoutubeTranscriptPage/YoutubeTranscriptPage";
 
 const router = createBrowserRouter(
@@ -39,6 +40,9 @@ const router = createBrowserRouter(
       </Route>
       <Route path="shared-chat">
         <Route path=":id" element={<SharedChatPage />} />
+      </Route>
+      <Route path="shared-preview">
+        <Route path=":id" element={<SharedPreviewPage />} />
       </Route>
       <Route path="youtube">
         <Route path="transcript" element={<YoutubeTranscriptPage />} />
