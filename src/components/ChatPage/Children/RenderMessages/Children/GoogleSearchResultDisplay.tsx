@@ -1,13 +1,21 @@
 import { GoogleSearchResult } from "~/lib/typesJsonData";
+import { cn } from "~/lib/utils";
 
 interface GoogleSearchResultDisplayProps {
   googleSearchResult: GoogleSearchResult;
+  type: "cited-source" | "tool-call";
 }
 const GoogleSearchResultDisplay: React.FC<GoogleSearchResultDisplayProps> = ({
   googleSearchResult,
+  type,
 }) => {
   return (
-    <div className="flex gap-[20px] group hover:bg-muted rounded-lg p-3">
+    <div
+      className={cn(
+        "flex gap-[20px] group hover:bg-muted rounded-lg p-3 min-w-[400px]",
+        type === "cited-source" && "bg-muted"
+      )}
+    >
       <div>
         <div className="flex gap-3">
           <img

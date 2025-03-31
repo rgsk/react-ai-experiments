@@ -1,4 +1,7 @@
 import { useMemo } from "react";
+import ShowOnHover from "~/components/Shared/ShowOnHover";
+import TargetBlankLink from "~/components/Shared/TargetBlankLink";
+import { Button } from "~/components/ui/button";
 import { GoogleSearchResult } from "~/lib/typesJsonData";
 import GoogleSearchResultDisplay from "./GoogleSearchResultDisplay";
 
@@ -15,9 +18,21 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
   }, [googleSearchResults, link]);
   if (searchResult) {
     return (
-      <div>
-        <GoogleSearchResultDisplay googleSearchResult={searchResult} />
-      </div>
+      <TargetBlankLink href={link}>
+        <ShowOnHover
+          getMainElement={(hovered) => (
+            <Button variant={hovered ? "default" : "secondary"}>
+              {searchResult.displayLink}
+            </Button>
+          )}
+          hiddenElement={
+            <GoogleSearchResultDisplay
+              googleSearchResult={searchResult}
+              type="cited-source"
+            />
+          }
+        />
+      </TargetBlankLink>
     );
   }
   return <div>{link}</div>;

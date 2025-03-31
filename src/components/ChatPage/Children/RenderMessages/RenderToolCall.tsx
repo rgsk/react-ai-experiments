@@ -122,7 +122,10 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
           <div className="flex flex-col">
             {entries.map((entry) => (
               <TargetBlankLink href={entry.link} key={entry.title}>
-                <GoogleSearchResultDisplay googleSearchResult={entry} />
+                <GoogleSearchResultDisplay
+                  googleSearchResult={entry}
+                  type="tool-call"
+                />
               </TargetBlankLink>
             ))}
           </div>

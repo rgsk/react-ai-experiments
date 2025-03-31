@@ -295,6 +295,21 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   >
                     {text}
                   </MemoizedMarkdownRenderer>
+                  {citedSourcesResult?.sources && (
+                    <div className="py-4">
+                      <div className="flex gap-2">
+                        {citedSourcesResult.sources.map((link, i) => {
+                          return (
+                            <CitedSourceLink
+                              key={`${link}-${i}`}
+                              link={link}
+                              googleSearchResults={googleSearchResults}
+                            ></CitedSourceLink>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   {message.status !== "in_progress" && (
                     <div>
                       <MessageActions
@@ -319,19 +334,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     </div>
                   )}
                 </div>
-                {citedSourcesResult?.sources && (
-                  <div className="p-4">
-                    {citedSourcesResult.sources.map((link, i) => {
-                      return (
-                        <CitedSourceLink
-                          key={`${link}-${i}`}
-                          link={link}
-                          googleSearchResults={googleSearchResults}
-                        ></CitedSourceLink>
-                      );
-                    })}
-                  </div>
-                )}
+
                 {questionSuggestionsResult.hasQuestionSuggestions && (
                   <div className="p-4">
                     {questionSuggestionsResult.questionSuggestionsLoading && (
