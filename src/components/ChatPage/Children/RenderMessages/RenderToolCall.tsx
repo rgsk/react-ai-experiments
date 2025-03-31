@@ -3,9 +3,10 @@ import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Separator } from "~/components/ui/separator";
-import { Message } from "~/lib/typesJsonData";
+import { GoogleSearchResult, Message } from "~/lib/typesJsonData";
 import { recursiveParseJson } from "~/lib/utils";
 import SyntaxHighlighter from "../SyntaxHighlighter";
+import GoogleSearchResultDisplay from "./Children/GoogleSearchResultDisplay";
 
 interface RenderToolCallProps {
   toolCall: ChatCompletionMessageToolCall;
@@ -86,13 +87,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
   } else if (toolCall.function.name === "googleSearch") {
     const { query } = toolCall.function.arguments as any;
 
-    const entries = parsedJsonContent.content[0].text as {
-      title: string;
-      link: string;
-      snippet: string;
-      displayLink: string;
-      image: string;
-    }[];
+    const entries = parsedJsonContent.content[0].text as GoogleSearchResult[];
     return (
       <>
         <div className="pl-4">
@@ -127,28 +122,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
           <div className="flex flex-col">
             {entries.map((entry) => (
               <TargetBlankLink href={entry.link} key={entry.title}>
-                <div className="flex gap-[20px] group hover:bg-muted rounded-lg p-3">
-                  <div>
-                    <div className="flex gap-3">
-                      <img
-                        src={`https://www.google.com/s2/favicons?domain=${entry.displayLink}&sz=64`}
-                        className="w-[24px] h-[24px]"
-                      />
-                      <p>{entry.displayLink}</p>
-                    </div>
-                    <p className="font-bold group-hover:underline">
-                      {entry.title}
-                    </p>
-                    <p>{entry.snippet}</p>
-                  </div>
-                  <div className="flex-1"></div>
-                  <div>
-                    <img
-                      src={entry.image}
-                      className="max-w-[100px] w-[100px] rounded-lg"
-                    />
-                  </div>
-                </div>
+                <GoogleSearchResultDisplay googleSearchResult={entry} />
               </TargetBlankLink>
             ))}
           </div>

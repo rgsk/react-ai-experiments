@@ -152,3 +152,11 @@ export type CreditDetails = {
   userEmail: string;
   balance: number;
 };
+
+export type GoogleSearchResult = {
+  title: string;
+  link: string;
+  snippet: string;
+  displayLink: string;
+  image: string;
+};

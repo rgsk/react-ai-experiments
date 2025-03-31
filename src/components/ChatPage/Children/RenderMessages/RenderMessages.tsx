@@ -1,6 +1,6 @@
 import { Copy } from "iconsax-react";
 import { ArrowRight, Check, Download } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
@@ -12,12 +12,13 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { messageContentParsers } from "~/lib/messageContentParsers";
-import { Message } from "~/lib/typesJsonData";
-import { cn } from "~/lib/utils";
+import { GoogleSearchResult, Message } from "~/lib/typesJsonData";
+import { cn, recursiveParseJson } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
+import CitedSourceLink from "./Children/CitedSourceLink";
 import RenderToolCall from "./RenderToolCall";
 export type DisplayMessagesType = "chat" | "shared-chat";
 interface RenderMessagesProps {
@@ -40,6 +41,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
   const [previewedImageUrl, setPreviewedImageUrl] = useState<string>();
   const { logLevel } = useGlobalContext();
 
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
   useEffect(() => {
     if (messages.length > 0) {
       const hashValue = window.location.hash;
@@ -52,6 +56,32 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
       }
     }
   }, [messages.length, scrollContainerRef]);
+
+  const googleSearchResults = useMemo(() => {
+    const [] = [loading];
+    const currentMessages = messagesRef.current;
+    let results: GoogleSearchResult[] = [];
+    for (let i = 0; i < currentMessages.length; i++) {
+      const message = currentMessages[i];
+      if (message.role === "tool" && message.status === "completed") {
+        const { toolCall } =
+          messageContentParsers.tool({ messages: currentMessages, index: i }) ??
+          {};
+        if (toolCall) {
+          if (toolCall.function.name === "googleSearch") {
+            const entries = recursiveParseJson(message.content).content[0]
+              .text as GoogleSearchResult[];
+            results = [...results, ...entries];
+          }
+        }
+      }
+    }
+    return results;
+  }, [loading]);
+
+  useEffect(() => {
+    console.log({ googleSearchResults });
+  }, [googleSearchResults]);
 
   return (
     <div>
@@ -205,11 +235,8 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             );
           } else if (message.role === "tool") {
             if (logLevel !== LogLevel.DEBUG) return null;
-            const toolCall = messages
-              .slice(0, i)
-              .reverse()
-              .find((m) => m.role === "assistant")
-              ?.tool_calls?.find((tc) => tc.id === message.tool_call_id);
+            const { toolCall } =
+              messageContentParsers.tool({ messages, index: i }) ?? {};
             if (!toolCall) return null;
 
             return (
@@ -295,7 +322,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 {citedSourcesResult?.sources && (
                   <div className="p-4">
                     {citedSourcesResult.sources.map((link, i) => {
-                      return <div key={`${link}-${i}`}>{link}</div>;
+                      return (
+                        <CitedSourceLink
+                          key={`${link}-${i}`}
+                          link={link}
+                          googleSearchResults={googleSearchResults}
+                        ></CitedSourceLink>
+                      );
                     })}
                   </div>
                 )}

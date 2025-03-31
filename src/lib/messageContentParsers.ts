@@ -1,6 +1,7 @@
 import { FileEntry } from "~/components/ChatPage/ChatPage";
 import { extractTagContent, recursiveParseJson } from "~/lib/utils";
 import { separator } from "./specialMessageParser";
+import { Message } from "./typesJsonData";
 
 export const messageContentParsers = {
   image_url: (messageContent: any) => {
@@ -59,6 +60,16 @@ export const messageContentParsers = {
   },
   user: (messageContent: any) => {
     return { text: messageContent };
+  },
+  tool: ({ messages, index }: { messages: Message[]; index: number }) => {
+    const message = messages[index];
+    if (message.role !== "tool") return undefined;
+    const toolCall = messages
+      .slice(0, index)
+      .reverse()
+      .find((m) => m.role === "assistant")
+      ?.tool_calls?.find((tc) => tc.id === message.tool_call_id);
+    return { toolCall };
   },
 };
 
