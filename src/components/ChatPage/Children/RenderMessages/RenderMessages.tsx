@@ -394,6 +394,15 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             const { text, urls } = messageContentParsers.user(message.content);
             return (
               <div key={key}>
+                {urls.length > 0 && (
+                  <div className="py-4">
+                    <RenderMentionedUrls
+                      urls={urls}
+                      fetchedWebPages={fetchedWebPages}
+                      googleSearchResults={googleSearchResults}
+                    />
+                  </div>
+                )}
                 <div
                   id={`message-${message.id}`}
                   className="w-full flex group whitespace-pre-wrap"
@@ -428,15 +437,6 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     </MemoizedMarkdownRenderer>
                   </div>
                 </div>
-                {urls.length > 0 && (
-                  <div className="py-4">
-                    <RenderMentionedUrls
-                      urls={urls}
-                      fetchedWebPages={fetchedWebPages}
-                      googleSearchResults={googleSearchResults}
-                    />
-                  </div>
-                )}
               </div>
             );
           } else {
