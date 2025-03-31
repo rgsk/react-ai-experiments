@@ -2,7 +2,6 @@ import { addSeconds } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SetSharedState } from "./useJsonData";
 import useRunOnWindowFocus from "./useRunOnWindowFocus";
-import useWindowMessageAndBroadcastChannelState from "./useWindowMessageAndBroadcastChannelState";
 
 export const localStorageWithExpiry = {
   getItem<T>(key: string, { version }: { version?: string } = {}) {
@@ -64,8 +63,7 @@ const useLocalStorageState = <T>(
 ) => {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] =
-    useWindowMessageAndBroadcastChannelState<T>(key);
+  const [storedValue, setStoredValue] = useState<T>();
   const storedValueRef = useRef(storedValue);
   storedValueRef.current = storedValue;
   const [loading, setLoading] = useState(true);
