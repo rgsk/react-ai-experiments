@@ -69,6 +69,12 @@ export type SharedChat = {
   messages: Message[];
   createdAt: ISODateString;
 };
+export type SharedPreview = {
+  id: string;
+  language: string;
+  code: string;
+  createdAt: ISODateString;
+};
 export type UserData = {
   id: string;
   name: string;

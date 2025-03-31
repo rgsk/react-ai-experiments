@@ -1,6 +1,6 @@
 import Editor from "@monaco-editor/react";
 import { Copy } from "iconsax-react";
-import { Check, Play, RefreshCw, RotateCcw, X } from "lucide-react";
+import { Check, Play, RefreshCw, RotateCcw, Share, X } from "lucide-react";
 import React, { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -26,6 +26,7 @@ import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { useWindowSize } from "~/hooks/useWindowSize";
+import { getSharedPreviewLink } from "~/lib/chatUtils";
 import { cn, getCsvFile } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
@@ -47,6 +48,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   loading,
 }) => {
   const { loading: codeRunnersLoading, runCode } = useCodeRunners();
+  const [sharePreviewLoading, setSharePreviewLoading] = useState(false);
   const [executeCodeDetails, setExecuteCodeDetails] = useState({
     loading: false,
     output: "",
@@ -306,6 +308,29 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                     <RefreshCw size={18} />
                   </ActionButton>
                   <div className="flex-1"></div>
+                  <ActionButton
+                    tooltip="Share"
+                    onClick={async () => {
+                      if (!code) return;
+                      setSharePreviewLoading(true);
+                      const sharedChatLink = await getSharedPreviewLink({
+                        code,
+                        language,
+                      });
+                      if (sharedChatLink) {
+                        copy(sharedChatLink);
+                      }
+                      setSharePreviewLoading(false);
+                    }}
+                  >
+                    {sharePreviewLoading ? (
+                      <LoadingSpinner size={18} />
+                    ) : copied ? (
+                      <Check size={18} />
+                    ) : (
+                      <Share size={18} />
+                    )}
+                  </ActionButton>
                   <a href={iframePreviewLink} target="_blank">
                     <ActionButton tooltip="Open in New Tab">
                       <OpenInNewTabIcon size={18} />

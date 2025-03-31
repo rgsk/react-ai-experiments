@@ -1,4 +1,4 @@
-import { Chat, Message, SharedChat } from "./typesJsonData";
+import { Chat, Message, SharedChat, SharedPreview } from "./typesJsonData";
 
 import { v4 } from "uuid";
 import { FileEntry } from "~/components/ChatPage/ChatPage";
@@ -89,6 +89,24 @@ export const getSharedChatLink = memoizeFn(
       },
     });
     const link = `${window.location.origin}/shared-chat/${sharedChatId}`;
+    return link;
+  }
+);
+
+export const getSharedPreviewLink = memoizeFn(
+  async ({ language, code }: { language: string; code: string }) => {
+    const sharedPreviewId = v4();
+    const key = `admin/public/sharedPreviews/${sharedPreviewId}`;
+    await jsonDataService.setKey<SharedPreview>({
+      key,
+      value: {
+        id: sharedPreviewId,
+        code: code,
+        language: language,
+        createdAt: new Date().toISOString(),
+      },
+    });
+    const link = `${window.location.origin}/shared-preview/${sharedPreviewId}`;
     return link;
   }
 );
