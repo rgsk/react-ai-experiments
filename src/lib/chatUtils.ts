@@ -2,8 +2,9 @@ import { Chat, Message, SharedChat, SharedPreview } from "./typesJsonData";
 
 import { v4 } from "uuid";
 import { FileEntry } from "~/components/ChatPage/ChatPage";
-import { memoizeFn, recursiveParseJson } from "~/lib/utils";
+import { extractTagContent, memoizeFn, recursiveParseJson } from "~/lib/utils";
 import jsonDataService from "~/services/jsonDataService";
+import { separator } from "./specialMessageParser";
 
 export function createMarkdownContent(messages: Message[]): string {
   let markdownContent = "# Chat Export\n\n";
@@ -72,6 +73,46 @@ export const messageContentParsers = {
     const fileName = fileEntry.fileMetadata?.name;
     const url = fileEntry.s3Url;
     return { fileEntry, parsedContent, fileName, url };
+  },
+  assistant: (messageContent: any) => {
+    const reasoningContent = extractTagContent(
+      messageContent,
+      "reasoning_content",
+      true
+    );
+    const restContent = messageContent.includes("</reasoning_content>")
+      ? messageContent.slice(
+          messageContent.indexOf("</reasoning_content>") +
+            "</reasoning_content>".length
+        )
+      : messageContent;
+    let hasQuestionSuggestions = false;
+    let questionSuggestions: string[] = [];
+    let questionSuggestionsLoading = false;
+    const text = restContent;
+    const questionsCodeStartIndex = text.indexOf(`<questions>`);
+    const questionsCodeEndIndex = text.indexOf(`</questions>`);
+    if (questionsCodeStartIndex != -1) {
+      hasQuestionSuggestions = true;
+      questionSuggestionsLoading = true;
+    }
+    if (questionsCodeEndIndex !== -1) {
+      questionSuggestionsLoading = false;
+
+      questionSuggestions = text
+        .slice(
+          questionsCodeStartIndex + `<questions>`.length,
+          questionsCodeEndIndex
+        )
+        .split(separator);
+    }
+    return {
+      reasoningContent,
+      hasQuestionSuggestions,
+      questionSuggestions,
+      questionSuggestionsLoading,
+      text,
+    };
   },
 };
 

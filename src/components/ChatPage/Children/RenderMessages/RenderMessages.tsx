@@ -12,9 +12,8 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { messageContentParsers } from "~/lib/chatUtils";
-import { separator } from "~/lib/specialMessageParser";
 import { Message } from "~/lib/typesJsonData";
-import { cn, extractTagContent } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
@@ -239,39 +238,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             if (logLevel !== LogLevel.DEBUG) {
               if (message.content.startsWith("calling tools - ")) return null;
             }
-            const reasoningContent = extractTagContent(
-              message.content,
-              "reasoning_content",
-              true
-            );
-            const restContent = message.content.includes("</reasoning_content>")
-              ? message.content.slice(
-                  message.content.indexOf("</reasoning_content>") +
-                    "</reasoning_content>".length
-                )
-              : message.content;
-            let hasQuestionSuggestions = false;
-            let questionSuggestions: string[] = [];
-            let questionSuggestionsLoading = false;
-            const text = restContent;
-            if (message.role === "assistant") {
-              const questionsCodeStartIndex = text.indexOf(`<questions>`);
-              const questionsCodeEndIndex = text.indexOf(`</questions>`);
-              if (questionsCodeStartIndex != -1) {
-                hasQuestionSuggestions = true;
-                questionSuggestionsLoading = true;
-              }
-              if (questionsCodeEndIndex !== -1) {
-                questionSuggestionsLoading = false;
-
-                questionSuggestions = text
-                  .slice(
-                    questionsCodeStartIndex + `<questions>`.length,
-                    questionsCodeEndIndex
-                  )
-                  .split(separator);
-              }
-            }
+            const {
+              reasoningContent,
+              text,
+              hasQuestionSuggestions,
+              questionSuggestions,
+              questionSuggestionsLoading,
+            } = messageContentParsers.assistant(message.content);
             return (
               <div
                 key={key}
