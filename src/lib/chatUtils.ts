@@ -1,10 +1,9 @@
 import { Chat, Message, SharedChat, SharedPreview } from "./typesJsonData";
 
 import { v4 } from "uuid";
-import { FileEntry } from "~/components/ChatPage/ChatPage";
-import { extractTagContent, memoizeFn, recursiveParseJson } from "~/lib/utils";
+import { memoizeFn } from "~/lib/utils";
 import jsonDataService from "~/services/jsonDataService";
-import { separator } from "./specialMessageParser";
+import { messageContentParsers } from "./messageContentParsers";
 
 export function createMarkdownContent(messages: Message[]): string {
   let markdownContent = "# Chat Export\n\n";
@@ -40,81 +39,6 @@ export function createMarkdownContent(messages: Message[]): string {
   });
   return markdownContent;
 }
-
-export const messageContentParsers = {
-  image_url: (messageContent: any) => {
-    const fileName = messageContent[0].text;
-    const url = messageContent[1].image_url.url;
-    return { fileName, url };
-  },
-  image_ocr: (messageContent: any) => {
-    const { fileName, url, content } = JSON.parse(messageContent) as {
-      fileName: string;
-      url: string;
-      content: string;
-    };
-    const { imageModelOutput, imageOCROutput } = content as any;
-    return {
-      fileName,
-      url,
-      imageModelOutput,
-      imageOCROutput,
-    };
-  },
-  file: (messageContent: any) => {
-    const parsedContent = recursiveParseJson(messageContent as string) as {
-      fileEntry: FileEntry;
-      content: string;
-      instruction: string;
-      summary: string;
-      type: "rag" | "full";
-    };
-    const fileEntry = parsedContent.fileEntry;
-    const fileName = fileEntry.fileMetadata?.name;
-    const url = fileEntry.s3Url;
-    return { fileEntry, parsedContent, fileName, url };
-  },
-  assistant: (messageContent: any) => {
-    const reasoningContent = extractTagContent(
-      messageContent,
-      "reasoning_content",
-      true
-    );
-    const restContent = messageContent.includes("</reasoning_content>")
-      ? messageContent.slice(
-          messageContent.indexOf("</reasoning_content>") +
-            "</reasoning_content>".length
-        )
-      : messageContent;
-    let hasQuestionSuggestions = false;
-    let questionSuggestions: string[] = [];
-    let questionSuggestionsLoading = false;
-    const text = restContent;
-    const questionsCodeStartIndex = text.indexOf(`<questions>`);
-    const questionsCodeEndIndex = text.indexOf(`</questions>`);
-    if (questionsCodeStartIndex != -1) {
-      hasQuestionSuggestions = true;
-      questionSuggestionsLoading = true;
-    }
-    if (questionsCodeEndIndex !== -1) {
-      questionSuggestionsLoading = false;
-
-      questionSuggestions = text
-        .slice(
-          questionsCodeStartIndex + `<questions>`.length,
-          questionsCodeEndIndex
-        )
-        .split(separator);
-    }
-    return {
-      reasoningContent,
-      hasQuestionSuggestions,
-      questionSuggestions,
-      questionSuggestionsLoading,
-      text,
-    };
-  },
-};
 
 export const getSharedChatLink = memoizeFn(
   async ({ messages, chat }: { messages: Message[]; chat: Chat }) => {

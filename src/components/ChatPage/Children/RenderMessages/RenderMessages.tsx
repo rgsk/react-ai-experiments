@@ -11,7 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
-import { messageContentParsers } from "~/lib/chatUtils";
+import { messageContentParsers } from "~/lib/messageContentParsers";
 import { Message } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
