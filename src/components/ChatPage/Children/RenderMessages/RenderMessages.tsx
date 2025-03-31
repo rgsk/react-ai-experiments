@@ -1,6 +1,6 @@
 import { Copy } from "iconsax-react";
 import { ArrowRight, Check, Download } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
@@ -12,18 +12,13 @@ import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { messageContentParsers } from "~/lib/messageContentParsers";
-import toolCallParser from "~/lib/toolCallParser";
-import {
-  FetchedWebPage,
-  GoogleSearchResult,
-  Message,
-} from "~/lib/typesJsonData";
+import { Message } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
-import CitedSourceLink from "./Children/CitedSourceLink";
+import RenderCitedSources from "./Children/RenderCitedSources";
 import RenderToolCall from "./RenderToolCall";
 export type DisplayMessagesType = "chat" | "shared-chat";
 interface RenderMessagesProps {
@@ -61,54 +56,6 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
       }
     }
   }, [messages.length, scrollContainerRef]);
-
-  const { googleSearchResults, fetchedWebPages } = useMemo(() => {
-    const [] = [loading];
-    const currentMessages = messagesRef.current;
-    let localGoogleSearchResults: GoogleSearchResult[] = [];
-    let localFetchedWebPages: { url: string; webPage: FetchedWebPage }[] = [];
-    for (let i = 0; i < currentMessages.length; i++) {
-      const message = currentMessages[i];
-      if (message.role === "tool" && message.status === "completed") {
-        const { toolCall } =
-          messageContentParsers.tool({ messages: currentMessages, index: i }) ??
-          {};
-        if (toolCall) {
-          if (toolCall.function.name === "googleSearch") {
-            const {
-              output: { googleSearchResults },
-            } = toolCallParser.googleSearch({
-              toolCall,
-              messageContent: message.content,
-            });
-            localGoogleSearchResults = [
-              ...localGoogleSearchResults,
-              ...googleSearchResults,
-            ];
-          } else if (toolCall.function.name === "getUrlContent") {
-            const {
-              arguments: { url, type },
-              output: { content },
-            } = toolCallParser.getUrlContent({
-              toolCall,
-              messageContent: message.content,
-            });
-
-            const page = content as FetchedWebPage;
-            localFetchedWebPages.push({ url, webPage: page });
-          }
-        }
-      }
-    }
-    return {
-      googleSearchResults: localGoogleSearchResults,
-      fetchedWebPages: localFetchedWebPages,
-    };
-  }, [loading]);
-
-  useEffect(() => {
-    console.log({ googleSearchResults, fetchedWebPages });
-  }, [googleSearchResults, fetchedWebPages]);
 
   return (
     <div>
@@ -324,18 +271,10 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                   </MemoizedMarkdownRenderer>
                   {citedSourcesResult?.sources && (
                     <div className="py-4">
-                      <div className="flex gap-2">
-                        {citedSourcesResult.sources.map((link, i) => {
-                          return (
-                            <CitedSourceLink
-                              key={`${link}-${i}`}
-                              link={link}
-                              googleSearchResults={googleSearchResults}
-                              fetchedWebPages={fetchedWebPages}
-                            ></CitedSourceLink>
-                          );
-                        })}
-                      </div>
+                      <RenderCitedSources
+                        sources={citedSourcesResult?.sources}
+                        messages={messages}
+                      />
                     </div>
                   )}
                   {message.status !== "in_progress" && (

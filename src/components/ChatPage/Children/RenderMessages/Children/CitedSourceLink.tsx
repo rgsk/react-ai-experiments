@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import ShowOnHover from "~/components/Shared/ShowOnHover";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Button } from "~/components/ui/button";
@@ -9,35 +8,29 @@ import GoogleSearchResultDisplay from "./GoogleSearchResultDisplay";
 
 interface CitedSourceLinkProps {
   link: string;
-  googleSearchResults: GoogleSearchResult[];
-  fetchedWebPages: {
+  googleSearchResult?: GoogleSearchResult;
+  fetchedWebPage?: {
     url: string;
     webPage: FetchedWebPage;
-  }[];
+  };
 }
 const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
   link,
-  googleSearchResults,
-  fetchedWebPages,
+  googleSearchResult,
+  fetchedWebPage,
 }) => {
-  const searchResult = useMemo(() => {
-    return googleSearchResults.find((sr) => sr.link === link);
-  }, [googleSearchResults, link]);
-  const webPage = useMemo(() => {
-    return fetchedWebPages.find((p) => p.url === link);
-  }, [fetchedWebPages, link]);
-  if (searchResult) {
+  if (googleSearchResult) {
     return (
       <TargetBlankLink href={link}>
         <ShowOnHover
           getMainElement={(hovered) => (
             <Button variant={hovered ? "default" : "secondary"}>
-              {searchResult.displayLink}
+              {googleSearchResult.displayLink}
             </Button>
           )}
           hiddenElement={
             <GoogleSearchResultDisplay
-              googleSearchResult={searchResult}
+              googleSearchResult={googleSearchResult}
               type="cited-source"
             />
           }
@@ -45,19 +38,19 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
       </TargetBlankLink>
     );
   }
-  if (webPage) {
+  if (fetchedWebPage) {
     return (
       <TargetBlankLink href={link}>
         <ShowOnHover
           getMainElement={(hovered) => (
             <Button variant={hovered ? "default" : "secondary"}>
-              {getDomain(webPage.url)}
+              {getDomain(fetchedWebPage.url)}
             </Button>
           )}
           hiddenElement={
             <FetchedWebPageDisplay
-              fetchedWebPage={webPage.webPage}
-              url={webPage.url}
+              fetchedWebPage={fetchedWebPage.webPage}
+              url={fetchedWebPage.url}
               type="cited-source"
             />
           }
@@ -66,6 +59,6 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
     );
   }
 
-  return <div>{link}</div>;
+  return <div>{link} (!!unknown source!!)</div>;
 };
 export default CitedSourceLink;
