@@ -6,9 +6,11 @@ import "react-resizable/css/styles.css";
 import { RouterProvider } from "react-router-dom";
 import "./globalModifications.ts";
 
+import { addStyles } from "react-mathquill";
 import "./global.css";
 import router from "./router.tsx";
 
+addStyles();
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RouterProvider router={router} />
