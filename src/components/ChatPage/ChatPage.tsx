@@ -890,13 +890,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         tag
         <hidden>
           <cited-sources
-            ><source>
-            https://github.com/tashapais
-            </source>
-            <source>https://tashapais.com/</source>
-            <source>https://tashapais.medium.com/</source>
-            </cited-sources
-          >
+            ><li>https://github.com/tashapais</li>
+            <li>https://tashapais.com/</li>
+            <li>https://tashapais.medium.com/</li>
+          </cited-sources>
         </hidden>
       </span>
     `;

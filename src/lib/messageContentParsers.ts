@@ -49,10 +49,12 @@ export const messageContentParsers = {
       : messageContent;
     const text = restContent;
     const questionSuggestionsResult = extractQuestionSuggestions(text);
+    const citedSourcesResult = extractCitedSources(text);
     return {
       reasoningContent,
       questionSuggestionsResult,
       text,
+      citedSourcesResult,
     };
   },
   user: (messageContent: any) => {
@@ -85,4 +87,17 @@ const extractQuestionSuggestions = (text: string) => {
     questionSuggestions,
     questionSuggestionsLoading,
   };
+};
+
+const extractCitedSources = (text: string) => {
+  const citedSourcesTagContent = extractTagContent(text, "cited-sources", true);
+  if (!citedSourcesTagContent) return undefined;
+  const liRegex = /<li>([^<]+)<\/li>/g;
+  const sources: string[] = [];
+
+  let match: RegExpExecArray | null;
+  while ((match = liRegex.exec(citedSourcesTagContent)) !== null) {
+    sources.push(match[1].trim());
+  }
+  return { sources };
 };

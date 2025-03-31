@@ -238,8 +238,12 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             if (logLevel !== LogLevel.DEBUG) {
               if (message.content.startsWith("calling tools - ")) return null;
             }
-            const { reasoningContent, text, questionSuggestionsResult } =
-              messageContentParsers.assistant(message.content);
+            const {
+              reasoningContent,
+              text,
+              questionSuggestionsResult,
+              citedSourcesResult,
+            } = messageContentParsers.assistant(message.content);
             return (
               <div
                 key={key}
@@ -288,6 +292,13 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                     </div>
                   )}
                 </div>
+                {citedSourcesResult?.sources && (
+                  <div className="p-4">
+                    {citedSourcesResult.sources.map((link, i) => {
+                      return <div key={`${link}-${i}`}>{link}</div>;
+                    })}
+                  </div>
+                )}
                 {questionSuggestionsResult.hasQuestionSuggestions && (
                   <div className="p-4">
                     {questionSuggestionsResult.questionSuggestionsLoading && (
