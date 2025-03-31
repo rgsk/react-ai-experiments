@@ -12,7 +12,8 @@ export type Model =
   | "deepseek/deepseek-chat"
   | "deepseek/deepseek-reasoner"
   | "openai/gpt-4o"
-  | "openai/gpt-4o-mini";
+  | "openai/gpt-4o-mini"
+  | "openrouter/google/gemma-3-27b-it:free";
 export const modelOptions: Record<
   Model,
   {
@@ -39,6 +40,11 @@ export const modelOptions: Record<
   "openai/gpt-4o-mini": {
     toolsSupport: true,
     imageSupport: true,
+    successiveMessagesSupport: true,
+  },
+  "openrouter/google/gemma-3-27b-it:free": {
+    toolsSupport: false,
+    imageSupport: false,
     successiveMessagesSupport: true,
   },
 };
