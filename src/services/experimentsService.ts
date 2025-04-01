@@ -21,8 +21,8 @@ export const axiosExperimentsInstance = axios.create({
   baseURL: environmentVars.NODE_EXPERIMENTS_SERVER_URL,
 });
 
-axiosExperimentsInstance.interceptors.request.use((config) => {
-  const token = getToken();
+axiosExperimentsInstance.interceptors.request.use(async (config) => {
+  const token = await getToken();
   config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

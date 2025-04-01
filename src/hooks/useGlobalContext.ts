@@ -14,16 +14,11 @@ import { firebaseAuth } from "~/lib/firebaseApp";
 import { CreditDetails, UserData } from "~/lib/typesJsonData";
 import experimentsService from "~/services/experimentsService";
 import useJsonData from "./useJsonData";
-import useLocalStorageState, {
-  localStorageWithExpiry,
-} from "./useLocalStorageState";
+import useLocalStorageState from "./useLocalStorageState";
 import useRunOnWindowFocus from "./useRunOnWindowFocus";
-export const getToken = () => {
-  const token = localStorageWithExpiry.getItem<string>("token");
-  if (!token) {
-    // window.location.href = "/login";
-    throw new Error("Please login to continue");
-  }
+
+export const getToken = async () => {
+  const token = await firebaseAuth.currentUser?.getIdToken();
   return token;
 };
 export enum LogLevel {
@@ -36,9 +31,8 @@ export enum LogLevel {
 }
 
 export const useGlobalContextValue = () => {
-  const [token, setToken] = useLocalStorageState<string>("token");
-  const [tokenLoading, setTokenLoading] = useState(true);
   const [firebaseUser, setFirebaseUser] = useState<User>();
+  const [firebaseUserLoading, setFirebaseUserLoading] = useState(true);
   const [isFirstHistoryRender, setIsFirstHistoryRender] = useState(true);
   const [logLevel, setLogLevel] = useLocalStorageState<LogLevel>(
     "logLevel",
@@ -56,7 +50,6 @@ export const useGlobalContextValue = () => {
   );
   const [creditsOverMessage, setCreditsOverMessage] = useState<string>();
 
-  const [firebaseUserLoading, setFirebaseUserLoading] = useState(true);
   const [
     userData,
     setUserData,
@@ -68,15 +61,8 @@ export const useGlobalContextValue = () => {
     return firebaseAuth.onAuthStateChanged(async (user) => {
       setFirebaseUser(user ?? undefined);
       setFirebaseUserLoading(false);
-      if (user) {
-        const token = await user.getIdToken();
-        setToken(token);
-      } else {
-        setToken(undefined);
-      }
-      setTokenLoading(false);
     });
-  }, [setToken]);
+  }, []);
   useRunOnWindowFocus(() => {
     // this ensures token is refreshed if expired on window focus
     firebaseAuth.currentUser?.getIdToken();
@@ -85,7 +71,6 @@ export const useGlobalContextValue = () => {
     if (
       !userDataLoading &&
       !userData &&
-      token &&
       firebaseUser &&
       firebaseUser.email &&
       firebaseUser.photoURL &&
@@ -99,7 +84,7 @@ export const useGlobalContextValue = () => {
         createdAt: new Date().toISOString(),
       });
     }
-  }, [firebaseUser, setUserData, token, userData, userDataLoading]);
+  }, [firebaseUser, setUserData, userData, userDataLoading]);
 
   const deductCredits = useCallback(async () => {
     const deductCreditsResponse = await experimentsService.deductCredits();
@@ -124,8 +109,6 @@ export const useGlobalContextValue = () => {
   }, [creditDetails, creditDetailsLoading, refetchCreditDetails]);
 
   return {
-    token,
-    tokenLoading,
     firebaseUser,
     firebaseUserLoading,
     userData,

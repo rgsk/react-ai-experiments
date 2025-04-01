@@ -2,37 +2,19 @@ import { CheckCheck, Copy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
-import useGlobalContext from "~/hooks/useGlobalContext";
+import { getToken } from "~/hooks/useGlobalContext";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import { CreditDetails } from "~/lib/typesJsonData";
 
 interface AdminHomePageProps {}
 const AdminHomePage: React.FC<AdminHomePageProps> = ({}) => {
-  const { copy, copied, copiedText } = useCopyToClipboard();
-  const { token } = useGlobalContext();
   const { data: creditDetailsEntries } = useJsonDataKeysLike<CreditDetails>({
     key: "admin/public/creditDetails/%",
   });
 
   return (
     <div className="p-[32px]">
-      <Button
-        variant="outline"
-        onClick={() => {
-          if (token) {
-            copy(token);
-          }
-        }}
-      >
-        <span>
-          {copied && copiedText === token ? (
-            <CheckCheck className="h-4 w-4" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
-        </span>
-        Copy Token
-      </Button>
+      <CopyTokenButton />
       <div className="h-[30px]"></div>
       <div className="space-y-2">
         {creditDetailsEntries?.data?.map(({ value: creditDetails }) => {
@@ -50,3 +32,29 @@ const AdminHomePage: React.FC<AdminHomePageProps> = ({}) => {
   );
 };
 export default AdminHomePage;
+
+interface CopyTokenButtonProps {}
+const CopyTokenButton: React.FC<CopyTokenButtonProps> = ({}) => {
+  const { copy, copied } = useCopyToClipboard();
+
+  return (
+    <Button
+      variant="outline"
+      onClick={async () => {
+        const token = await getToken();
+        if (token) {
+          copy(token);
+        }
+      }}
+    >
+      <span>
+        {copied ? (
+          <CheckCheck className="h-4 w-4" />
+        ) : (
+          <Copy className="h-4 w-4" />
+        )}
+      </span>
+      Copy Token
+    </Button>
+  );
+};
