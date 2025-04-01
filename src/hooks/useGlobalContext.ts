@@ -15,7 +15,6 @@ import { CreditDetails, UserData } from "~/lib/typesJsonData";
 import experimentsService from "~/services/experimentsService";
 import useJsonData from "./useJsonData";
 import useLocalStorageState from "./useLocalStorageState";
-import useRunOnWindowFocus from "./useRunOnWindowFocus";
 
 export const getToken = async () => {
   const token = await firebaseAuth.currentUser?.getIdToken();
@@ -63,10 +62,7 @@ export const useGlobalContextValue = () => {
       setFirebaseUserLoading(false);
     });
   }, []);
-  useRunOnWindowFocus(() => {
-    // this ensures token is refreshed if expired on window focus
-    firebaseAuth.currentUser?.getIdToken();
-  });
+
   useEffect(() => {
     if (
       !userDataLoading &&
