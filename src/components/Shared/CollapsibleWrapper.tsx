@@ -8,7 +8,6 @@ import {
 } from "~/components/ui/collapsible";
 import { cn } from "~/lib/utils";
 import { Collapsible } from "../ui/collapsible";
-import MaintiainOriginalWidth from "./MaintiainOriginalWidth";
 interface CollapsibleWrapperProps {
   heading: string;
   children: any;
@@ -38,7 +37,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
           asChild
           className={cn(
             "sticky bg-background",
-            level === 1 ? "top-[-32px] z-30" : "top-[0px] z-20",
+            level === 1 ? "top-[-16px] z-30" : "top-[16px] z-20",
             triggerClassName
           )}
           onClick={() => {
@@ -80,11 +79,9 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
         </CollapsibleTrigger>
         {isOpen && <div className="h-4"></div>}
         <CollapsibleContent>
-          <MaintiainOriginalWidth>
-            <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
-              {children}
-            </div>
-          </MaintiainOriginalWidth>
+          <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
+            {children}
+          </div>
         </CollapsibleContent>
       </div>
     </Collapsible>
