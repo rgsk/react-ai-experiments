@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Outlet } from "react-router-dom";
+import Navbar from "./components/Navbar/Navbar";
 import CentralLoader from "./components/Shared/CentralLoader";
 import CreditsOverModal from "./components/Shared/CreditsOverModal";
 import useAuthRequired from "./hooks/auth/useAuthRequired";
 import useGlobalContext from "./hooks/useGlobalContext";
 import usePathname from "./hooks/usePathname";
+import { useWindowSize } from "./hooks/useWindowSize";
 import environmentVars from "./lib/environmentVars";
 
 function App() {
@@ -19,6 +21,7 @@ function App() {
   } = useGlobalContext();
   const [canAccessAdminPath, setCanAccessAdminPath] = useState(false);
   useAuthRequired();
+  const windowSize = useWindowSize();
   const pathname = usePathname();
   const isAdminPath = useMemo(() => pathname.startsWith("/admin"), [pathname]);
   useEffect(() => {
@@ -31,30 +34,37 @@ function App() {
     }
   }, [firebaseUser, firebaseUserLoading, isAdminPath]);
   return (
-    <div className="h-screen overflow-auto">
+    <div>
       {creditsOverMessage && (
         <CreditsOverModal
           message={creditsOverMessage}
           onClose={() => setCreditsOverMessage(undefined)}
         />
       )}
-      {firebaseUserLoading ? (
-        <CentralLoader />
-      ) : (
-        <>
-          {isAdminPath ? (
-            canAccessAdminPath ? (
-              <Outlet />
-            ) : (
-              <>
-                <p>no admin access</p>
-              </>
-            )
+      <div className="flex flex-col" style={{ height: windowSize.height }}>
+        <div>
+          <Navbar />
+        </div>
+        <div className="flex-1 overflow-auto">
+          {firebaseUserLoading ? (
+            <CentralLoader />
           ) : (
-            <Outlet />
+            <>
+              {isAdminPath ? (
+                canAccessAdminPath ? (
+                  <Outlet />
+                ) : (
+                  <>
+                    <p>no admin access</p>
+                  </>
+                )
+              ) : (
+                <Outlet />
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

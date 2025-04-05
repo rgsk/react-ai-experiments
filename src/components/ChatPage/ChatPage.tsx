@@ -1059,7 +1059,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     );
   };
   return (
-    <div className="h-screen flex">
+    <div className="h-full flex">
       {leftPanelWrapper(
         <LeftPanel
           openNewChat={openNewChat}
