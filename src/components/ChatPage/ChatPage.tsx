@@ -138,10 +138,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
   const { md } = useBreakpoints();
   const { id: chatId } = useParams<{ id: string }>();
+
   useEffect(() => {
     const [] = [chatId];
-    setLeftPanelOpen(false);
-  }, [chatId, setLeftPanelOpen]);
+    if (!md) {
+      setLeftPanelOpen(false);
+    }
+  }, [chatId, md, setLeftPanelOpen]);
   const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
     {

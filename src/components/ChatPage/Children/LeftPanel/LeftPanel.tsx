@@ -1,14 +1,5 @@
-import authService from "~/lib/authService";
-
 import NewChatIcon from "~/components/Icons/NewChatIcon";
-import ProfileInfo from "~/components/ProfileInfo/ProfileInfo";
 import { Button } from "~/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import { Chat } from "~/lib/typesJsonData";
 import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
 import { SearchDialog } from "../SearchDialog";
@@ -40,20 +31,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({
         {historyBlocks.map(([date, items], i) => (
           <HistoryBlock key={i} date={date} chats={items} />
         ))}
-      </div>
-      <div className="p-[16px]">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <span>
-              <ProfileInfo />
-            </span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent avoidCollisions align="start" side="top">
-            <DropdownMenuItem onClick={authService.logout}>
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   );
