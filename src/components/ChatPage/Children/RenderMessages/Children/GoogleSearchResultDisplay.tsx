@@ -1,3 +1,4 @@
+import useBreakpoints from "~/hooks/useBreakpoints";
 import { GoogleSearchResult } from "~/lib/typesJsonData";
 import { cn, getFavicon } from "~/lib/utils";
 
@@ -9,11 +10,12 @@ const GoogleSearchResultDisplay: React.FC<GoogleSearchResultDisplayProps> = ({
   googleSearchResult,
   type,
 }) => {
+  const { md } = useBreakpoints();
   return (
     <div
       className={cn(
-        "flex gap-[20px] group hover:bg-muted rounded-lg p-3 min-w-[400px]",
-        type === "cited-source" && "bg-muted"
+        "flex gap-[20px] group hover:bg-muted p-3",
+        type === "cited-source" && "bg-muted rounded-lg"
       )}
     >
       <div>
@@ -27,15 +29,29 @@ const GoogleSearchResultDisplay: React.FC<GoogleSearchResultDisplayProps> = ({
         <p className="font-bold group-hover:underline">
           {googleSearchResult.title}
         </p>
-        <p>{googleSearchResult.snippet}</p>
+        <div className="flex items-start gap-2 mt-3 md:mt-0">
+          <p className="text-sm">{googleSearchResult.snippet}</p>
+          {!md && (
+            <>
+              <img
+                src={googleSearchResult.image}
+                className="max-w-[75px] w-[75px] rounded-sm"
+              />
+            </>
+          )}
+        </div>
       </div>
-      <div className="flex-1"></div>
-      <div>
-        <img
-          src={googleSearchResult.image}
-          className="max-w-[100px] w-[100px] rounded-lg"
-        />
-      </div>
+      {md && (
+        <>
+          <div className="flex-1"></div>
+          <div>
+            <img
+              src={googleSearchResult.image}
+              className="max-w-[92px] w-[92px] rounded-lg"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

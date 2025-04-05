@@ -1,4 +1,5 @@
 import { ChatCompletionMessageToolCall } from "openai/resources/index.mjs";
+import { Fragment } from "react";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
@@ -8,7 +9,6 @@ import { Message } from "~/lib/typesJsonData";
 import { recursiveParseJson } from "~/lib/utils";
 import SyntaxHighlighter from "../SyntaxHighlighter";
 import GoogleSearchResultDisplay from "./Children/GoogleSearchResultDisplay";
-
 interface RenderToolCallProps {
   toolCall: ChatCompletionMessageToolCall;
   message: Message;
@@ -125,14 +125,19 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
             <p>Results:</p>
           </div>
           <div className="flex flex-col">
-            {googleSearchResults.map((entry) => (
-              <TargetBlankLink href={entry.link} key={entry.title}>
-                <GoogleSearchResultDisplay
-                  googleSearchResult={entry}
-                  type="tool-call"
-                />
-              </TargetBlankLink>
-            ))}
+            {googleSearchResults.map((entry, i) => {
+              return (
+                <Fragment key={entry.title + i}>
+                  <TargetBlankLink href={entry.link}>
+                    <GoogleSearchResultDisplay
+                      googleSearchResult={entry}
+                      type="tool-call"
+                    />
+                    <Separator />
+                  </TargetBlankLink>
+                </Fragment>
+              );
+            })}
           </div>
         </div>
       </>
