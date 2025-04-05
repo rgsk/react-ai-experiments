@@ -320,5 +320,22 @@ const experimentsService = {
     });
     return response.data;
   },
+  getPlayAudioStreamReader: async ({ text }: { text: string }) => {
+    const url = `${environmentVars.NODE_EXPERIMENTS_SERVER_URL}/play-audio`;
+    const token = await getToken();
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.body!.getReader();
+  },
 };
 export default experimentsService;
