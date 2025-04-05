@@ -22,7 +22,7 @@ const Container: React.FC<ContainerProps> = ({
       ref={divRef as any}
       className={cn(
         "w-full flex-1 overflow-auto",
-        "py-[32px] px-[32px]",
+        "py-4 px-4",
         centerContent && "flex justify-center items-center"
       )}
       style={{

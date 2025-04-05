@@ -1092,7 +1092,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
 
         {messagesLoading ? (
           <>
-            <Container centerContent={true}>
+            <Container centerContent={true} applyChatWidthLimit>
               <LoadingSpinner />
             </Container>
             <MessageInputContainer>
@@ -1103,7 +1103,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           <>
             {messages?.length === 0 ? (
               <>
-                <Container centerContent={true}>
+                <Container centerContent={true} applyChatWidthLimit>
                   <div className="">
                     {personaId && !persona ? (
                       <CentralLoader />
@@ -1133,7 +1133,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               </>
             ) : (
               <>
-                <Container divRef={scrollContainerRef}>
+                <Container divRef={scrollContainerRef} applyChatWidthLimit>
                   <RenderMessages
                     scrollToBottom={scrollToBottom}
                     messages={messages ?? []}
@@ -1301,8 +1301,8 @@ const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
   children,
 }) => {
   return (
-    <div className="m-auto max-w-[800px] pb-[28px] w-full px-[32px] md:px-0">
-      {children}
+    <div className="pb-[12px]">
+      <Container applyChatWidthLimit>{children}</Container>
     </div>
   );
 };
