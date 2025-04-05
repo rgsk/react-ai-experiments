@@ -1155,7 +1155,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                   />
                 </Container>
                 <div className="relative">
-                  <div className="absolute right-1/2 -translate-x-1/2 translate-y-[-60px] z-40">
+                  <div className="absolute left-1/2 -translate-x-1/2 translate-y-[-60px] z-40">
                     <div
                       className={cn(
                         "transition-opacity",
