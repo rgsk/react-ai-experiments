@@ -337,5 +337,26 @@ const experimentsService = {
     }
     return response.body!.getReader();
   },
+  getAudioAIResponseStreamReader: async ({
+    messages,
+  }: {
+    messages: Message[];
+  }) => {
+    const url = `${environmentVars.NODE_EXPERIMENTS_SERVER_URL}/audio`;
+    const token = await getToken();
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    return response.body!.getReader();
+  },
 };
 export default experimentsService;

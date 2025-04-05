@@ -1,10 +1,10 @@
-import SampleUsePlayAudio from "../Sample/SampleUsePlayAudio";
+import SampleAudioAIResponse from "../Sample/SampleAudioAIResponse";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleUsePlayAudio />
+      <SampleAudioAIResponse />
     </div>
   );
 };
