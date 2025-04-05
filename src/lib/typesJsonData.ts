@@ -61,6 +61,7 @@ export type MessageFeedback = {
 export type Chat = {
   id: string | undefined;
   title: string;
+  sharedChatId?: string;
   createdAt: ISODateString;
 };
 export type SharedChat = {
@@ -68,6 +69,7 @@ export type SharedChat = {
   chat: Chat;
   messages: Message[];
   createdAt: ISODateString;
+  updatedAt: ISODateString;
 };
 export type SharedPreview = {
   id: string;

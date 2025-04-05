@@ -21,7 +21,7 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
-import { createMarkdownContent, getSharedChatId } from "~/lib/chatUtils";
+import { createMarkdownContent } from "~/lib/chatUtils";
 import clientTools from "~/lib/clientTools";
 import {
   defaultModel,
@@ -61,6 +61,7 @@ import LeftPanel from "./Children/LeftPanel/LeftPanel";
 import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import RightPanel from "./Children/RightPanel/RightPanel";
+import ShareChatPreview from "./Children/ShareChatPreview";
 import TopPanel from "./Children/TopPanel/TopPanel";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
@@ -383,14 +384,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
 
   const navigate = useNavigate();
   useAuthRequired();
-  const [chat, setChat, { updating: chatUpdating }] = useJsonData<Chat>(
-    attachPersonaPrefixIfPresent(`chats/${chatId}`),
-    {
+  const chatKey = attachPersonaPrefixIfPresent(`chats/${chatId}`);
+  const [chat, setChat, { updating: chatUpdating, refetch: refetchChat }] =
+    useJsonData<Chat>(chatKey, {
       id: chatId,
       title: "",
       createdAt: new Date().toISOString(),
-    }
-  );
+    });
   const [messages, setMessages, { loading: messagesLoading }] = useJsonData<
     Message[]
   >(attachPersonaPrefixIfPresent(`chats/${chatId}/messages`), []);
@@ -641,10 +641,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       filename: `Chat: ${chat.title}.md`,
     });
   };
-  const shareChat = async () => {
-    if (!messages || !chat) return;
-
-    return getSharedChatId({ messages, chat });
+  const [shareChatPreviewOpen, setShareChatPreviewOpen] = useState(false);
+  const shareChat = () => {
+    setShareChatPreviewOpen(true);
   };
 
   const processAttachedFiles = async (userMessage: Message) => {
@@ -1063,6 +1062,18 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
   return (
     <div className="h-full flex">
+      {chat && messages && (
+        <ShareChatPreview
+          chat={chat}
+          chatKey={chatKey}
+          messages={messages}
+          open={shareChatPreviewOpen}
+          onClose={() => {
+            setShareChatPreviewOpen(false);
+            refetchChat();
+          }}
+        />
+      )}
       {leftPanelWrapper(
         <LeftPanel
           openNewChat={openNewChat}

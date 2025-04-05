@@ -5,11 +5,13 @@ interface SimpleModalProps {
   onClose: () => void;
   children: any;
   maxWidth?: number;
+  hideCloseIcon?: boolean;
 }
 const SimpleModal: React.FC<SimpleModalProps> = ({
   onClose,
   children,
   maxWidth = 300,
+  hideCloseIcon,
 }) => {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -31,11 +33,13 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
           className="fixed h-full w-full bg-[#000] bg-opacity-80"
           onClick={onClose}
         >
-          <div className="flex justify-end">
-            <button className="p-[20px]">
-              <X className="text-white" />
-            </button>
-          </div>
+          {!hideCloseIcon && (
+            <div className="flex justify-end">
+              <button className="p-[20px]">
+                <X className="text-white" />
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex items-center justify-center h-screen">
           <div
