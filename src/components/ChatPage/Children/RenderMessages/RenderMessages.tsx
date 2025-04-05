@@ -458,7 +458,7 @@ export default RenderMessages;
 interface AIAvatarProps {}
 const AIAvatar: React.FC<AIAvatarProps> = ({}) => {
   return (
-    <div className="absolute top-0 left-0 -translate-x-full translate-y-1/2">
+    <div className="absolute top-0 left-0 -translate-x-[14px] md:-translate-x-full translate-y-1/2">
       <img src="/ai-avatar.svg" className="w-[24px]" />
     </div>
   );
