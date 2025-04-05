@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useRef, useState } from "react";
+import useMeasure from "react-use-measure";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import {
@@ -30,6 +31,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(openByDefault);
   const collapsibleRef = useRef<any>(null);
+  const [divRef, divBounds] = useMeasure();
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} ref={collapsibleRef}>
       <div className={cn("flex flex-col", type === "right" && "items-end")}>
@@ -79,7 +81,11 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
         </CollapsibleTrigger>
         {isOpen && <div className="h-4"></div>}
         <CollapsibleContent>
-          <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
+          <div ref={divRef}></div>
+          <div
+            className={cn(type === "left" ? "border-l-2" : "border-r-2")}
+            style={{ maxWidth: divBounds.width }}
+          >
             {children}
           </div>
         </CollapsibleContent>
