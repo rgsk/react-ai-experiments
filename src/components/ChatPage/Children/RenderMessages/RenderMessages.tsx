@@ -1,6 +1,7 @@
 import { Copy } from "iconsax-react";
 import { ArrowRight, Check, Download } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import useMeasure from "react-use-measure";
 import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
@@ -457,9 +458,18 @@ export default RenderMessages;
 
 interface AIAvatarProps {}
 const AIAvatar: React.FC<AIAvatarProps> = ({}) => {
+  const [divRef, divBounds] = useMeasure();
+
   return (
-    <div className="absolute top-0 left-0 -translate-x-[14px] md:-translate-x-full translate-y-1/2">
-      <img src="/ai-avatar.svg" className="w-[24px]" />
+    <div ref={divRef}>
+      <div
+        className={cn(
+          "absolute top-0 left-0 translate-y-1/2",
+          divBounds.width > 700 ? "-translate-x-full" : "-translate-x-[14px]"
+        )}
+      >
+        <img src="/ai-avatar.svg" className="w-[24px]" />
+      </div>
     </div>
   );
 };

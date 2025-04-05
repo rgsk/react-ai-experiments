@@ -1,7 +1,7 @@
 import { Chat, Message, SharedChat, SharedPreview } from "./typesJsonData";
 
 import { v4 } from "uuid";
-import { memoizeFn } from "~/lib/utils";
+import { memoizeFn, safeSleep } from "~/lib/utils";
 import jsonDataService from "~/services/jsonDataService";
 import { messageContentParsers } from "./messageContentParsers";
 
@@ -40,8 +40,9 @@ export function createMarkdownContent(messages: Message[]): string {
   return markdownContent;
 }
 
-export const getSharedChatLink = memoizeFn(
+export const getSharedChatId = memoizeFn(
   async ({ messages, chat }: { messages: Message[]; chat: Chat }) => {
+    await safeSleep(5000);
     const sharedChatId = v4();
     const key = `admin/public/sharedChats/${sharedChatId}`;
     const sharedChat = await jsonDataService.setKey<SharedChat>({
@@ -53,8 +54,7 @@ export const getSharedChatLink = memoizeFn(
         createdAt: new Date().toISOString(),
       },
     });
-    const link = `${window.location.origin}/shared-chat/${sharedChatId}`;
-    return link;
+    return sharedChatId;
   }
 );
 

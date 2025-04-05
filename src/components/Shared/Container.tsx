@@ -21,7 +21,7 @@ const Container: React.FC<ContainerProps> = ({
     <div
       ref={divRef as any}
       className={cn(
-        "w-full flex-1 overflow-auto",
+        "w-full h-full flex-1 overflow-auto",
         "py-4 px-4",
         centerContent && "flex justify-center items-center"
       )}
@@ -33,7 +33,7 @@ const Container: React.FC<ContainerProps> = ({
         className={cn(
           "w-full max-w-[1264px] m-auto",
           applyChatWidthLimit && "max-w-[800px]",
-          spanHeight && "h-full"
+          "h-full flex flex-col"
         )}
       >
         {children}

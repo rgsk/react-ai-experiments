@@ -6,15 +6,17 @@ import useBreakpoints from "~/hooks/useBreakpoints";
 
 interface DialogWrapperProps {
   children: any;
-  triggerComponent: any;
+  triggerComponent?: any;
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose?: () => void;
 }
 const DialogWrapper: React.FC<DialogWrapperProps> = ({
   triggerComponent,
   children,
   open,
   setOpen,
+  onClose,
 }) => {
   const { md } = useBreakpoints();
   return (
@@ -25,6 +27,7 @@ const DialogWrapper: React.FC<DialogWrapperProps> = ({
             triggerComponent={triggerComponent}
             open={open}
             setOpen={setOpen}
+            onClose={onClose}
           >
             {children}
           </DesktopDialogWrapper>
@@ -48,17 +51,27 @@ export default DialogWrapper;
 interface DesktopDialogWrapperProps {
   children: any;
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   triggerComponent: any;
+  onClose?: () => void;
 }
 const DesktopDialogWrapper: React.FC<DesktopDialogWrapperProps> = ({
   children,
   open,
   setOpen,
   triggerComponent,
+  onClose,
 }) => {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        setOpen?.(value);
+        if (!value) {
+          onClose?.();
+        }
+      }}
+    >
       <DialogTrigger asChild>{triggerComponent}</DialogTrigger>
       <DialogContent
         hideCloseIcon
@@ -72,7 +85,7 @@ const DesktopDialogWrapper: React.FC<DesktopDialogWrapperProps> = ({
 
 interface MobileDialogWrapperProps {
   open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   children: any;
   triggerComponent: any;
 }
@@ -86,7 +99,7 @@ const MobileDialogWrapper: React.FC<MobileDialogWrapperProps> = ({
     <div>
       <div
         onClick={() => {
-          setOpen(true);
+          setOpen?.(true);
         }}
       >
         {triggerComponent}

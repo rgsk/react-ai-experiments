@@ -21,7 +21,7 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
-import { createMarkdownContent, getSharedChatLink } from "~/lib/chatUtils";
+import { createMarkdownContent, getSharedChatId } from "~/lib/chatUtils";
 import clientTools from "~/lib/clientTools";
 import {
   defaultModel,
@@ -644,7 +644,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const shareChat = async () => {
     if (!messages || !chat) return;
 
-    return getSharedChatLink({ messages, chat });
+    return getSharedChatId({ messages, chat });
   };
 
   const processAttachedFiles = async (userMessage: Message) => {
@@ -1144,7 +1144,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                   />
                 </Container>
                 <div className="relative">
-                  <div className="absolute right-1/2 -translate-x-1/2 translate-y-[-60px] z-50">
+                  <div className="absolute right-1/2 -translate-x-1/2 translate-y-[-60px] z-40">
                     <div
                       className={cn(
                         "transition-opacity",

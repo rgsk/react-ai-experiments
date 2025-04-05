@@ -1,13 +1,7 @@
-import {
-  Check,
-  Download,
-  Menu,
-  PanelLeft,
-  PanelRight,
-  Share,
-} from "lucide-react";
+import { Download, Menu, PanelLeft, PanelRight, Share, X } from "lucide-react";
 import { useState } from "react";
 import NewChatIcon from "~/components/Icons/NewChatIcon";
+import DialogWrapper from "~/components/Shared/DialogWrapper";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import {
@@ -17,9 +11,10 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import useBreakpoints from "~/hooks/useBreakpoints";
-import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { SetSharedState } from "~/hooks/useJsonData";
+import { useWindowSize } from "~/hooks/useWindowSize";
 import { Chat } from "~/lib/typesJsonData";
+import ShareChatPreview from "../ShareChatPreview";
 interface TopPanelProps {
   setLeftPanelOpen: SetSharedState<boolean>;
   setRightPanelOpen: SetSharedState<boolean>;
@@ -38,12 +33,37 @@ const TopPanel: React.FC<TopPanelProps> = ({
   shareChat,
   chat,
 }) => {
-  const { copy, copied } = useCopyToClipboard();
   const [shareChatLoading, setShareChatLoading] = useState(false);
+  const [sharedChatId, setSharedChatId] = useState<string>();
+  const windowSize = useWindowSize();
   const { md } = useBreakpoints();
-
   return (
     <div className="border-b border-b-input p-4 flex justify-between items-center gap-3">
+      <DialogWrapper
+        open={!!sharedChatId}
+        onClose={() => {
+          setSharedChatId(undefined);
+        }}
+      >
+        <div
+          style={{ height: md ? windowSize.height / 2 : windowSize.height }}
+          className="flex flex-col"
+        >
+          <div className="p-4 border-b border-b-input flex justify-between items-center">
+            <span>Share public link to chat</span>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => {
+                setSharedChatId(undefined);
+              }}
+            >
+              <X />
+            </Button>
+          </div>
+          {sharedChatId && <ShareChatPreview sharedChatId={sharedChatId} />}
+        </div>
+      </DialogWrapper>
       <span className="flex gap-2">
         <Button
           variant="outline"
@@ -79,20 +99,14 @@ const TopPanel: React.FC<TopPanelProps> = ({
             <DropdownMenuItem
               onClick={async () => {
                 setShareChatLoading(true);
-                const sharedChatLink = await shareChat();
-                if (sharedChatLink) {
-                  copy(sharedChatLink);
+                const id = await shareChat();
+                if (id) {
+                  setSharedChatId(id);
                 }
                 setShareChatLoading(false);
               }}
             >
-              {shareChatLoading ? (
-                <LoadingSpinner />
-              ) : copied ? (
-                <Check />
-              ) : (
-                <Share />
-              )}
+              {shareChatLoading ? <LoadingSpinner /> : <Share />}
               <span>Share Chat</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={exportChat}>
