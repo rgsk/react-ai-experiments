@@ -1,12 +1,14 @@
 import { ArrowRotateRight, Copy, Dislike, Like1 } from "iconsax-react";
-import { Check } from "lucide-react";
-import { useState } from "react";
+import { Check, CircleStop, Volume2 } from "lucide-react";
+import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import DislikeFilledIcon from "~/components/Icons/DislikeFilledIcon";
 import LikeFilledIcon from "~/components/Icons/LikeFilledIcon";
 import ActionButton from "~/components/Shared/ActionButton";
+import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
+import usePlayAudio from "~/hooks/usePlayAudio";
 import { Message, MessageFeedback } from "~/lib/typesJsonData";
 import jsonDataService from "~/services/jsonDataService";
 import { HandleSend } from "../../ChatPage";
@@ -37,6 +39,13 @@ const MessageActions: React.FC<MessageActionsProps> = ({
     type: MessageFeedback["type"];
     text?: string;
   }>();
+  const audioPlayerRef = useRef<HTMLAudioElement>(null);
+  const {
+    playAudio,
+    playing,
+    stopPlaying,
+    loading: audioLoading,
+  } = usePlayAudio({ audioPlayerRef });
   const onLikeDislike = async ({
     type,
     text,
@@ -110,6 +119,25 @@ const MessageActions: React.FC<MessageActionsProps> = ({
               <Dislike size={18} />
             )}
           </ActionButton>
+          <ActionButton
+            tooltip="Read aloud"
+            onClick={() => {
+              if (playing) {
+                stopPlaying();
+              } else {
+                playAudio({ text: currentText });
+              }
+            }}
+          >
+            {audioLoading ? (
+              <LoadingSpinner size={16} />
+            ) : playing ? (
+              <CircleStop size={18} strokeWidth={1.6} />
+            ) : (
+              <Volume2 size={18} strokeWidth={1.6} />
+            )}
+          </ActionButton>
+          <audio className="hidden" ref={audioPlayerRef}></audio>
         </>
       )}
     </div>

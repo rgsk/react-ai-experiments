@@ -9,7 +9,9 @@ const usePlayAudio = ({
 }) => {
   const audioQueue = useRef<Uint8Array[]>([]);
   const currentMediaSourceRef = useRef<MediaSource>();
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>();
   const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const appendNextBuffer = (sourceBuffer: SourceBuffer) => {
     if (audioQueue.current.length > 0 && !sourceBuffer.updating) {
@@ -29,9 +31,12 @@ const usePlayAudio = ({
 
   const playAudio = useCallback(
     async ({ text }: { text: string }) => {
+      setLoading(true);
       const reader = await experimentsService.getPlayAudioStreamReader({
         text: text,
       });
+      readerRef.current = reader;
+
       const audioPlayer = audioPlayerRef.current!;
 
       const mediaSource = new MediaSource();
@@ -82,6 +87,7 @@ const usePlayAudio = ({
       // console.log("Audio has started playing");
       // Add your logic here for when the audio starts playing
       setPlaying(true);
+      setLoading(false);
     };
 
     if (audioPlayer) {
@@ -96,10 +102,18 @@ const usePlayAudio = ({
       }
     };
   }, [audioPlayerRef]);
-
+  const stopPlaying = () => {
+    const audioPlayer = audioPlayerRef.current!;
+    audioPlayer.pause();
+    readerRef.current?.cancel();
+    setPlaying(false);
+    setLoading(false);
+  };
   return {
     playAudio,
     playing,
+    stopPlaying,
+    loading,
   };
 };
 export default usePlayAudio;
