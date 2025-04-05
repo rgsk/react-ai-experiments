@@ -8,6 +8,7 @@ import {
 } from "~/components/ui/collapsible";
 import { cn } from "~/lib/utils";
 import { Collapsible } from "../ui/collapsible";
+import MaintiainOriginalWidth from "./MaintiainOriginalWidth";
 interface CollapsibleWrapperProps {
   heading: string;
   children: any;
@@ -79,9 +80,11 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
         </CollapsibleTrigger>
         {isOpen && <div className="h-4"></div>}
         <CollapsibleContent>
-          <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
-            {children}
-          </div>
+          <MaintiainOriginalWidth>
+            <div className={cn(type === "left" ? "border-l-2" : "border-r-2")}>
+              {children}
+            </div>
+          </MaintiainOriginalWidth>
         </CollapsibleContent>
       </div>
     </Collapsible>
