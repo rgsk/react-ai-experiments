@@ -19,6 +19,7 @@ import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
+import usePlayAudioChunks from "~/hooks/usePlayAudioChunks";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
 import {
@@ -265,6 +266,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       })
     );
   };
+
+  const audioPlayerRef = useRef<HTMLAudioElement>(null);
+  const { addAudioChunk, completeAudio, startPlayback } = usePlayAudioChunks({
+    audioPlayerRef,
+  });
+
   const {
     handleGenerate,
     loading: textStreamLoading,
@@ -275,6 +282,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   } = useTextStream({
     handleToolCall,
     handleToolCallOutput,
+    addAudioChunk,
+    completeAudio,
   });
 
   const localHandleStop = () => {
@@ -348,6 +357,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       handleMessageDelta({ role: "user", transcript: transcript });
     },
   });
+
   const [searchParams] = useSearchParams();
 
   const personaId = searchParams?.get("personaId") ?? undefined;
@@ -1051,6 +1061,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
   return (
     <div className="h-full flex">
+      <audio className="hidden" ref={audioPlayerRef}></audio>
       {chat && messages && (
         <ShareChatPreview
           chat={chat}
@@ -1079,6 +1090,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         }}
         {...dropAreaProps}
       >
+        <Button onClick={startPlayback}>Start Playback</Button>
+
         {isDragging && <DraggingBackdrop />}
         <TopPanel
           openNewChat={openNewChat}
