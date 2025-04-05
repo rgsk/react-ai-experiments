@@ -21,7 +21,10 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import useTextStream from "~/hooks/useTextStream";
 import useWebSTT from "~/hooks/useWebSTT";
-import { createMarkdownContent } from "~/lib/chatUtils";
+import {
+  createMarkdownContent,
+  generateTitleBasedOnFirstUserMessage,
+} from "~/lib/chatUtils";
 import clientTools from "~/lib/clientTools";
 import {
   defaultModel,
@@ -385,11 +388,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   useAuthRequired();
   const chatKey = attachPersonaPrefixIfPresent(`chats/${chatId}`);
   const [chat, setChat, { updating: chatUpdating, refetch: refetchChat }] =
-    useJsonData<Chat>(chatKey, {
-      id: chatId,
-      title: "",
-      createdAt: new Date().toISOString(),
-    });
+    useJsonData<Chat>(
+      chatKey,
+      {
+        id: chatId!,
+        title: "",
+        createdAt: new Date().toISOString(),
+      },
+      { enabled: !!chatId }
+    );
   const [messages, setMessages, { loading: messagesLoading }] = useJsonData<
     Message[]
   >(attachPersonaPrefixIfPresent(`chats/${chatId}/messages`), []);
@@ -444,45 +451,28 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         openNewChatLoadingRef.current
       );
       await safeSleep(100, true);
-      if (!chatRef.current?.title) {
-        const currentMessages = messagesRef.current;
-        if (currentMessages) {
-          // set the title of chat based on current messages
-          const { content: title } = await experimentsService.getCompletion({
-            messages: [
-              {
-                role: "user",
-                content: `
-              generate a title for this chat
-              based on following conversation
-              only respond with the title
-              the title should max 50 characters
-              don't add double quotes at start and end
-              <currentMessages>${JSON.stringify(
-                preProcessMessages(currentMessages ?? [])
-              )}</currentMessages>
-              `,
-              },
-            ],
-            model: "openai/gpt-4o-mini",
-          });
-          setChat((prev) => {
-            if (prev) {
-              return {
-                ...prev,
-                title,
-              };
-            }
-            return prev;
-          }, openNewChatLoadingRef.current);
-        }
-      }
       if (openNewChatLoadingRef.current) {
         openNewChatRef.current();
       }
     },
-    [setChat, setMessages]
+    [setMessages]
   );
+  useEffect(() => {
+    if (messages?.length === 1 && chat && !chat.title) {
+      const firstMessage = messages[0].content;
+      if (typeof firstMessage === "string") {
+        (async () => {
+          const title = await generateTitleBasedOnFirstUserMessage(
+            firstMessage
+          );
+          setChat({
+            ...chat,
+            title,
+          });
+        })();
+      }
+    }
+  }, [chat, messages, setChat]);
   const handleFilesChange = async (files: File[]) => {
     if (files) {
       const supportedFiles: File[] = [];

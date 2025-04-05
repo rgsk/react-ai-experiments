@@ -59,7 +59,7 @@ export type MessageFeedback = {
   createdAt: ISODateString;
 };
 export type Chat = {
-  id: string | undefined;
+  id: string;
   title: string;
   sharedChatId?: string;
   createdAt: ISODateString;

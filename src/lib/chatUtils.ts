@@ -1,7 +1,8 @@
 import { Chat, Message, SharedChat, SharedPreview } from "./typesJsonData";
 
 import { v4 } from "uuid";
-import { memoizeFn } from "~/lib/utils";
+import { extractTagContent, memoizeFn } from "~/lib/utils";
+import experimentsService from "~/services/experimentsService";
 import jsonDataService from "~/services/jsonDataService";
 import { messageContentParsers } from "./messageContentParsers";
 
@@ -113,3 +114,29 @@ export const getSharedPreviewLink = memoizeFn(
     return link;
   }
 );
+
+export const generateTitleBasedOnFirstUserMessage = async (
+  firstUserMessage: string
+) => {
+  let title = extractTagContent(firstUserMessage, "title");
+  if (!title) {
+    const { content } = await experimentsService.getCompletion({
+      messages: [
+        {
+          role: "user",
+          content: `
+         generate a title for this chat
+              based on following user message
+              only respond with the title
+              the title should max 50 characters
+              don't add double quotes at start and end
+              <message>${firstUserMessage}</message>
+        `,
+        },
+      ],
+      model: "openai/gpt-4o-mini",
+    });
+    title = content;
+  }
+  return title;
+};
