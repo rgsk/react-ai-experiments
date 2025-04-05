@@ -1,4 +1,4 @@
-import { Copy, X } from "lucide-react";
+import { Copy, Link2, X } from "lucide-react";
 import { useState } from "react";
 import Container from "~/components/Shared/Container";
 import DialogWrapper from "~/components/Shared/DialogWrapper";
@@ -84,7 +84,13 @@ const ShareChatPreview: React.FC<ShareChatPreviewProps> = ({
               }
             }}
           >
-            {loading ? <LoadingSpinner size={18} /> : <Copy size={18} />}
+            {loading ? (
+              <LoadingSpinner size={18} />
+            ) : sharedChatId ? (
+              <Copy size={18} />
+            ) : (
+              <Link2 size={18} />
+            )}
             {copied ? (
               <span>Copied</span>
             ) : (
