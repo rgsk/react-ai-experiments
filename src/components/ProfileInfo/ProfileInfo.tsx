@@ -9,7 +9,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({}) => {
     <div>
       <div className="border rounded-[6px] py-[8px] px-[12px] cursor-pointer">
         <div className="flex gap-[10px]">
-          <div className="rounded-full overflow-hidden min-w-[20px] h-[20px] relative">
+          <div className="rounded-full overflow-hidden min-w-[20px] h-[20px] w-[20px] relative">
             <img
               src={userData.avatarUrl}
               alt="profile photo"
