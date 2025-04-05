@@ -71,6 +71,7 @@ const experimentsService = {
     socketId?: string;
     tools?: Tool[];
     model: Model;
+    streamAudio?: boolean;
   }) => {
     const result = await axiosExperimentsInstance.post<{
       toolCalls: ToolCall[];

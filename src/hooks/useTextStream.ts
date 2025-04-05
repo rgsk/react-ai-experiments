@@ -46,7 +46,6 @@ const useTextStream = ({
         setReasoningText((prev) => prev + content);
       });
       socket.on("audio", (chunk) => {
-        console.log({ chunk });
         addAudioChunk?.(chunk);
       });
       socket.on("audio-complete", () => {
@@ -67,11 +66,13 @@ const useTextStream = ({
       onComplete,
       tools,
       model,
+      streamAudio,
     }: {
       messages: Message[];
       onComplete?: ({ toolCalls }: { toolCalls: ToolCall[] }) => Promise<void>;
       tools?: Tool[];
       model: Model;
+      streamAudio?: boolean;
     }) => {
       setLoading(true);
       setText("");
@@ -81,6 +82,7 @@ const useTextStream = ({
         socketId: socketRef.current?.id,
         tools: tools,
         model,
+        streamAudio,
       });
       setLoading(false);
       setToolCallsInProgress(false);

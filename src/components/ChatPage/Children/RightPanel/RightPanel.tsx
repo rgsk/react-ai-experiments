@@ -17,6 +17,8 @@ import { Persona, Preferences } from "~/lib/typesJsonData";
 import ModelSelector from "../ModelSelector";
 interface RightPanelProps {
   preferences: Preferences;
+  autoReadAloud: boolean | undefined;
+  setAutoReadAloud: SetSharedState<boolean>;
   setPreferences: SetSharedState<Preferences>;
   model: Model;
   setModel: SetSharedState<Model>;
@@ -28,10 +30,24 @@ const RightPanel: React.FC<RightPanelProps> = ({
   model,
   setModel,
   persona,
+  autoReadAloud,
+  setAutoReadAloud,
 }) => {
   const { logLevel, setLogLevel } = useGlobalContext();
   return (
     <div className="h-full flex flex-col">
+      <div className="p-4">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="autoReadAloud"
+            checked={autoReadAloud}
+            onCheckedChange={(value) => {
+              setAutoReadAloud(value);
+            }}
+          />
+          <Label htmlFor="autoReadAloud">Auto Read Aloud</Label>
+        </div>
+      </div>
       <div className="p-4">
         <div className="flex items-center space-x-2">
           <Switch
