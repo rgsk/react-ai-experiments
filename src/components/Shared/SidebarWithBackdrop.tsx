@@ -25,7 +25,7 @@ const SidebarWithBackdrop: React.FC<SidebarWithBackdropProps> = ({
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black bg-opacity-70 z-40"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -34,7 +34,7 @@ const SidebarWithBackdrop: React.FC<SidebarWithBackdropProps> = ({
 
           {/* Sidebar */}
           <motion.div
-            className={`fixed top-0 h-full bg-white shadow-lg z-50 ${positionClass}`}
+            className={`fixed top-0 h-full bg-background shadow-lg z-50 ${positionClass}`}
             initial={{ x: initialX }}
             animate={{ x: 0 }}
             exit={{ x: initialX }}
