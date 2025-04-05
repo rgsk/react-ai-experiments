@@ -3,6 +3,7 @@ import { usePopper } from "react-popper";
 import { v4 } from "uuid";
 import useBreakpoints from "~/hooks/useBreakpoints";
 import useEventListener from "~/hooks/useEventListener";
+import { useWindowSize } from "~/hooks/useWindowSize";
 
 interface ShowOnHoverProps {
   getMainElement: (hovered: boolean) => any;
@@ -18,6 +19,7 @@ const ShowOnHover: React.FC<ShowOnHoverProps> = ({
   const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(
     null
   );
+  const windowSize = useWindowSize();
   const { md } = useBreakpoints();
   const [popperElement, setPopperElement] = useState<HTMLElement | null>(null);
   const componentId = useMemo(() => v4(), []);
@@ -76,7 +78,7 @@ const ShowOnHover: React.FC<ShowOnHoverProps> = ({
           style={{
             ...styles.popper,
             zIndex: 1000,
-            width: 400,
+            width: Math.min(windowSize.width - 64, 400),
           }}
           {...attributes.popper}
           onClick={(e) => {
