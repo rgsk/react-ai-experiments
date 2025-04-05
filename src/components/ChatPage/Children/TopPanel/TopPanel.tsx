@@ -1,21 +1,25 @@
 import {
   Check,
   Download,
-  Home,
+  Menu,
   PanelLeft,
   PanelRight,
   Share,
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import NewChatIcon from "~/components/Icons/NewChatIcon";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
-import { ModeToggle } from "~/components/Shared/ModeToggle";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import useBreakpoints from "~/hooks/useBreakpoints";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import { SetSharedState } from "~/hooks/useJsonData";
 import { Chat } from "~/lib/typesJsonData";
-
 interface TopPanelProps {
   setLeftPanelOpen: SetSharedState<boolean>;
   setRightPanelOpen: SetSharedState<boolean>;
@@ -36,9 +40,10 @@ const TopPanel: React.FC<TopPanelProps> = ({
 }) => {
   const { copy, copied } = useCopyToClipboard();
   const [shareChatLoading, setShareChatLoading] = useState(false);
+  const { md } = useBreakpoints();
 
   return (
-    <div className="border-b border-b-input p-4 flex justify-between items-center">
+    <div className="border-b border-b-input p-4 flex justify-between items-center gap-3">
       <span className="flex gap-2">
         <Button
           variant="outline"
@@ -59,38 +64,43 @@ const TopPanel: React.FC<TopPanelProps> = ({
         >
           <NewChatIcon />
         </Button>
-        <Link to="/">
-          <Button variant="outline" size="icon">
-            <Home />
-          </Button>
-        </Link>
       </span>
-      <span>{chat?.title || "New Chat"}</span>
+      <span className="text-center line-clamp-1">
+        {chat?.title || "New Chat"}
+      </span>
       <span className="flex gap-2">
-        <Button
-          variant="outline"
-          onClick={async () => {
-            setShareChatLoading(true);
-            const sharedChatLink = await shareChat();
-            if (sharedChatLink) {
-              copy(sharedChatLink);
-            }
-            setShareChatLoading(false);
-          }}
-          size="icon"
-        >
-          {shareChatLoading ? (
-            <LoadingSpinner />
-          ) : copied ? (
-            <Check />
-          ) : (
-            <Share />
-          )}
-        </Button>
-        <Button variant="outline" onClick={exportChat} size="icon">
-          <Download />
-        </Button>
-        <ModeToggle />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Menu />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent avoidCollisions align="end" side="bottom">
+            <DropdownMenuItem
+              onClick={async () => {
+                setShareChatLoading(true);
+                const sharedChatLink = await shareChat();
+                if (sharedChatLink) {
+                  copy(sharedChatLink);
+                }
+                setShareChatLoading(false);
+              }}
+            >
+              {shareChatLoading ? (
+                <LoadingSpinner />
+              ) : copied ? (
+                <Check />
+              ) : (
+                <Share />
+              )}
+              <span>Share Chat</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={exportChat}>
+              <Download />
+              <span>Export Chat</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Button
           variant="outline"

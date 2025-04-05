@@ -1,14 +1,14 @@
 import authService from "~/lib/authService";
 
+import NewChatIcon from "~/components/Icons/NewChatIcon";
+import ProfileInfo from "~/components/ProfileInfo/ProfileInfo";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
-import NewChatIcon from "~/components/Icons/NewChatIcon";
-import ProfileInfo from "~/components/ProfileInfo/ProfileInfo";
-import { Button } from "~/components/ui/button";
+} from "~/components/ui/dropdown-menu";
 import { Chat } from "~/lib/typesJsonData";
 import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
 import { SearchDialog } from "../SearchDialog";

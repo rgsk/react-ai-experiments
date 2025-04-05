@@ -1046,7 +1046,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             {messages?.length === 0 ? (
               <>
                 <Container centerContent={true}>
-                  <div className="w-[800px]">
+                  <div className="">
                     {personaId && !persona ? (
                       <CentralLoader />
                     ) : (
@@ -1241,6 +1241,8 @@ const MessageInputContainer: React.FC<MessageInputContainerProps> = ({
   children,
 }) => {
   return (
-    <div className="m-auto max-w-[800px] pb-[28px] w-full">{children}</div>
+    <div className="m-auto max-w-[800px] pb-[28px] w-full px-[32px] md:px-0">
+      {children}
+    </div>
   );
 };
