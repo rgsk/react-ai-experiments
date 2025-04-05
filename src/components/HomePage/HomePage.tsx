@@ -7,10 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import authService from "~/lib/authService";
-import ProfileInfo from "../ProfileInfo/ProfileInfo";
-import { ModeToggle } from "../Shared/ModeToggle";
-import { Button } from "../ui/button";
+import Container from "../Shared/Container";
 const items = [
   {
     link: `/assistants/chat`,
@@ -33,31 +30,17 @@ interface HomePageProps {}
 const HomePage: React.FC<HomePageProps> = ({}) => {
   const newChatId = useMemo(() => v4(), []);
   return (
-    <div className="p-[32px]">
-      <div className="flex gap-4 items-center">
-        <p> Toggle Theme:</p> <ModeToggle />
-      </div>
-      <div className="h-[20px]"></div>
-      <div className="max-w-[300px]">
-        <p className="text-lg">Logged in as: </p>
-        <div className="h-[10px]"></div>
-        <ProfileInfo />
-        <div className="h-[10px]"></div>
-        <Button variant="outline" onClick={authService.logout}>
-          Logout
-        </Button>
-      </div>
-      <div className="h-[30px]"></div>
+    <Container>
       <div>
         <h1 className="text-3xl">Explore</h1>
         <div className="h-[20px]"></div>
-        <div className="flex gap-4 items-stretch">
+        <div className="flex gap-4 items-stretch flex-wrap md:flex-row flex-col">
           {items.map((item) => {
             const link =
               item.link === "/chat" ? `/chat/${newChatId}` : item.link;
             return (
               <Link to={link} key={item.link}>
-                <Card className="w-[350px] h-full">
+                <Card className="md:w-[350px] h-full">
                   <CardHeader>
                     <CardTitle>{item.title}</CardTitle>
                     <CardDescription>{item.description}</CardDescription>
@@ -68,7 +51,7 @@ const HomePage: React.FC<HomePageProps> = ({}) => {
           })}
         </div>
       </div>
-    </div>
+    </Container>
   );
 };
 export default HomePage;
