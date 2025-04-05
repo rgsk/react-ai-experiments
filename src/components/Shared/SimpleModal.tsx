@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useWindowSize } from "~/hooks/useWindowSize";
 
 interface SimpleModalProps {
   onClose: () => void;
@@ -26,6 +27,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+  const windowSize = useWindowSize();
   return (
     <div>
       <div className="fixed inset-0 z-[100]">
@@ -41,7 +43,10 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
             </div>
           )}
         </div>
-        <div className="flex items-center justify-center h-screen">
+        <div
+          className="flex items-center justify-center"
+          style={{ height: windowSize.height }}
+        >
           <div
             className="w-[80%] z-[1000] relative"
             style={{ maxWidth: maxWidth }}
