@@ -7,7 +7,6 @@ import App from "~/App";
 import Providers from "~/Providers";
 import AdminHomePage from "./components/Admin/AdminHomePage/AdminHomePage";
 import AdminSingleUserPage from "./components/Admin/AdminSingleUserPage/AdminSingleUserPage";
-import AssistantsChatPage from "./components/AssistantsChatPage/AssistantsChatPage";
 import ChatPage from "./components/ChatPage/ChatPage";
 import EditPersonaPage from "./components/EditPersonaPage/EditPersonaPage";
 import HomePage from "./components/HomePage/HomePage";
@@ -50,9 +49,7 @@ const router = createBrowserRouter(
       <Route path="ocr">
         <Route index element={<OcrPage />} />
       </Route>
-      <Route path="assistants">
-        <Route path="chat" element={<AssistantsChatPage />} />
-      </Route>
+
       <Route path="pdf">
         <Route index element={<PDFPage />} />
       </Route>

@@ -10,11 +10,6 @@ import {
 import Container from "../Shared/Container";
 const items = [
   {
-    link: `/assistants/chat`,
-    title: "Assistants Chat",
-    description: "Chat with General Assistant",
-  },
-  {
     link: `/personas`,
     title: "Personas",
     description: "Create AI Personas with Knowledge base and Chat with them",

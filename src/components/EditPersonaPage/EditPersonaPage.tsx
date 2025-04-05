@@ -16,8 +16,8 @@ import { Persona, PersonaKnowledgeItem } from "~/lib/typesJsonData";
 import { handleInputOnPaste } from "~/lib/utils";
 import { supportedExtensions } from "~/services/assistantsService";
 import ragService from "~/services/ragService";
-import FileUploadedPreview from "../AssistantsChatPage/Children/FileUploadedPreview/FileUploadedPreview";
-import { FileEntry } from "../AssistantsChatPage/Children/MessageInput/MessageInput";
+import { FileEntry } from "../ChatPage/ChatPage";
+import FileUploadedPreview from "../ChatPage/Children/FileUploadedPreview/FileUploadedPreview";
 import NewChatIcon from "../Icons/NewChatIcon";
 import CentralLoader from "../Shared/CentralLoader";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
@@ -409,7 +409,6 @@ const EditPersonaPage: React.FC<EditPersonaPageProps> = ({}) => {
                     <div key={fileEntry.id}>
                       <FileUploadedPreview
                         key={fileEntry.id}
-                        destination="s3"
                         fileEntry={fileEntry}
                         onRemove={() => {
                           if (fileEntry.s3Url) {
