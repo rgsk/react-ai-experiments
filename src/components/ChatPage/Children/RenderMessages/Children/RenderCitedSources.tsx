@@ -30,7 +30,7 @@ const RenderCitedSources: React.FC<RenderCitedSourcesProps> = ({
                 <div>
                   <Label>Search Results:</Label>
                   <div className="h-1"></div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {matchedSearchResults.map((sr, i) => {
                       const searchResult = sr!;
                       return (
@@ -64,7 +64,7 @@ const RenderCitedSources: React.FC<RenderCitedSourcesProps> = ({
                 <div>
                   <Label>Web Pages:</Label>
                   <div className="h-1"></div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {matchedWebPages.map((sr, i) => {
                       const matchedWebPage = sr!;
                       return (
