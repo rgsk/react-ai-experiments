@@ -1,6 +1,7 @@
 import ShowOnHover from "~/components/Shared/ShowOnHover";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Button } from "~/components/ui/button";
+import useBreakpoints from "~/hooks/useBreakpoints";
 import { FetchedWebPage, GoogleSearchResult } from "~/lib/typesJsonData";
 import { getDomain } from "~/lib/utils";
 import FetchedWebPageDisplay from "./FetchedWebPageDisplay";
@@ -19,43 +20,54 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
   googleSearchResult,
   fetchedWebPage,
 }) => {
+  const { md } = useBreakpoints();
+  const conditionallyWrapWithLink = (condition: boolean, children: any) => {
+    if (condition) {
+      return <TargetBlankLink href={link}>{children}</TargetBlankLink>;
+    }
+    return children;
+  };
   if (googleSearchResult) {
     return (
-      <TargetBlankLink href={link}>
-        <ShowOnHover
-          getMainElement={(hovered) => (
-            <Button variant={hovered ? "default" : "secondary"}>
+      <ShowOnHover
+        getMainElement={(show) =>
+          conditionallyWrapWithLink(
+            md,
+            <Button variant={show ? "default" : "secondary"}>
               {googleSearchResult.displayLink}
             </Button>
-          )}
-          hiddenElement={
-            <GoogleSearchResultDisplay
-              googleSearchResult={googleSearchResult}
-              type="cited-source"
-            />
-          }
-        />
-      </TargetBlankLink>
+          )
+        }
+        hiddenElement={conditionallyWrapWithLink(
+          !md,
+          <GoogleSearchResultDisplay
+            googleSearchResult={googleSearchResult}
+            type="cited-source"
+          />
+        )}
+      />
     );
   }
   if (fetchedWebPage) {
     return (
-      <TargetBlankLink href={link}>
-        <ShowOnHover
-          getMainElement={(hovered) => (
-            <Button variant={hovered ? "default" : "secondary"}>
+      <ShowOnHover
+        getMainElement={(show) =>
+          conditionallyWrapWithLink(
+            md,
+            <Button variant={show ? "default" : "secondary"}>
               {getDomain(fetchedWebPage.url)}
             </Button>
-          )}
-          hiddenElement={
-            <FetchedWebPageDisplay
-              fetchedWebPage={fetchedWebPage.webPage}
-              url={fetchedWebPage.url}
-              type="cited-source"
-            />
-          }
-        />
-      </TargetBlankLink>
+          )
+        }
+        hiddenElement={conditionallyWrapWithLink(
+          !md,
+          <FetchedWebPageDisplay
+            fetchedWebPage={fetchedWebPage.webPage}
+            url={fetchedWebPage.url}
+            type="cited-source"
+          />
+        )}
+      />
     );
   }
 
