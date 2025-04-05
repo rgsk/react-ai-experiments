@@ -39,7 +39,7 @@ const SidebarWithBackdrop: React.FC<SidebarWithBackdropProps> = ({
             animate={{ x: 0 }}
             exit={{ x: initialX }}
             style={{ width: width }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            transition={{ type: "tween", duration: 0.1, ease: "easeOut" }}
           >
             {children}
           </motion.div>
