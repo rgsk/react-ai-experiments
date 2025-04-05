@@ -23,7 +23,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({
   historyBlocks,
 }) => {
   return (
-    <div className="w-[260px] border-r border-r-input h-full flex flex-col">
+    <div className="h-full flex flex-col">
       <div className="p-[16px] flex justify-between items-center">
         <Button
           onClick={() => {

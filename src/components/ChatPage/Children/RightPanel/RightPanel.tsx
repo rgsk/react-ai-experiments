@@ -31,7 +31,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
 }) => {
   const { logLevel, setLogLevel } = useGlobalContext();
   return (
-    <div className="w-[260px] border-l border-l-input h-full flex flex-col">
+    <div className="h-full flex flex-col">
       <div className="p-4">
         <div className="flex items-center space-x-2">
           <Switch

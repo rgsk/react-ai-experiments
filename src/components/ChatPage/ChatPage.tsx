@@ -12,6 +12,7 @@ import {
   pythonCSVPrefix,
   pythonImagePrefix,
 } from "~/hooks/codeRunners/usePythonRunner";
+import useBreakpoints from "~/hooks/useBreakpoints";
 import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
 import useGlobalContext from "~/hooks/useGlobalContext";
@@ -53,6 +54,7 @@ import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
+import SidebarWithBackdrop from "../Shared/SidebarWithBackdrop";
 import { Button } from "../ui/button";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import LeftPanel from "./Children/LeftPanel/LeftPanel";
@@ -134,6 +136,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     "rightPanelOpen",
     true
   );
+  const { md } = useBreakpoints();
   const { id: chatId } = useParams<{ id: string }>();
   const { userData } = useGlobalContext();
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
@@ -1003,9 +1006,57 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       />
     );
   };
+  const leftPanelWrapper = (children: any) => {
+    return (
+      <>
+        {md ? (
+          <>
+            {leftPanelOpen && (
+              <div className="w-[260px] border-r border-r-input">
+                {children}
+              </div>
+            )}
+          </>
+        ) : (
+          <SidebarWithBackdrop
+            open={leftPanelOpen ?? false}
+            onClose={() => setLeftPanelOpen(false)}
+            width={260}
+            side="left"
+          >
+            {children}
+          </SidebarWithBackdrop>
+        )}
+      </>
+    );
+  };
+  const rigthPanelWrapper = (children: any) => {
+    return (
+      <>
+        {md ? (
+          <>
+            {rightPanelOpen && (
+              <div className="w-[260px] border-l border-l-input">
+                {children}
+              </div>
+            )}
+          </>
+        ) : (
+          <SidebarWithBackdrop
+            open={rightPanelOpen ?? false}
+            onClose={() => setRightPanelOpen(false)}
+            width={260}
+            side="right"
+          >
+            {children}
+          </SidebarWithBackdrop>
+        )}
+      </>
+    );
+  };
   return (
     <div className="h-screen flex">
-      {leftPanelOpen && (
+      {leftPanelWrapper(
         <LeftPanel
           openNewChat={openNewChat}
           openNewChatLoading={openNewChatLoading}
@@ -1115,15 +1166,17 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           </>
         )}
       </div>
-      {rightPanelOpen && preferences && model && (
-        <RightPanel
-          model={model}
-          preferences={preferences}
-          setModel={setModel}
-          setPreferences={setPreferences}
-          persona={persona}
-        />
-      )}
+      {preferences &&
+        model &&
+        rigthPanelWrapper(
+          <RightPanel
+            model={model}
+            preferences={preferences}
+            setModel={setModel}
+            setPreferences={setPreferences}
+            persona={persona}
+          />
+        )}
     </div>
   );
   // return (
