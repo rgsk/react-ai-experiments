@@ -268,8 +268,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
 
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
-  const { addAudioChunk, completeAudio, startPlayback } = usePlayAudioChunks({
+  const { addAudioChunk, completeAudio } = usePlayAudioChunks({
     audioPlayerRef,
+    autoStartOnChunk: true,
   });
 
   const {
@@ -1090,8 +1091,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         }}
         {...dropAreaProps}
       >
-        <Button onClick={startPlayback}>Start Playback</Button>
-
         {isDragging && <DraggingBackdrop />}
         <TopPanel
           openNewChat={openNewChat}

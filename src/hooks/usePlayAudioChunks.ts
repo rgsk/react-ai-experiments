@@ -3,14 +3,25 @@ import { arraysEqual, endOfStreamUint8Array } from "~/lib/audioUtils";
 
 const usePlayAudioChunks = ({
   audioPlayerRef,
+  autoStartOnChunk = false,
 }: {
   audioPlayerRef: RefObject<HTMLAudioElement>;
+  autoStartOnChunk?: boolean;
 }) => {
   const audioQueue = useRef<Uint8Array[]>([]);
   const currentMediaSourceRef = useRef<MediaSource | null>(null);
   const sourceBufferRef = useRef<SourceBuffer | null>(null);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Tracks whether playback has been initialized
+  const initializedRef = useRef(false);
+
+  const resetInternalState = () => {
+    initializedRef.current = false;
+    audioQueue.current = [];
+    currentMediaSourceRef.current = null;
+    sourceBufferRef.current = null;
+  };
 
   const appendNextBuffer = (sourceBuffer: SourceBuffer) => {
     if (audioQueue.current.length > 0 && !sourceBuffer.updating) {
@@ -25,12 +36,14 @@ const usePlayAudioChunks = ({
     }
   };
 
-  // Initializes playback by setting up a new MediaSource
-  const startPlayback = useCallback(() => {
+  const initPlayback = useCallback(() => {
+    if (initializedRef.current) return;
+
     setLoading(true);
     const audioPlayer = audioPlayerRef.current!;
     const mediaSource = new MediaSource();
     currentMediaSourceRef.current = mediaSource;
+    initializedRef.current = true;
 
     mediaSource.addEventListener("sourceopen", () => {
       const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
@@ -39,7 +52,7 @@ const usePlayAudioChunks = ({
       sourceBuffer.addEventListener("updateend", () => {
         appendNextBuffer(sourceBuffer);
       });
-      // If there are any already queued chunks, start appending them
+      // Flush any queued chunks
       appendNextBuffer(sourceBuffer);
     });
 
@@ -47,16 +60,31 @@ const usePlayAudioChunks = ({
     audioPlayer.play();
   }, [audioPlayerRef]);
 
-  // This function should be called externally when new audio chunk data is available
-  const addChunk = useCallback((chunk: Uint8Array) => {
-    audioQueue.current.push(chunk);
-    const sourceBuffer = sourceBufferRef.current;
-    if (sourceBuffer && !sourceBuffer.updating) {
-      appendNextBuffer(sourceBuffer);
-    }
-  }, []);
+  // Allows manual start
+  const startPlayback = useCallback(() => {
+    initPlayback();
+  }, [initPlayback]);
 
-  // Call this function to signal that no more audio chunks will be provided
+  const addChunk = useCallback(
+    (chunk: Uint8Array) => {
+      // Enqueue the incoming chunk.
+      audioQueue.current.push(chunk);
+
+      // Auto-start if enabled and not already initialized.
+      if (autoStartOnChunk && !initializedRef.current) {
+        initPlayback();
+      }
+
+      // Try to flush the queue if sourceBuffer is available.
+      const sourceBuffer = sourceBufferRef.current;
+      if (sourceBuffer && !sourceBuffer.updating) {
+        appendNextBuffer(sourceBuffer);
+      }
+    },
+    [autoStartOnChunk, initPlayback]
+  );
+
+  // Signals that no further audio chunks will be provided.
   const completeAudio = useCallback(() => {
     addChunk(endOfStreamUint8Array);
   }, [addChunk]);
@@ -64,30 +92,31 @@ const usePlayAudioChunks = ({
   const stopPlaying = useCallback(() => {
     const audioPlayer = audioPlayerRef.current!;
     audioPlayer.pause();
-    // Optionally clear the queue and reset states here
     setPlaying(false);
     setLoading(false);
+    resetInternalState();
   }, [audioPlayerRef]);
 
   useEffect(() => {
     const audioPlayer = audioPlayerRef.current;
+    if (!audioPlayer) return;
+
     const handleEnded = () => {
       setPlaying(false);
+      // Reset internal state to allow a new playback session.
+      resetInternalState();
     };
+
     const handlePlay = () => {
       setPlaying(true);
       setLoading(false);
     };
 
-    if (audioPlayer) {
-      audioPlayer.addEventListener("ended", handleEnded);
-      audioPlayer.addEventListener("play", handlePlay);
-    }
+    audioPlayer.addEventListener("ended", handleEnded);
+    audioPlayer.addEventListener("play", handlePlay);
     return () => {
-      if (audioPlayer) {
-        audioPlayer.removeEventListener("ended", handleEnded);
-        audioPlayer.removeEventListener("play", handlePlay);
-      }
+      audioPlayer.removeEventListener("ended", handleEnded);
+      audioPlayer.removeEventListener("play", handlePlay);
     };
   }, [audioPlayerRef]);
 
