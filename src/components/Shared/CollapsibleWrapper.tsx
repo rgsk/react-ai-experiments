@@ -37,7 +37,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
           asChild
           className={cn(
             "sticky bg-background",
-            level === 1 ? "top-[-32px] z-50" : "top-[0px] z-40",
+            level === 1 ? "top-[-32px] z-30" : "top-[0px] z-20",
             triggerClassName
           )}
           onClick={() => {
