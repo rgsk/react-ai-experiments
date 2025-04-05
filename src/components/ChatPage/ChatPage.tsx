@@ -53,7 +53,6 @@ import experimentsService from "~/services/experimentsService";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
-import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import SidebarWithBackdrop from "../Shared/SidebarWithBackdrop";
 import { Button } from "../ui/button";
 import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
@@ -1103,8 +1102,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
 
         {messagesLoading ? (
           <>
-            <Container centerContent={true} applyChatWidthLimit>
-              <LoadingSpinner />
+            <Container applyChatWidthLimit>
+              <CentralLoader />
             </Container>
             <MessageInputContainer>
               {renderMessageInput()}
@@ -1114,8 +1113,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           <>
             {messages?.length === 0 ? (
               <>
-                <Container centerContent={true} applyChatWidthLimit>
-                  <div className="">
+                <Container applyChatWidthLimit>
+                  <div className="flex-1 flex justify-center items-center">
                     {personaId && !persona ? (
                       <CentralLoader />
                     ) : (
