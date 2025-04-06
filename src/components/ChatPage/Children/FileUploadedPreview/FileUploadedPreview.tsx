@@ -143,9 +143,14 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             </span>
           )}
         </div>
-        <p className="text-[14px] font-medium text-ellipsis overflow-hidden whitespace-nowrap">
-          {fileName}
-        </p>
+        <div>
+          <p className="text-[14px] font-medium text-ellipsis overflow-hidden whitespace-nowrap">
+            {fileName}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {fileExtension === "csv" ? "Spreadsheet" : "Document"}
+          </p>
+        </div>
         <div className="flex-1"></div>
         <div>{children}</div>
       </div>
