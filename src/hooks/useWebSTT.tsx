@@ -1,15 +1,17 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 const useWebSTT = ({
   onFinalTranscript,
   onInterimTranscript,
 }: {
-  onFinalTranscript: (transcript: string) => void;
+  onFinalTranscript: (transcript: string, recogintionActive: boolean) => void;
   onInterimTranscript: (transcript: string) => void;
 }) => {
   const onFinalTranscriptRef = useRef(onFinalTranscript);
   onFinalTranscriptRef.current = onFinalTranscript;
-
+  const [recognitionActive, setRecognitionActive] = useState(false);
+  const recognitionActiveRef = useRef(recognitionActive);
+  recognitionActiveRef.current = recognitionActive;
   const onInterimTranscriptRef = useRef(onInterimTranscript);
   onInterimTranscriptRef.current = onInterimTranscript;
   const recognitionInstance = useMemo(() => {
@@ -39,7 +41,10 @@ const useWebSTT = ({
       }
       // console.log({ finalTranscripts, interimTranscripts });
       if (finalTranscripts) {
-        onFinalTranscriptRef.current(finalTranscripts);
+        onFinalTranscriptRef.current(
+          finalTranscripts,
+          recognitionActiveRef.current
+        );
       } else {
         onInterimTranscriptRef.current(interimTranscripts);
       }
@@ -48,11 +53,13 @@ const useWebSTT = ({
   }, []);
 
   const startRecognition = useCallback(() => {
+    setRecognitionActive(true);
     recognitionInstance!.start();
   }, [recognitionInstance]);
 
   const stopRecognition = useCallback(
     (abort?: boolean) => {
+      setRecognitionActive(false);
       if (abort) {
         // don't make the last recorded speech as final
         recognitionInstance!.abort();
@@ -65,6 +72,7 @@ const useWebSTT = ({
   return {
     startRecognition,
     stopRecognition,
+    recognitionActive,
   };
 };
 export default useWebSTT;

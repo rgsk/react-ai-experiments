@@ -17,6 +17,7 @@ import { FileEntry, HandleSend } from "../ChatPage";
 import FileUploadedPreview, {
   CloseButton,
 } from "./FileUploadedPreview/FileUploadedPreview";
+import SpeechRecognitionMic from "./SpeechRecognitionMic";
 
 interface MessageInputProps {
   handleSend: HandleSend;
@@ -44,6 +45,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   const [latexActive, setLatexActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textAreaInputRef = useRef<HTMLTextAreaElement>(null);
+  const [textInputDisabled, setTextInputDisabled] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const handleFileInputClick = () => {
     if (fileInputRef.current) {
@@ -173,6 +175,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
               onChange={(e) => {
                 setText(e.target.value);
               }}
+              disabled={textInputDisabled}
               onFocus={() => {
                 setInputFocused(true);
               }}
@@ -246,7 +249,13 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 <PlusIcon size={20} />
               </Button>
             </div>
-            <div>
+            <div className="flex gap-2">
+              <SpeechRecognitionMic
+                text={text}
+                setText={setText}
+                textInputDisabled={textInputDisabled}
+                setTextInputDisabled={setTextInputDisabled}
+              />
               {loading && interruptEnabled ? (
                 <Button
                   onClick={interrupt}

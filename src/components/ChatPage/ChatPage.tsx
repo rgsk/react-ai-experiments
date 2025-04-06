@@ -351,7 +351,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       return prev;
     });
   };
-  const { startRecognition, stopRecognition } = useWebSTT({
+  const { startRecognition, stopRecognition, recognitionActive } = useWebSTT({
     onFinalTranscript: () => {
       markLastMessageAsComplete("user");
     },
