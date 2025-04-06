@@ -738,7 +738,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             };
             await addMessage(message);
             const result = await experimentsService
-              .getUrlContent({ url: fileEntry.s3Url! })
+              .getUrlContent({ url: fileEntry.s3Url!, type: "image" })
               .fn();
             contentObj.content = result;
             message.content = JSON.stringify(contentObj);

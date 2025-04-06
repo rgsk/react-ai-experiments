@@ -1,7 +1,7 @@
 import { FileEntry } from "~/components/ChatPage/ChatPage";
 import { extractTagContent, recursiveParseJson } from "~/lib/utils";
 import { separator } from "./specialMessageParser";
-import { Message } from "./typesJsonData";
+import { Message, WebsiteMeta } from "./typesJsonData";
 
 export const messageContentParsers = {
   image_url: (messageContent: any) => {
@@ -10,12 +10,21 @@ export const messageContentParsers = {
     return { fileName, url };
   },
   image_ocr: (messageContent: any) => {
-    const { fileName, url, content } = JSON.parse(messageContent) as {
+    const { fileName, url, content } = recursiveParseJson(messageContent) as {
       fileName: string;
       url: string;
-      content: string;
+      content: any;
     };
-    const { imageModelOutput, imageOCROutput } = content as any;
+    const {
+      websiteContentResult: { imageModelOutput, imageOCROutput },
+      websiteMeta,
+    } = content as {
+      websiteContentResult: {
+        imageModelOutput: string;
+        imageOCROutput: string;
+      };
+      websiteMeta: WebsiteMeta;
+    };
     return {
       fileName,
       url,

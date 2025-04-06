@@ -1,5 +1,9 @@
 import { ChatCompletionMessageToolCall } from "openai/resources/index.mjs";
-import { GoogleSearchResult, UrlContentType } from "./typesJsonData";
+import {
+  GoogleSearchResult,
+  UrlContentType,
+  WebsiteMeta,
+} from "./typesJsonData";
 import { recursiveParseJson } from "./utils";
 
 const toolCallParser = {
@@ -27,8 +31,16 @@ const toolCallParser = {
     const url: string = args.url;
     const type: UrlContentType | undefined = args.type;
     const finalArguments = { url, type };
-    const firstItemText = recursiveParseJson(messageContent).content[0].text;
-    return { arguments: finalArguments, output: { content: firstItemText } };
+    const { websiteContentResult, websiteMeta } = recursiveParseJson(
+      messageContent
+    ).content[0].text as {
+      websiteContentResult: any;
+      websiteMeta: WebsiteMeta;
+    };
+    return {
+      arguments: finalArguments,
+      output: { websiteContentResult, websiteMeta },
+    };
   },
 };
 export default toolCallParser;

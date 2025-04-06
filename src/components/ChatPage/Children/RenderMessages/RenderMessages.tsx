@@ -72,17 +72,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
             ];
           } else if (toolCall.function.name === "getUrlContent") {
             const {
-              arguments: { url, type },
-              output: { content },
+              output: { websiteMeta },
             } = toolCallParser.getUrlContent({
               toolCall,
               messageContent: message.content,
             });
-
-            const { websiteMeta } = content as {
-              websiteContentResult: string;
-              websiteMeta: WebsiteMeta;
-            };
             localFetchedWebPages.push(websiteMeta);
           }
         }
