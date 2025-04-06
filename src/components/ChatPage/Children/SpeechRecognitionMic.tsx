@@ -9,6 +9,8 @@ interface SpeechRecognitionMicProps {
   textInputDisabled: boolean;
   setTextInputDisabled: Dispatch<SetStateAction<boolean>>;
   scrollTextAreaToBottom: () => void;
+  onMicStart: () => void;
+  disabled: boolean;
 }
 const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
   text,
@@ -16,6 +18,8 @@ const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
   setTextInputDisabled,
   textInputDisabled,
   scrollTextAreaToBottom,
+  onMicStart,
+  disabled,
 }) => {
   const [localText, setLocalText] = useState(text);
   const { startRecognition, stopRecognition, recognitionActive } = useWebSTT({
@@ -62,8 +66,10 @@ const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
             stopRecognition();
           } else {
             startRecognition();
+            onMicStart();
           }
         }}
+        disabled={disabled}
       >
         {recognitionActive ? <MicOffIcon /> : <MicIcon />}
       </Button>

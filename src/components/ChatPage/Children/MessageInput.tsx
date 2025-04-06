@@ -291,6 +291,10 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 textInputDisabled={textInputDisabled}
                 setTextInputDisabled={setTextInputDisabled}
                 scrollTextAreaToBottom={scrollTextAreaToBottom}
+                onMicStart={() => {
+                  autoReadAloudProps.stop();
+                }}
+                disabled={loading}
               />
               {loading && interruptEnabled ? (
                 <Button
