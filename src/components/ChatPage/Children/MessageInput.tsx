@@ -226,7 +226,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
               placeholder={placeholder}
               className={cn(
                 `w-full resize-none
-            placeholder:text-muted-foreground focus:outline-none bg-transparent px-2 pt-2`,
+            placeholder:text-muted-foreground focus:outline-none bg-transparent px-2 pt-2 disabled:text-foreground`,
                 disabled && "cursor-not-allowed"
               )}
               style={{
