@@ -17,9 +17,9 @@ const OpenAIRealtimeWebRTC = ({
   onUserTranscript?: (transcript: string) => void;
   onAssistantTranscript: (transcript: string) => void;
   onAssistantTranscriptDelta: (delta: string) => void;
-  onUserSpeechStarted: () => void;
-  onUserSpeechStopped: () => void;
-  onAssistantSpeechStopped: () => void;
+  onUserSpeechStarted?: () => void;
+  onUserSpeechStopped?: () => void;
+  onAssistantSpeechStopped?: () => void;
   onDataChannelOpened: () => void;
   isEnabled: boolean;
 }) => {
@@ -113,11 +113,11 @@ const OpenAIRealtimeWebRTC = ({
           const event = realtimeEvent as typeof sampleAudioTranscriptDeltaEvent;
           onAssistantTranscriptDelta(event.delta);
         } else if (realtimeEvent.type === "input_audio_buffer.speech_started") {
-          onUserSpeechStarted();
+          onUserSpeechStarted?.();
         } else if (realtimeEvent.type === "input_audio_buffer.speech_stopped") {
-          onUserSpeechStopped();
+          onUserSpeechStopped?.();
         } else if (realtimeEvent.type === "output_audio_buffer.audio_stopped") {
-          onAssistantSpeechStopped();
+          onAssistantSpeechStopped?.();
         }
       });
 

@@ -115,9 +115,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
       <div className="flex flex-col gap-4 items-end">
         {messages.map((message, i) => {
           const key = `id: ${message.id}, index - ${i}`;
-          if (!message.content) {
-            return null;
-          } else if (message.type === "file") {
+          if (message.type === "file") {
             const { fileEntry, parsedContent } = messageContentParsers.file(
               message.content
             );
@@ -421,14 +419,27 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                         </ActionButton>
                       </div>
                     </div>
-                    <MemoizedMarkdownRenderer
-                      loading={message.status === "in_progress"}
-                      collapsibleWrapperTriggerClassname={
-                        "bg-gray-100 dark:bg-gray-800"
-                      }
-                    >
-                      {text}
-                    </MemoizedMarkdownRenderer>
+
+                    {text ? (
+                      <MemoizedMarkdownRenderer
+                        loading={message.status === "in_progress"}
+                        collapsibleWrapperTriggerClassname={
+                          "bg-gray-100 dark:bg-gray-800"
+                        }
+                      >
+                        {text}
+                      </MemoizedMarkdownRenderer>
+                    ) : (
+                      <div className="messageContent">
+                        {message.status === "in_progress" ? (
+                          <p>
+                            <LoadingSpinner />
+                          </p>
+                        ) : (
+                          <p>&nbsp;</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

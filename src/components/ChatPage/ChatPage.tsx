@@ -21,7 +21,6 @@ import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import usePlayAudioChunks from "~/hooks/usePlayAudioChunks";
 import useTextStream from "~/hooks/useTextStream";
-import useWebSTT from "~/hooks/useWebSTT";
 import {
   createMarkdownContent,
   generateTitleBasedOnFirstUserMessage,
@@ -333,7 +332,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       return [...(prev ?? []), newMessage];
     });
   };
-  const markLastMessageAsComplete = (role: "user" | "assistant") => {
+  const markLastMessageAsComplete = (
+    role: "user" | "assistant",
+    messageContent?: string
+  ) => {
     // get the last user message and mark it as complete
     setMessages((prev) => {
       if (!prev) return prev;
@@ -350,6 +352,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         const updatedMessages = [...prev];
         updatedMessages[lastUserIndex] = {
           ...updatedMessages[lastUserIndex],
+          content: (messageContent ??
+            updatedMessages[lastUserIndex].content) as any,
           status: "completed",
         };
         return updatedMessages;
@@ -358,14 +362,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       return prev;
     });
   };
-  const { startRecognition, stopRecognition, recognitionActive } = useWebSTT({
-    onFinalTranscript: () => {
-      markLastMessageAsComplete("user");
-    },
-    onInterimTranscript: (transcript) => {
-      handleMessageDelta({ role: "user", transcript: transcript });
-    },
-  });
 
   const [searchParams] = useSearchParams();
 
@@ -1138,13 +1134,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         <OpenAIRealtimeWebRTC
           onDataChannelOpened={() => {
             setVoiceModeLoading(false);
-            startRecognition();
-          }}
-          onUserSpeechStarted={() => {
-            startRecognition();
-          }}
-          onUserSpeechStopped={() => {
-            stopRecognition();
           }}
           isEnabled={voiceModeEnabled}
           onAssistantTranscript={() => {
@@ -1153,9 +1142,19 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           onAssistantTranscriptDelta={(delta: any) => {
             handleMessageDelta({ role: "assistant", delta: delta });
           }}
-          onAssistantSpeechStopped={() => {
-            // assistant audio response is complete
-            startRecognition();
+          onUserSpeechStarted={() => {
+            setMessages((prev) => [
+              ...(prev ?? []),
+              {
+                id: v4(),
+                role: "user",
+                status: "in_progress",
+                content: "",
+              },
+            ]);
+          }}
+          onUserTranscript={(transcript) => {
+            markLastMessageAsComplete("user", transcript);
           }}
           initialMessages={messages ?? []}
         />
