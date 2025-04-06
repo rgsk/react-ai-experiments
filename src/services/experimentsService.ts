@@ -306,10 +306,10 @@ const experimentsService = {
     };
   },
   processFileMessage: async ({
-    s3Url,
+    url,
     collectionName,
   }: {
-    s3Url: string;
+    url: string;
     collectionName: string;
   }) => {
     const response = await axiosExperimentsInstance.post<
@@ -321,7 +321,7 @@ const experimentsService = {
         }
       | { content: string; type: "full"; instruction: string }
     >(`/process-file-message`, {
-      s3Url,
+      url,
       collectionName,
     });
     return response.data;

@@ -770,7 +770,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             throw new Error("no collectionName");
           }
           const result = await experimentsService.processFileMessage({
-            s3Url: fileEntry.s3Url!,
+            url: fileEntry.s3Url!,
             collectionName: collectionName,
           });
           contentObj.content = JSON.stringify(result);
