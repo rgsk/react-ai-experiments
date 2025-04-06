@@ -3,25 +3,16 @@ import { arraysEqual, endOfStreamUint8Array } from "~/lib/audioUtils";
 
 const usePlayAudioChunks = ({
   audioPlayerRef,
-  autoStartOnChunk = false,
 }: {
   audioPlayerRef: RefObject<HTMLAudioElement>;
-  autoStartOnChunk?: boolean;
 }) => {
   const audioQueue = useRef<Uint8Array[]>([]);
   const currentMediaSourceRef = useRef<MediaSource | null>(null);
   const sourceBufferRef = useRef<SourceBuffer | null>(null);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [streamLoading, setStreamLoading] = useState(false);
   // Tracks whether playback has been initialized
-  const initializedRef = useRef(false);
-
-  const resetInternalState = () => {
-    initializedRef.current = false;
-    audioQueue.current = [];
-    currentMediaSourceRef.current = null;
-    sourceBufferRef.current = null;
-  };
 
   const appendNextBuffer = (sourceBuffer: SourceBuffer) => {
     if (audioQueue.current.length > 0 && !sourceBuffer.updating) {
@@ -37,13 +28,13 @@ const usePlayAudioChunks = ({
   };
 
   const initPlayback = useCallback(() => {
-    if (initializedRef.current) return;
+    audioQueue.current = [];
+    currentMediaSourceRef.current = null;
+    sourceBufferRef.current = null;
 
-    setLoading(true);
     const audioPlayer = audioPlayerRef.current!;
     const mediaSource = new MediaSource();
     currentMediaSourceRef.current = mediaSource;
-    initializedRef.current = true;
 
     mediaSource.addEventListener("sourceopen", () => {
       const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
@@ -60,41 +51,27 @@ const usePlayAudioChunks = ({
     audioPlayer.play();
   }, [audioPlayerRef]);
 
-  // Allows manual start
-  const startPlayback = useCallback(() => {
-    initPlayback();
-  }, [initPlayback]);
-
-  const addChunk = useCallback(
-    (chunk: Uint8Array) => {
-      // Enqueue the incoming chunk.
-      audioQueue.current.push(chunk);
-
-      // Auto-start if enabled and not already initialized.
-      if (autoStartOnChunk && !initializedRef.current) {
-        initPlayback();
-      }
-
-      // Try to flush the queue if sourceBuffer is available.
-      const sourceBuffer = sourceBufferRef.current;
-      if (sourceBuffer && !sourceBuffer.updating) {
-        appendNextBuffer(sourceBuffer);
-      }
-    },
-    [autoStartOnChunk, initPlayback]
-  );
+  const addChunk = useCallback((chunk: Uint8Array) => {
+    // Enqueue the incoming chunk.
+    audioQueue.current.push(chunk);
+    setLoading(false);
+    // Try to flush the queue if sourceBuffer is available.
+    const sourceBuffer = sourceBufferRef.current;
+    if (sourceBuffer && !sourceBuffer.updating) {
+      appendNextBuffer(sourceBuffer);
+    }
+  }, []);
 
   // Signals that no further audio chunks will be provided.
   const completeAudio = useCallback(() => {
     addChunk(endOfStreamUint8Array);
+    setStreamLoading(false);
   }, [addChunk]);
 
   const stopPlaying = useCallback(() => {
     const audioPlayer = audioPlayerRef.current!;
     audioPlayer.pause();
     setPlaying(false);
-    setLoading(false);
-    resetInternalState();
   }, [audioPlayerRef]);
 
   useEffect(() => {
@@ -103,13 +80,10 @@ const usePlayAudioChunks = ({
 
     const handleEnded = () => {
       setPlaying(false);
-      // Reset internal state to allow a new playback session.
-      resetInternalState();
     };
 
     const handlePlay = () => {
       setPlaying(true);
-      setLoading(false);
     };
 
     audioPlayer.addEventListener("ended", handleEnded);
@@ -119,7 +93,11 @@ const usePlayAudioChunks = ({
       audioPlayer.removeEventListener("play", handlePlay);
     };
   }, [audioPlayerRef]);
-
+  const startPlayback = useCallback(() => {
+    setLoading(true);
+    setStreamLoading(true);
+    initPlayback();
+  }, [initPlayback]);
   return {
     startPlayback,
     addAudioChunk: addChunk,
@@ -127,6 +105,7 @@ const usePlayAudioChunks = ({
     stopPlaying,
     playing,
     loading,
+    streamLoading,
   };
 };
 

@@ -10,6 +10,7 @@ const useTextStream = ({
   handleToolCallOutput,
   addAudioChunk,
   completeAudio,
+  startPlayback,
 }: {
   handleToolCall: (toolCall: ToolCall) => Promise<void>;
   handleToolCallOutput: (entry: {
@@ -18,6 +19,7 @@ const useTextStream = ({
   }) => Promise<void>;
   addAudioChunk?: (chunk: Uint8Array) => void;
   completeAudio?: () => void;
+  startPlayback?: () => void;
 }) => {
   const [text, setText] = useState("");
   const [reasoningText, setReasoningText] = useState("");
@@ -35,6 +37,8 @@ const useTextStream = ({
   addAudioChunkRef.current = addAudioChunk;
   const completeAudioRef = useRef(completeAudio);
   completeAudioRef.current = completeAudio;
+  const startPlaybackRef = useRef(startPlayback);
+  startPlaybackRef.current = startPlayback;
   useEffect(() => {
     const socket = socketRef.current;
     if (socket) {
@@ -92,6 +96,7 @@ const useTextStream = ({
       model: Model;
       streamAudio?: boolean;
     }) => {
+      startPlaybackRef.current?.();
       setLoading(true);
       setText("");
       setReasoningText("");

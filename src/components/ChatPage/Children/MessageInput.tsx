@@ -1,5 +1,5 @@
 import { ArrowUp } from "iconsax-react";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Volume2Icon, VolumeOffIcon } from "lucide-react";
 import {
   Dispatch,
   SetStateAction,
@@ -12,6 +12,7 @@ import { isMobile } from "react-device-detect";
 
 import { EditableMathField } from "react-mathquill";
 import TextareaAutosize from "react-textarea-autosize";
+import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import { cn, handleInputOnPaste } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
@@ -31,6 +32,11 @@ interface MessageInputProps {
   handleFilesChange: (files: File[]) => void;
   attachedFiles: FileEntry[];
   setAttachedFiles: Dispatch<SetStateAction<FileEntry[]>>;
+  autoReadAloudProps: {
+    stop: () => void;
+    loading: boolean;
+    playing: boolean;
+  };
 }
 const MessageInput: React.FC<MessageInputProps> = ({
   handleSend,
@@ -42,6 +48,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   handleFilesChange,
   attachedFiles,
   setAttachedFiles,
+  autoReadAloudProps,
 }) => {
   const [latex, setLatex] = useState("");
   const [latexActive, setLatexActive] = useState(false);
@@ -259,6 +266,22 @@ const MessageInput: React.FC<MessageInputProps> = ({
               </Button>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="rounded-full"
+                size="icon"
+                onClick={autoReadAloudProps.stop}
+                disabled={!autoReadAloudProps.playing}
+              >
+                {autoReadAloudProps.loading ? (
+                  <LoadingSpinner />
+                ) : autoReadAloudProps.playing ? (
+                  <VolumeOffIcon />
+                ) : (
+                  <Volume2Icon />
+                )}
+              </Button>
+
               <SpeechRecognitionMic
                 text={text}
                 setText={setText}
