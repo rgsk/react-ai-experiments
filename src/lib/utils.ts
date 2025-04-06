@@ -66,26 +66,55 @@ export function extractTagContent(
   return null;
 }
 
-export const handleInputOnPaste = (
+const generateFileNameBasedOnDate = (
+  prefix = "pasted-text",
+  extension = "txt"
+): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  return `${prefix}_${year}-${month}-${day}_${hours}-${minutes}-${seconds}.${extension}`;
+};
+
+const textInputUploadedAsFileThreshold = 1000;
+export const handleInputOnPaste = async (
   event: React.ClipboardEvent<HTMLElement>,
   onFilesChange: (files: File[]) => void
 ) => {
+  event.preventDefault();
   const items = event.clipboardData.items;
   const files: File[] = [];
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-
     if (item.kind === "file") {
       const file = item.getAsFile();
 
       if (file) {
         files.push(file);
       }
+    } else if (item.kind === "string") {
+      const text = await new Promise<string>((resolve) => {
+        item.getAsString((data) => {
+          resolve(data);
+        });
+      });
+      if (text.length > textInputUploadedAsFileThreshold) {
+        const file = new File([text], generateFileNameBasedOnDate(), {
+          type: "text/plain",
+        });
+        files.push(file);
+      } else {
+        document.execCommand("insertText", false, text);
+      }
     }
   }
   if (files.length > 0) {
     // Prevent default paste behavior (which pastes the file name)
-    event.preventDefault();
     onFilesChange(files);
   }
 };
