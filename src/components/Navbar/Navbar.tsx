@@ -14,7 +14,7 @@ import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 interface NavbarProps {}
 const Navbar: React.FC<NavbarProps> = ({}) => {
-  const { userData, userDataLoading } = useGlobalContext();
+  const { userData, userDataLoading, firebaseUserLoading } = useGlobalContext();
   return (
     <div className="border-b border-b-input p-4 flex justify-between items-center gap-3">
       <Link to="/">
@@ -25,7 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
       <div className="flex gap-2 items-center">
         <ModeToggle />
         <>
-          {userDataLoading ? (
+          {userDataLoading || firebaseUserLoading ? (
             <div className="w-[36px] h-[36px] flex items-center justify-center">
               <LoadingSpinner />
             </div>
