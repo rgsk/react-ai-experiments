@@ -36,6 +36,7 @@ interface MessageInputProps {
     stop: () => void;
     loading: boolean;
     playing: boolean;
+    enabled: boolean;
   };
 }
 const MessageInput: React.FC<MessageInputProps> = ({
@@ -266,21 +267,23 @@ const MessageInput: React.FC<MessageInputProps> = ({
               </Button>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="rounded-full"
-                size="icon"
-                onClick={autoReadAloudProps.stop}
-                disabled={!autoReadAloudProps.playing}
-              >
-                {autoReadAloudProps.loading ? (
-                  <LoadingSpinner />
-                ) : autoReadAloudProps.playing ? (
-                  <VolumeOffIcon />
-                ) : (
-                  <Volume2Icon />
-                )}
-              </Button>
+              {autoReadAloudProps.enabled && (
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  size="icon"
+                  onClick={autoReadAloudProps.stop}
+                  disabled={!autoReadAloudProps.playing}
+                >
+                  {autoReadAloudProps.loading ? (
+                    <LoadingSpinner />
+                  ) : autoReadAloudProps.playing ? (
+                    <VolumeOffIcon />
+                  ) : (
+                    <Volume2Icon />
+                  )}
+                </Button>
+              )}
 
               <SpeechRecognitionMic
                 text={text}

@@ -142,7 +142,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
   const { md } = useBreakpoints();
   const { id: chatId } = useParams<{ id: string }>();
-  const [autoReadAloud, setAutoReadAloud] = useJsonData("autoReadAloud", false);
+  const [autoReadAloudEnabled, setAutoReadAloudEnabled] = useJsonData(
+    "autoReadAloudEnabled",
+    false
+  );
 
   useEffect(() => {
     const [] = [chatId];
@@ -570,13 +573,13 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             messages: getCurrentMessagesRef.current(),
             onComplete: onGenerateComplete,
             model,
-            streamAudio: autoReadAloud,
+            streamAudio: autoReadAloudEnabled,
           });
         }, 100);
       }
     }
   }, [
-    autoReadAloud,
+    autoReadAloudEnabled,
     handleGenerate,
     hasAssistantMessageForCurrentToolCalls,
     model,
@@ -989,7 +992,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         tools: modelOptions[model].toolsSupport ? tools : undefined,
         onComplete: onGenerateComplete,
         model,
-        streamAudio: autoReadAloud,
+        streamAudio: autoReadAloudEnabled,
       });
     }, 100);
   };
@@ -1036,6 +1039,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           stop: stopPlaying,
           loading: autoReadAloudLoading,
           playing: autoReadAloudPlaying,
+          enabled: !!autoReadAloudEnabled,
         }}
       />
     );
@@ -1217,8 +1221,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         model &&
         rigthPanelWrapper(
           <RightPanel
-            autoReadAloud={autoReadAloud}
-            setAutoReadAloud={setAutoReadAloud}
+            autoReadAloudEnabled={autoReadAloudEnabled}
+            setAutoReadAloudEnabled={setAutoReadAloudEnabled}
             model={model}
             preferences={preferences}
             setModel={setModel}
