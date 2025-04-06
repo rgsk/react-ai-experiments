@@ -28,14 +28,14 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
       <ShowOnHover
         getMainElement={(show) =>
           conditionallyWrapWithLink(
-            isMobile,
+            !isMobile,
             <Button variant={show ? "default" : "secondary"}>
               {googleSearchResult.displayLink}
             </Button>
           )
         }
         hiddenElement={conditionallyWrapWithLink(
-          !isMobile,
+          isMobile,
           <GoogleSearchResultDisplay
             googleSearchResult={googleSearchResult}
             type="cited-source"
@@ -49,14 +49,14 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
       <ShowOnHover
         getMainElement={(show) =>
           conditionallyWrapWithLink(
-            isMobile,
+            !isMobile,
             <Button variant={show ? "default" : "secondary"}>
               {getDomain(fetchedWebPage.url)}
             </Button>
           )
         }
         hiddenElement={conditionallyWrapWithLink(
-          !isMobile,
+          isMobile,
           <FetchedWebPageDisplay
             websiteMeta={fetchedWebPage}
             type="cited-source"
