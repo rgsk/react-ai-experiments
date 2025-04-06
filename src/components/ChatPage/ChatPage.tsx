@@ -466,8 +466,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               });
             }
           }
-        }),
-        openNewChatLoadingRef.current
+        })
       );
       await safeSleep(100, true);
       if (openNewChatLoadingRef.current) {

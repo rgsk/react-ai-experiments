@@ -31,38 +31,7 @@ function useJsonData<T>(
   const lastFetchedValueRef = useRef<T | undefined>();
   const migrationRef = useRef(migration);
   migrationRef.current = migration;
-  const setSharedState: SetSharedState<T> = useCallback(
-    (valueOrFunction, mandatorySetKey = false) => {
-      // Allow value to be a function so we have same API as useState
-      const newState =
-        valueOrFunction instanceof Function
-          ? valueOrFunction(localValueRef.current)
-          : valueOrFunction;
-      setLocalValue(newState);
-      setUpdating(true);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-      if (mandatorySetKey) {
-        (async () => {
-          await jsonDataService.setKey({
-            key: keyRef.current,
-            value: newState,
-          });
-          setUpdating(false);
-        })();
-      } else {
-        timerRef.current = setTimeout(async () => {
-          await jsonDataService.setKey({
-            key: keyRef.current,
-            value: newState,
-          });
-          setUpdating(false);
-        }, 1000);
-      }
-    },
-    [setLocalValue]
-  );
+
   const populateState = useCallback(async () => {
     if (!enabled) {
       setLocalValue(undefined);
@@ -90,7 +59,7 @@ function useJsonData<T>(
       if (value !== undefined) {
         if (migrationRef.current) {
           const migratedValue = migrationRef.current(value);
-          setSharedState(migratedValue);
+          setLocalValue(migratedValue);
         } else {
           setLocalValue(value);
         }
@@ -100,14 +69,14 @@ function useJsonData<T>(
             ? initialValueRef.current()
             : initialValueRef.current;
         if (finalInitialValue !== undefined) {
-          setSharedState(finalInitialValue);
+          setLocalValue(finalInitialValue);
         }
       }
     } catch (err) {
       console.error(err);
     }
     setLoading(false);
-  }, [enabled, key, setLocalValue, setSharedState]);
+  }, [enabled, key]);
 
   useEffect(() => {
     void populateState();
@@ -132,6 +101,20 @@ function useJsonData<T>(
   }, []);
   const [updating, setUpdating] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
+  useEffect(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    setUpdating(true);
+    const latestValue = localValue;
+    timerRef.current = setTimeout(async () => {
+      await jsonDataService.setKey({
+        key: keyRef.current,
+        value: latestValue,
+      });
+      setUpdating(false);
+    }, 1000);
+  }, [localValue]);
   const refetch = useCallback(async () => {
     const result = await jsonDataService.getKey<T>({
       key,
@@ -143,7 +126,7 @@ function useJsonData<T>(
   }, [key]);
   return [
     localValue,
-    setSharedState,
+    setLocalValue,
     { loading, refetch: refetch, updating },
   ] as const;
 }
