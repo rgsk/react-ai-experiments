@@ -54,6 +54,7 @@ import {
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
+import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
@@ -1037,6 +1038,11 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           playing: playAudioChunks.playing,
           enabled: !!autoReadAloudEnabled,
         }}
+        voiceModeProps={{
+          setVoiceModeEnabled,
+          voiceModeEnabled,
+          voiceModeLoading,
+        }}
       />
     );
   };
@@ -1128,6 +1134,31 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
           exportChat={exportChat}
           chat={chat}
           shareChat={shareChat}
+        />
+
+        <OpenAIRealtimeWebRTC
+          onDataChannelOpened={() => {
+            setVoiceModeLoading(false);
+            startRecognition();
+          }}
+          onUserSpeechStarted={() => {
+            startRecognition();
+          }}
+          onUserSpeechStopped={() => {
+            stopRecognition();
+          }}
+          isEnabled={voiceModeEnabled}
+          onAssistantTranscript={() => {
+            markLastMessageAsComplete("assistant");
+          }}
+          onAssistantTranscriptDelta={(delta: any) => {
+            handleMessageDelta({ role: "assistant", delta: delta });
+          }}
+          onAssistantSpeechStopped={() => {
+            // assistant audio response is complete
+            startRecognition();
+          }}
+          initialMessages={messages ?? []}
         />
 
         {messagesLoading ? (

@@ -1,5 +1,11 @@
 import { ArrowUp } from "iconsax-react";
-import { PlusIcon, Volume2Icon, VolumeOffIcon } from "lucide-react";
+import {
+  AudioLinesIcon,
+  PlusIcon,
+  Volume2Icon,
+  VolumeOffIcon,
+  X,
+} from "lucide-react";
 import {
   Dispatch,
   SetStateAction,
@@ -38,6 +44,11 @@ interface MessageInputProps {
     playing: boolean;
     enabled: boolean;
   };
+  voiceModeProps: {
+    voiceModeEnabled: boolean;
+    setVoiceModeEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+    voiceModeLoading: boolean;
+  };
 }
 const MessageInput: React.FC<MessageInputProps> = ({
   handleSend,
@@ -50,6 +61,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   attachedFiles,
   setAttachedFiles,
   autoReadAloudProps,
+  voiceModeProps,
 }) => {
   const [latex, setLatex] = useState("");
   const [latexActive, setLatexActive] = useState(false);
@@ -267,6 +279,23 @@ const MessageInput: React.FC<MessageInputProps> = ({
               </Button>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="rounded-full"
+                size="icon"
+                disabled={loading}
+                onClick={() => {
+                  voiceModeProps.setVoiceModeEnabled((prev) => !prev);
+                }}
+              >
+                {voiceModeProps.voiceModeEnabled ? (
+                  <X />
+                ) : voiceModeProps.voiceModeLoading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <AudioLinesIcon />
+                )}
+              </Button>
               {autoReadAloudProps.enabled && (
                 <Button
                   variant="outline"

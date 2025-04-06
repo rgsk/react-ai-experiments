@@ -183,7 +183,7 @@ const OpenAIRealtimeWebRTC = ({
     }
   }, [isEnabled]);
 
-  return <div>hii</div>;
+  return <></>;
 };
 
 export default OpenAIRealtimeWebRTC;
