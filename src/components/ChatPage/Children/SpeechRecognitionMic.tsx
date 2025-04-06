@@ -8,12 +8,14 @@ interface SpeechRecognitionMicProps {
   setText: Dispatch<SetStateAction<string>>;
   textInputDisabled: boolean;
   setTextInputDisabled: Dispatch<SetStateAction<boolean>>;
+  scrollTextAreaToBottom: () => void;
 }
 const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
   text,
   setText,
   setTextInputDisabled,
   textInputDisabled,
+  scrollTextAreaToBottom,
 }) => {
   const [localText, setLocalText] = useState(text);
   const { startRecognition, stopRecognition, recognitionActive } = useWebSTT({
@@ -25,6 +27,7 @@ const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
     },
     onInterimTranscript: (transcript) => {
       setText(localText + (localText ? "\n" : "") + transcript.trim());
+      scrollTextAreaToBottom();
     },
   });
   useEffect(() => {

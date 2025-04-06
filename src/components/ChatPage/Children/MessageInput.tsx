@@ -74,6 +74,15 @@ const MessageInput: React.FC<MessageInputProps> = ({
     setText("");
   };
 
+  const scrollTextAreaToBottom = () => {
+    const scrollContainer = textAreaInputRef.current;
+    if (scrollContainer) {
+      scrollContainer.scrollTo({
+        top: scrollContainer.scrollHeight - scrollContainer.clientHeight,
+      });
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -255,6 +264,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 setText={setText}
                 textInputDisabled={textInputDisabled}
                 setTextInputDisabled={setTextInputDisabled}
+                scrollTextAreaToBottom={scrollTextAreaToBottom}
               />
               {loading && interruptEnabled ? (
                 <Button
