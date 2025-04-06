@@ -14,11 +14,7 @@ import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { messageContentParsers } from "~/lib/messageContentParsers";
 import toolCallParser from "~/lib/toolCallParser";
-import {
-  FetchedWebPage,
-  GoogleSearchResult,
-  Message,
-} from "~/lib/typesJsonData";
+import { GoogleSearchResult, Message, WebsiteMeta } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
 import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
@@ -54,7 +50,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
   const { googleSearchResults, fetchedWebPages } = useMemo(() => {
     const [] = [loading];
     let localGoogleSearchResults: GoogleSearchResult[] = [];
-    let localFetchedWebPages: { url: string; webPage: FetchedWebPage }[] = [];
+    let localFetchedWebPages: WebsiteMeta[] = [];
     const currentMessages = messagesRef.current;
     for (let i = 0; i < currentMessages.length; i++) {
       const message = currentMessages[i];
@@ -83,8 +79,11 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               messageContent: message.content,
             });
 
-            const page = content as FetchedWebPage;
-            localFetchedWebPages.push({ url, webPage: page });
+            const { websiteMeta } = content as {
+              websiteContentResult: string;
+              websiteMeta: WebsiteMeta;
+            };
+            localFetchedWebPages.push(websiteMeta);
           }
         }
       }

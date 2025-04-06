@@ -1,14 +1,11 @@
 import { Label } from "@radix-ui/react-label";
-import { FetchedWebPage, GoogleSearchResult } from "~/lib/typesJsonData";
+import { GoogleSearchResult, WebsiteMeta } from "~/lib/typesJsonData";
 import CitedSourceLink from "./CitedSourceLink";
 
 interface RenderCitedSourcesProps {
   sources: string[];
   googleSearchResults: GoogleSearchResult[];
-  fetchedWebPages: {
-    url: string;
-    webPage: FetchedWebPage;
-  }[];
+  fetchedWebPages: WebsiteMeta[];
 }
 const RenderCitedSources: React.FC<RenderCitedSourcesProps> = ({
   sources,

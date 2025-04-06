@@ -1,14 +1,12 @@
-import { FetchedWebPage } from "~/lib/typesJsonData";
-import { cn, getDomain, getFavicon } from "~/lib/utils";
+import { WebsiteMeta } from "~/lib/typesJsonData";
+import { cn, getDomain } from "~/lib/utils";
 
 interface FetchedWebPageDisplayProps {
-  url: string;
-  fetchedWebPage: FetchedWebPage;
+  websiteMeta: WebsiteMeta;
   type: "cited-source" | "tool-call";
 }
 const FetchedWebPageDisplay: React.FC<FetchedWebPageDisplayProps> = ({
-  url,
-  fetchedWebPage,
+  websiteMeta,
   type,
 }) => {
   return (
@@ -20,20 +18,18 @@ const FetchedWebPageDisplay: React.FC<FetchedWebPageDisplayProps> = ({
     >
       <div>
         <div className="flex gap-3">
-          <img src={getFavicon(getDomain(url))} className="w-[24px] h-[24px]" />
-          <p>{getDomain(url)}</p>
+          <img src={websiteMeta.favicon} className="w-[24px] h-[24px]" />
+          <p>{getDomain(websiteMeta.url)}</p>
         </div>
-        <p className="font-bold group-hover:underline">
-          {fetchedWebPage.title}
-        </p>
-        <p className="line-clamp-3">{fetchedWebPage.description}</p>
+        <p className="font-bold group-hover:underline">{websiteMeta.title}</p>
+        <p className="line-clamp-3">{websiteMeta.description}</p>
       </div>
-      {fetchedWebPage.og?.image && (
+      {websiteMeta.og?.image && (
         <>
           <div className="flex-1"></div>
           <div>
             <img
-              src={fetchedWebPage.og.image}
+              src={websiteMeta.og.image}
               className="max-w-[100px] w-[100px] rounded-lg"
             />
           </div>

@@ -1,15 +1,12 @@
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
-import { FetchedWebPage, GoogleSearchResult } from "~/lib/typesJsonData";
+import { GoogleSearchResult, WebsiteMeta } from "~/lib/typesJsonData";
 import FetchedWebPageDisplay from "./FetchedWebPageDisplay";
 import GoogleSearchResultDisplay from "./GoogleSearchResultDisplay";
 
 interface RenderMentionedUrlsProps {
   urls: string[];
   googleSearchResults: GoogleSearchResult[];
-  fetchedWebPages: {
-    url: string;
-    webPage: FetchedWebPage;
-  }[];
+  fetchedWebPages: WebsiteMeta[];
 }
 const RenderMentionedUrls: React.FC<RenderMentionedUrlsProps> = ({
   urls,
@@ -28,8 +25,7 @@ const RenderMentionedUrls: React.FC<RenderMentionedUrlsProps> = ({
             <TargetBlankLink href={url}>
               {matchedWebPage ? (
                 <FetchedWebPageDisplay
-                  fetchedWebPage={matchedWebPage.webPage}
-                  url={matchedWebPage.url}
+                  websiteMeta={matchedWebPage}
                   type="cited-source"
                 />
               ) : matchedSearchResult ? (

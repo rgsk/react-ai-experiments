@@ -172,22 +172,16 @@ export type UrlContentType =
   | "image";
 
 export type WebsiteMeta = {
-  title: string;
-  description: string;
-  image: string;
   url: string;
-  bodyTextContent: string;
-};
-export type FetchedWebPage = {
   title: string;
   description: string;
-  og: {
-    site_name: string;
-    type: string;
-    title: string;
-    description: string;
-    image: string;
-    url: string;
+  favicon: string;
+  og?: {
+    site_name?: string;
+    type?: string;
+    title?: string;
+    description?: string;
+    image?: string;
+    url?: string;
   };
-  content: string;
 };

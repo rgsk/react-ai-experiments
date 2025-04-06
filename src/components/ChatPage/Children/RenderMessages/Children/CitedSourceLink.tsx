@@ -2,7 +2,7 @@ import ShowOnHover from "~/components/Shared/ShowOnHover";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Button } from "~/components/ui/button";
 import useBreakpoints from "~/hooks/useBreakpoints";
-import { FetchedWebPage, GoogleSearchResult } from "~/lib/typesJsonData";
+import { GoogleSearchResult, WebsiteMeta } from "~/lib/typesJsonData";
 import { getDomain } from "~/lib/utils";
 import FetchedWebPageDisplay from "./FetchedWebPageDisplay";
 import GoogleSearchResultDisplay from "./GoogleSearchResultDisplay";
@@ -10,10 +10,7 @@ import GoogleSearchResultDisplay from "./GoogleSearchResultDisplay";
 interface CitedSourceLinkProps {
   link: string;
   googleSearchResult?: GoogleSearchResult;
-  fetchedWebPage?: {
-    url: string;
-    webPage: FetchedWebPage;
-  };
+  fetchedWebPage?: WebsiteMeta;
 }
 const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
   link,
@@ -62,8 +59,7 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
         hiddenElement={conditionallyWrapWithLink(
           !md,
           <FetchedWebPageDisplay
-            fetchedWebPage={fetchedWebPage.webPage}
-            url={fetchedWebPage.url}
+            websiteMeta={fetchedWebPage}
             type="cited-source"
           />
         )}
