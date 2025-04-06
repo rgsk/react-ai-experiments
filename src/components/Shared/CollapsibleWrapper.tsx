@@ -34,7 +34,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
   const [divRef, divBounds] = useMeasure();
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} ref={collapsibleRef}>
-      <div className={cn("flex flex-col", type === "right" && "items-end")}>
+      <div className={cn("flex flex-col")}>
         <CollapsibleTrigger
           asChild
           className={cn(
@@ -69,7 +69,9 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
             )}
           >
             <Button variant="secondary" size="sm">
-              <span className="text-sm">{heading}</span>
+              <span className="text-sm max-w-[70vw] text-ellipsis overflow-hidden">
+                {heading}
+              </span>
               {isOpen ? (
                 <ChevronUp className="h-4 w-4" />
               ) : (
