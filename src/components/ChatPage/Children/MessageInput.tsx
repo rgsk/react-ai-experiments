@@ -1,4 +1,5 @@
-import { ArrowUp, Paperclip2 } from "iconsax-react";
+import { ArrowUp } from "iconsax-react";
+import { PlusIcon } from "lucide-react";
 import {
   Dispatch,
   SetStateAction,
@@ -9,6 +10,7 @@ import {
 } from "react";
 import { EditableMathField } from "react-mathquill";
 import TextareaAutosize from "react-textarea-autosize";
+import { Button } from "~/components/ui/button";
 import { cn, handleInputOnPaste } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import { FileEntry, HandleSend } from "../ChatPage";
@@ -75,7 +77,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       className={cn(
         "border border-input",
         inputFocused && "ring-1 ring-ring",
-        "bg-transparent rounded-lg py-[16px] px-[16px]",
+        "bg-transparent rounded-[18px] px-4 py-2",
         disabled &&
           "border-gslearnlightmodeGrey1 bg-gslearnlightmodeGrey6 cursor-not-allowed"
       )}
@@ -157,91 +159,114 @@ const MessageInput: React.FC<MessageInputProps> = ({
         </div>
       )}
       <form
-        className="relative flex"
         onSubmit={(e) => {
           e.preventDefault();
         }}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          onChange={(ev) => {
-            const files = ev.target.files;
-            if (files) {
-              handleFilesChange(Array.from(files));
-            }
-          }}
-          multiple
-          className="hidden"
-          onClick={(event: any) => {
-            // Reset the value so that the same file/files can be selected again
-            event.target.value = null;
-          }}
-        />
-        <button onClick={handleFileInputClick}>
-          <Paperclip2 size={20} />
-        </button>
-        <div className="w-[8px]"></div>
-        <TextareaAutosize
-          ref={textAreaInputRef}
-          minRows={1}
-          maxRows={6}
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-          }}
-          onFocus={() => {
-            setInputFocused(true);
-          }}
-          onBlur={() => {
-            setInputFocused(false);
-          }}
-          autoFocus
-          onKeyDown={(e) => {
-            if (e.key === "e") {
-              const textarea = textAreaInputRef.current;
-              if (textarea) {
-                const selection = text
-                  .substring(textarea.selectionStart, textarea.selectionEnd)
-                  .trim();
-                if (selection.startsWith("\\(") && selection.endsWith("\\)")) {
-                  // user has performed edit action on latex
-                  e.preventDefault();
-                  setText((prev) => prev.replace(selection, "/^math"));
-                  setLatex(selection.substring(3, selection.length - 3));
-                  setLatexActive(true);
+        <div className="space-y-2">
+          <div>
+            <TextareaAutosize
+              ref={textAreaInputRef}
+              minRows={1}
+              maxRows={6}
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+              }}
+              onFocus={() => {
+                setInputFocused(true);
+              }}
+              onBlur={() => {
+                setInputFocused(false);
+              }}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "e") {
+                  const textarea = textAreaInputRef.current;
+                  if (textarea) {
+                    const selection = text
+                      .substring(textarea.selectionStart, textarea.selectionEnd)
+                      .trim();
+                    if (
+                      selection.startsWith("\\(") &&
+                      selection.endsWith("\\)")
+                    ) {
+                      // user has performed edit action on latex
+                      e.preventDefault();
+                      setText((prev) => prev.replace(selection, "/^math"));
+                      setLatex(selection.substring(3, selection.length - 3));
+                      setLatexActive(true);
+                    }
+                  }
                 }
-              }
-            }
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          onPaste={(event) => {
-            handleInputOnPaste(event, handleFilesChange);
-          }}
-          placeholder={placeholder}
-          className={cn(
-            `w-full resize-none
-            placeholder:text-muted-foreground text-[14px] focus:outline-none bg-transparent`,
-            disabled && "cursor-not-allowed"
-          )}
-          style={{
-            // 36 is size of button container
-            paddingRight: 36,
-          }}
-        />
-        <div className="absolute bottom-1/2 translate-y-1/2 right-0">
-          {loading && interruptEnabled ? (
-            <ActionButton onClick={interrupt}>
-              <div className="h-[8px] w-[8px] md:h-[12px] md:w-[12px] rounded-[1px] md:rounded-[2px] bg-background"></div>
-            </ActionButton>
-          ) : (
-            <ActionButton onClick={handleSubmit} disabled={!canSend}>
-              <ArrowUp className="text-background" size={18} />
-            </ActionButton>
-          )}
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
+              onPaste={(event) => {
+                handleInputOnPaste(event, handleFilesChange);
+              }}
+              placeholder={placeholder}
+              className={cn(
+                `w-full resize-none
+            placeholder:text-muted-foreground focus:outline-none bg-transparent px-2 pt-2`,
+                disabled && "cursor-not-allowed"
+              )}
+              style={{
+                // 36 is size of button container
+                paddingRight: 36,
+              }}
+            />
+          </div>
+          <div className="flex justify-between items-center">
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={(ev) => {
+                  const files = ev.target.files;
+                  if (files) {
+                    handleFilesChange(Array.from(files));
+                  }
+                }}
+                multiple
+                className="hidden"
+                onClick={(event: any) => {
+                  // Reset the value so that the same file/files can be selected again
+                  event.target.value = null;
+                }}
+              />
+              <Button
+                onClick={handleFileInputClick}
+                size="icon"
+                variant="outline"
+                className="rounded-full"
+              >
+                <PlusIcon size={20} />
+              </Button>
+            </div>
+            <div>
+              {loading && interruptEnabled ? (
+                <Button
+                  onClick={interrupt}
+                  className="rounded-full"
+                  size="icon"
+                >
+                  <div className="h-[9px] w-[9px] md:h-[10px] md:w-[10px] rounded-[1px] md:rounded-[2px] bg-background"></div>
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canSend}
+                  className="rounded-full"
+                  size="icon"
+                >
+                  <ArrowUp />
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </form>
     </div>
@@ -249,28 +274,3 @@ const MessageInput: React.FC<MessageInputProps> = ({
 };
 
 export default MessageInput;
-
-interface ActionButtonProps {
-  onClick: () => void;
-  disabled?: boolean;
-  children: any;
-}
-const ActionButton: React.FC<ActionButtonProps> = ({
-  onClick,
-  disabled,
-  children,
-}) => {
-  return (
-    <button
-      className={cn(
-        "rounded-full w-[24px] h-[24px] md:w-[36px] md:h-[36px] flex justify-center items-center",
-        "bg-foreground",
-        "disabled:opacity-50 disabled:cursor-not-allowed"
-      )}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  );
-};
