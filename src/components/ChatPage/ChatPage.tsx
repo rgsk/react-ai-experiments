@@ -272,14 +272,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
 
   const audioPlayerRef = useRef<HTMLAudioElement>(null);
-  const {
-    addAudioChunk,
-    completeAudio,
-    stopPlaying,
-    loading: autoReadAloudLoading,
-    playing: autoReadAloudPlaying,
-    startPlayback,
-  } = usePlayAudioChunks({
+  const playAudioChunks = usePlayAudioChunks({
     audioPlayerRef,
   });
 
@@ -293,9 +286,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   } = useTextStream({
     handleToolCall,
     handleToolCallOutput,
-    addAudioChunk,
-    completeAudio,
-    startPlayback,
+    autoReadAloudProps: {
+      addAudioChunk: playAudioChunks.addAudioChunk,
+      completeAudio: playAudioChunks.completeAudio,
+      startPlayback: playAudioChunks.startPlayback,
+      stopPlaying: playAudioChunks.stopPlaying,
+    },
   });
 
   const localHandleStop = () => {
@@ -969,7 +965,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { deductCredits } = useGlobalContext();
 
   const handleSend: HandleSend = async ({ text }) => {
-    stopPlaying();
+    playAudioChunks.stopPlaying();
     const hasRemainingCredits = await deductCredits();
     if (!hasRemainingCredits) return;
 
@@ -1036,9 +1032,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         attachedFiles={attachedFiles}
         setAttachedFiles={setAttachedFiles}
         autoReadAloudProps={{
-          stop: stopPlaying,
-          loading: autoReadAloudLoading,
-          playing: autoReadAloudPlaying,
+          stop: playAudioChunks.stopPlaying,
+          loading: playAudioChunks.loading,
+          playing: playAudioChunks.playing,
           enabled: !!autoReadAloudEnabled,
         }}
       />

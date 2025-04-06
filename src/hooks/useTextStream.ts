@@ -9,18 +9,19 @@ import useSocket from "./useSocket";
 const useTextStream = ({
   handleToolCall,
   handleToolCallOutput,
-  addAudioChunk,
-  completeAudio,
-  startPlayback,
+  autoReadAloudProps,
 }: {
   handleToolCall: (toolCall: ToolCall) => Promise<void>;
   handleToolCallOutput: (entry: {
     toolCall: ToolCall;
     toolCallOutput: string;
   }) => Promise<void>;
-  addAudioChunk?: (chunk: Uint8Array) => void;
-  completeAudio?: () => void;
-  startPlayback?: (socket: Socket) => void;
+  autoReadAloudProps?: {
+    addAudioChunk: (chunk: Uint8Array) => void;
+    completeAudio: () => void;
+    startPlayback: (socket: Socket) => void;
+    stopPlaying: () => void;
+  };
 }) => {
   const [text, setText] = useState("");
   const [reasoningText, setReasoningText] = useState("");
@@ -34,12 +35,9 @@ const useTextStream = ({
   handleToolCallRef.current = handleToolCall;
   const handleToolCallOutputRef = useRef(handleToolCallOutput);
   handleToolCallOutputRef.current = handleToolCallOutput;
-  const addAudioChunkRef = useRef(addAudioChunk);
-  addAudioChunkRef.current = addAudioChunk;
-  const completeAudioRef = useRef(completeAudio);
-  completeAudioRef.current = completeAudio;
-  const startPlaybackRef = useRef(startPlayback);
-  startPlaybackRef.current = startPlayback;
+  const autoReadAloudPropsRef = useRef(autoReadAloudProps);
+  autoReadAloudPropsRef.current = autoReadAloudProps;
+
   useEffect(() => {
     const socket = socketRef.current;
     if (socket) {
@@ -59,10 +57,10 @@ const useTextStream = ({
         setReasoningText((prev) => prev + content);
       });
       socket.on("audio", (chunk) => {
-        addAudioChunkRef.current?.(chunk);
+        autoReadAloudPropsRef.current?.addAudioChunk(chunk);
       });
       socket.on("audio-complete", () => {
-        completeAudioRef.current?.();
+        autoReadAloudPropsRef.current?.completeAudio();
       });
     }
     return () => {
@@ -78,6 +76,7 @@ const useTextStream = ({
     };
   }, [socketRef]);
   const handleStop = useCallback(() => {
+    autoReadAloudPropsRef.current?.stopPlaying();
     const socket = socketRef.current;
     if (socket) {
       socket.emit("stop");
@@ -98,7 +97,7 @@ const useTextStream = ({
       streamAudio?: boolean;
     }) => {
       const socket = socketRef.current;
-      startPlaybackRef.current?.(socket!);
+      autoReadAloudPropsRef.current?.startPlayback(socket!);
       setLoading(true);
       setText("");
       setReasoningText("");
