@@ -44,6 +44,12 @@ const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
       setLocalText(text);
     }
   }, [text, textInputDisabled]);
+  useEffect(() => {
+    if (text === "") {
+      stopRecognition();
+      setLocalText("");
+    }
+  }, [stopRecognition, text]);
 
   return (
     <div>
