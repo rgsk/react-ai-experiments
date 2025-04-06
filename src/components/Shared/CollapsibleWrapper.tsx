@@ -83,7 +83,7 @@ const CollapsibleWrapper: React.FC<CollapsibleWrapperProps> = ({
         </CollapsibleTrigger>
         {isOpen && <div className="h-4"></div>}
         <CollapsibleContent>
-          <div ref={divRef}></div>
+          <div ref={divRef} className="min-w-[50vw]"></div>
           <div
             className={cn(type === "left" ? "border-l-2" : "border-r-2")}
             style={{ maxWidth: divBounds.width }}
