@@ -1,7 +1,7 @@
+import { isMobile } from "react-device-detect";
 import ShowOnHover from "~/components/Shared/ShowOnHover";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Button } from "~/components/ui/button";
-import useBreakpoints from "~/hooks/useBreakpoints";
 import { GoogleSearchResult, WebsiteMeta } from "~/lib/typesJsonData";
 import { getDomain } from "~/lib/utils";
 import FetchedWebPageDisplay from "./FetchedWebPageDisplay";
@@ -17,7 +17,6 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
   googleSearchResult,
   fetchedWebPage,
 }) => {
-  const { md } = useBreakpoints();
   const conditionallyWrapWithLink = (condition: boolean, children: any) => {
     if (condition) {
       return <TargetBlankLink href={link}>{children}</TargetBlankLink>;
@@ -29,14 +28,14 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
       <ShowOnHover
         getMainElement={(show) =>
           conditionallyWrapWithLink(
-            md,
+            isMobile,
             <Button variant={show ? "default" : "secondary"}>
               {googleSearchResult.displayLink}
             </Button>
           )
         }
         hiddenElement={conditionallyWrapWithLink(
-          !md,
+          !isMobile,
           <GoogleSearchResultDisplay
             googleSearchResult={googleSearchResult}
             type="cited-source"
@@ -50,14 +49,14 @@ const CitedSourceLink: React.FC<CitedSourceLinkProps> = ({
       <ShowOnHover
         getMainElement={(show) =>
           conditionallyWrapWithLink(
-            md,
+            isMobile,
             <Button variant={show ? "default" : "secondary"}>
               {getDomain(fetchedWebPage.url)}
             </Button>
           )
         }
         hiddenElement={conditionallyWrapWithLink(
-          !md,
+          !isMobile,
           <FetchedWebPageDisplay
             websiteMeta={fetchedWebPage}
             type="cited-source"
