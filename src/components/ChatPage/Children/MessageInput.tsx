@@ -229,10 +229,6 @@ const MessageInput: React.FC<MessageInputProps> = ({
             placeholder:text-muted-foreground focus:outline-none bg-transparent px-2 pt-2 disabled:text-foreground`,
                 disabled && "cursor-not-allowed"
               )}
-              style={{
-                // 36 is size of button container
-                paddingRight: 36,
-              }}
             />
           </div>
           <div className="flex justify-between items-center">
