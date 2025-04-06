@@ -8,6 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { isMobile } from "react-device-detect";
+
 import { EditableMathField } from "react-mathquill";
 import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "~/components/ui/button";
@@ -211,9 +213,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
                     }
                   }
                 }
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit();
+                if (!isMobile) {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
                 }
               }}
               onPaste={(event) => {
