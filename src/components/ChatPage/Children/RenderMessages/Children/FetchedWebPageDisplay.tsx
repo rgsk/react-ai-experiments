@@ -24,12 +24,12 @@ const FetchedWebPageDisplay: React.FC<FetchedWebPageDisplayProps> = ({
         <p className="font-bold group-hover:underline">{websiteMeta.title}</p>
         <p className="line-clamp-3">{websiteMeta.description}</p>
       </div>
-      {websiteMeta.og?.image && (
+      {websiteMeta.image && (
         <>
           <div className="flex-1"></div>
           <div>
             <img
-              src={websiteMeta.og.image}
+              src={websiteMeta.image}
               className="max-w-[100px] w-[100px] rounded-lg"
             />
           </div>
