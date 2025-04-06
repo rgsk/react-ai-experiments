@@ -520,6 +520,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         .find((m) => m.role === "assistant")
         ?.tool_calls?.some((tc) => tc.id === tco.toolCall.id)
   );
+  const collectionName = persona ? persona.collectionName : chatId;
 
   useEffect(() => {
     const toolsMessages: Message[] = toolCallsAndOutputs.map((tco) => {
@@ -755,9 +756,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               s3Url: fileEntry.s3Url!,
             },
             content: "",
-            instruction: "",
-            summary: "",
-            type: "",
           };
           message = {
             role: "user",
@@ -767,35 +765,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             type: "file",
           };
           await addMessage(message);
+          if (!collectionName) {
+            alert("no collectionName");
+            throw new Error("no collectionName");
+          }
           const result = await experimentsService.processFileMessage({
             s3Url: fileEntry.s3Url!,
-            collectionName: chatId!,
+            collectionName: collectionName,
           });
-          contentObj.type = result.type;
-          if (result.type === "full") {
-            contentObj.content = result.content;
-            contentObj.instruction = html`
-              for this file entry, this is the parsed content, user has attached
-              this file, use the file contents to answer the user query
-            `;
-          } else if (result.type === "rag") {
-            contentObj.summary = result.summary;
-            contentObj.instruction = html`
-              <span>
-                this file is attached by the user in this chat, based on the
-                summary of this file, you can decide to perform rag on this file
-                or not
-              </span>
-
-              here are it's creds that you can use to call the tool
-              retrieveRelevantDocs:
-              ${JSON.stringify({
-                source: fileEntry.s3Url!,
-                collectionName: chatId!,
-              })}
-            `;
-          }
-          // return result;
+          contentObj.content = JSON.stringify(result);
           message.content = JSON.stringify(contentObj);
           message.status = "completed";
           await addMessage(message);
@@ -944,6 +922,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             in that case you are allowed to get entire csv contents.
             </pre
           >
+        `);
+        if (!collectionName) {
+          alert("no collectionName");
+          throw new Error("no collectionName");
+        }
+        additionalInstructions.push(html`
+          use this as collectionName - "${collectionName}" for tools like
+          getUrlContent, retrieveRelevantDocs
         `);
       }
     }

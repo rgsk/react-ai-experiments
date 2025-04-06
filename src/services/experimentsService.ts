@@ -313,8 +313,13 @@ const experimentsService = {
     collectionName: string;
   }) => {
     const response = await axiosExperimentsInstance.post<
-      | { summary: string; embeddingCount: number; type: "rag" }
-      | { content: string; type: "full" }
+      | {
+          summary: string;
+          embeddingCount: number;
+          type: "rag";
+          instruction: string;
+        }
+      | { content: string; type: "full"; instruction: string }
     >(`/process-file-message`, {
       s3Url,
       collectionName,
