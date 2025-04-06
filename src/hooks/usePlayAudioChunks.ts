@@ -1,4 +1,5 @@
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { Socket } from "socket.io-client";
 import { arraysEqual, endOfStreamUint8Array } from "~/lib/audioUtils";
 
 const usePlayAudioChunks = ({
@@ -12,6 +13,7 @@ const usePlayAudioChunks = ({
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [streamLoading, setStreamLoading] = useState(false);
+  const socketRef = useRef<Socket>();
   // Tracks whether playback has been initialized
 
   const appendNextBuffer = (sourceBuffer: SourceBuffer) => {
@@ -72,6 +74,10 @@ const usePlayAudioChunks = ({
     const audioPlayer = audioPlayerRef.current!;
     audioPlayer.pause();
     setPlaying(false);
+    const socket = socketRef.current;
+    if (socket) {
+      socket.emit("audio-stop");
+    }
   }, [audioPlayerRef]);
 
   useEffect(() => {
@@ -93,11 +99,15 @@ const usePlayAudioChunks = ({
       audioPlayer.removeEventListener("play", handlePlay);
     };
   }, [audioPlayerRef]);
-  const startPlayback = useCallback(() => {
-    setLoading(true);
-    setStreamLoading(true);
-    initPlayback();
-  }, [initPlayback]);
+  const startPlayback = useCallback(
+    (socket: Socket) => {
+      socketRef.current = socket;
+      setLoading(true);
+      setStreamLoading(true);
+      initPlayback();
+    },
+    [initPlayback]
+  );
   return {
     startPlayback,
     addAudioChunk: addChunk,

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Message, Tool, ToolCall } from "~/lib/typesJsonData";
 
+import { Socket } from "socket.io-client";
 import { Model } from "~/lib/constants";
 import experimentsService from "~/services/experimentsService";
 import useSocket from "./useSocket";
@@ -19,7 +20,7 @@ const useTextStream = ({
   }) => Promise<void>;
   addAudioChunk?: (chunk: Uint8Array) => void;
   completeAudio?: () => void;
-  startPlayback?: () => void;
+  startPlayback?: (socket: Socket) => void;
 }) => {
   const [text, setText] = useState("");
   const [reasoningText, setReasoningText] = useState("");
@@ -96,7 +97,8 @@ const useTextStream = ({
       model: Model;
       streamAudio?: boolean;
     }) => {
-      startPlaybackRef.current?.();
+      const socket = socketRef.current;
+      startPlaybackRef.current?.(socket!);
       setLoading(true);
       setText("");
       setReasoningText("");
