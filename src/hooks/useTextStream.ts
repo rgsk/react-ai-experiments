@@ -27,14 +27,22 @@ const useTextStream = ({
   const { socketRef } = useSocket();
 
   const [toolCallsInProgress, setToolCallsInProgress] = useState(false);
+  const handleToolCallRef = useRef(handleToolCall);
+  handleToolCallRef.current = handleToolCall;
+  const handleToolCallOutputRef = useRef(handleToolCallOutput);
+  handleToolCallOutputRef.current = handleToolCallOutput;
+  const addAudioChunkRef = useRef(addAudioChunk);
+  addAudioChunkRef.current = addAudioChunk;
+  const completeAudioRef = useRef(completeAudio);
+  completeAudioRef.current = completeAudio;
   useEffect(() => {
     const socket = socketRef.current;
     if (socket) {
       socket.on("toolCall", (toolCall) => {
-        handleToolCall(toolCall);
+        handleToolCallRef.current(toolCall);
       });
       socket.on("toolCallOutput", (entry) => {
-        handleToolCallOutput(entry);
+        handleToolCallOutputRef.current(entry);
       });
       socket.on("content", (content) => {
         setText((prev) => prev + content);
@@ -46,13 +54,23 @@ const useTextStream = ({
         setReasoningText((prev) => prev + content);
       });
       socket.on("audio", (chunk) => {
-        addAudioChunk?.(chunk);
+        addAudioChunkRef.current?.(chunk);
       });
       socket.on("audio-complete", () => {
-        completeAudio?.();
+        completeAudioRef.current?.();
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      if (socket) {
+        socket.off("toolCall");
+        socket.off("toolCallOutput");
+        socket.off("content");
+        socket.off("tool_calls");
+        socket.off("reasoning_content");
+        socket.off("audio");
+        socket.off("audio-complete");
+      }
+    };
   }, [socketRef]);
   const handleStop = useCallback(() => {
     const socket = socketRef.current;
