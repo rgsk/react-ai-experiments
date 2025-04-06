@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { isMobile } from "react-device-detect";
 import { usePopper } from "react-popper";
 import { v4 } from "uuid";
 import useBreakpoints from "~/hooks/useBreakpoints";
@@ -35,7 +36,7 @@ const ShowOnHover: React.FC<ShowOnHoverProps> = ({
     ],
   });
 
-  const show = md ? hovered : tapped;
+  const show = isMobile ? tapped : hovered;
   useEventListener("click", () => {
     setTapped(false);
   });

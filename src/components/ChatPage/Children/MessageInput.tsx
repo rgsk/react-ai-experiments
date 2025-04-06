@@ -204,16 +204,16 @@ const MessageInput: React.FC<MessageInputProps> = ({
               maxRows={6}
               value={text}
               onChange={(e) => {
-                setText(e.target.value);
+                if (!textInputDisabled) {
+                  setText(e.target.value);
+                }
               }}
-              disabled={textInputDisabled}
               onFocus={() => {
                 setInputFocused(true);
               }}
               onBlur={() => {
                 setInputFocused(false);
               }}
-              autoFocus
               onKeyDown={(e) => {
                 if (e.key === "e") {
                   const textarea = textAreaInputRef.current;
