@@ -4,7 +4,7 @@ const useWebSTT = ({
   onFinalTranscript,
   onInterimTranscript,
 }: {
-  onFinalTranscript: (transcript: string, recogintionActive: boolean) => void;
+  onFinalTranscript: (transcript: string) => void;
   onInterimTranscript: (transcript: string) => void;
 }) => {
   const onFinalTranscriptRef = useRef(onFinalTranscript);
@@ -41,10 +41,7 @@ const useWebSTT = ({
       }
       // console.log({ finalTranscripts, interimTranscripts });
       if (finalTranscripts) {
-        onFinalTranscriptRef.current(
-          finalTranscripts,
-          recognitionActiveRef.current
-        );
+        onFinalTranscriptRef.current(finalTranscripts);
       } else {
         onInterimTranscriptRef.current(interimTranscripts);
       }

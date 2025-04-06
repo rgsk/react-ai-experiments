@@ -19,11 +19,8 @@ const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
 }) => {
   const [localText, setLocalText] = useState(text);
   const { startRecognition, stopRecognition, recognitionActive } = useWebSTT({
-    onFinalTranscript: (transcript, recognitionActive) => {
+    onFinalTranscript: (transcript) => {
       setLocalText(text);
-      if (!recognitionActive) {
-        setTextInputDisabled(false);
-      }
     },
     onInterimTranscript: (transcript) => {
       setText(localText + (localText ? "\n" : "") + transcript.trim());
@@ -35,6 +32,13 @@ const SpeechRecognitionMic: React.FC<SpeechRecognitionMicProps> = ({
       setTextInputDisabled(true);
     }
   }, [recognitionActive, setTextInputDisabled]);
+
+  useEffect(() => {
+    if (!recognitionActive && text === localText) {
+      setTextInputDisabled(false);
+    }
+  }, [localText, recognitionActive, setTextInputDisabled, text]);
+
   useEffect(() => {
     if (!textInputDisabled) {
       setLocalText(text);
