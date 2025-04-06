@@ -114,7 +114,6 @@ export const handleInputOnPaste = async (
     }
   }
   if (files.length > 0) {
-    // Prevent default paste behavior (which pastes the file name)
     onFilesChange(files);
   }
 };
