@@ -10,6 +10,7 @@ self.onmessage = async (event) => {
       "scipy",
       "scikit-learn",
       "pandas",
+      "statsmodels",
     ]);
     self.postMessage({ type: "loaded", namespace: "pyodideWorker" });
   } else if (type === "run" && namespace === "pyodideWorker") {

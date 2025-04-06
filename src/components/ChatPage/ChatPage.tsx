@@ -921,6 +921,18 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       if (modelOptions[model].toolsSupport) {
         additionalInstructions.push(googleSearchCiteSourcesInstruction);
       }
+      if (modelOptions[model].toolsSupport) {
+        additionalInstructions.push(html`
+          when running the executeTool code with python for data analysis. don't
+          ever load entire csv file content into your context (by either
+          fetching csv content via url or printing the entire file content),
+          otherwise your context will get bloated as csv data files are usually
+          very large, nor attempt to type out the data line by line, you are
+          given a url to csv file, use that url to fetch the "head" (small
+          portions of lines), if some error occurs fetch a different portion of
+          the csv file, but never the entire content
+        `);
+      }
     }
     const additionalMessages: Message[] = additionalInstructions.map(
       (content) => {
