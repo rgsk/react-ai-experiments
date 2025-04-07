@@ -158,3 +158,8 @@ function callBoth<T extends any[]>(
     fn2(...args);
   };
 }
+
+export type SetSharedState<T> = (
+  valueOrFunction: (T | undefined) | ((prev: T | undefined) => T | undefined),
+  mandatorySetKey?: boolean
+) => void;
