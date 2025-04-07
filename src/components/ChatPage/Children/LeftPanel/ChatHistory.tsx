@@ -36,6 +36,19 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
   const [historyItemsPerPage, setHistoryItemsPerPage] = useState<number>();
   useEffect(() => {
     if (initialRowNumber) {
+      /*
+            calculation explaination -
+            let result = Math.ceil(initialRowNumber / incrementItemsLoaded) * incrementItemsLoaded
+
+            let incrementItemsLoaded = 10
+            let initialRowNumber = 14
+            then result = 20
+            let initialRowNumber = 28
+            then result = 30
+
+            we also add incrementItemsLoaded, to fetch one extra page
+            this prevents another page fetch on automatic scroll to that item
+         */
       setHistoryItemsPerPage(
         Math.ceil(initialRowNumber / incrementItemsLoaded) *
           incrementItemsLoaded +
