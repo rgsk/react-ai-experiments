@@ -15,7 +15,6 @@ import {
 import useBreakpoints from "~/hooks/useBreakpoints";
 import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
-import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import usePlayAudioChunks from "~/hooks/usePlayAudioChunks";
@@ -51,6 +50,7 @@ import {
   html,
   safeSleep,
 } from "~/lib/utils";
+import useGlobalContext from "~/providers/context/useGlobalContext";
 import experimentsService from "~/services/experimentsService";
 import jsonDataService from "~/services/jsonDataService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";

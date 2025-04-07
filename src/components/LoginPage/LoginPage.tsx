@@ -1,7 +1,7 @@
 import { Home } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import useGlobalContext from "~/hooks/useGlobalContext";
 import authService from "~/lib/authService";
+import useGlobalContext from "~/providers/context/useGlobalContext";
 import ProfileInfo from "../ProfileInfo/ProfileInfo";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { Button } from "../ui/button";

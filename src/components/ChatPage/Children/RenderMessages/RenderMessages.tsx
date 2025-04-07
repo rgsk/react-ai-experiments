@@ -11,11 +11,13 @@ import PDFReader from "~/components/Shared/PDFReader/PDFReader";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
-import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { messageContentParsers } from "~/lib/messageContentParsers";
 import toolCallParser from "~/lib/toolCallParser";
 import { GoogleSearchResult, Message, WebsiteMeta } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
+import useGlobalContext, {
+  LogLevel,
+} from "~/providers/context/useGlobalContext";
 import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";

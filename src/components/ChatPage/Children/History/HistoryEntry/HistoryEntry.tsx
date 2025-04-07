@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import useGlobalContext from "~/hooks/useGlobalContext";
 import { Chat } from "~/lib/typesJsonData";
 import { cn } from "~/lib/utils";
+import useGlobalContext from "~/providers/context/useGlobalContext";
 interface HistoryEntryProps {
   chat: Chat;
 }

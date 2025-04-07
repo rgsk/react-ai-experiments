@@ -12,8 +12,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import DialogWrapper from "~/components/Shared/DialogWrapper";
 import { Button } from "~/components/ui/button";
 import useDebounce from "~/hooks/useDebounce";
-import useGlobalContext from "~/hooks/useGlobalContext";
 import { Chat } from "~/lib/typesJsonData";
+import useGlobalContext from "~/providers/context/useGlobalContext";
 
 export function SearchDialog() {
   const [searchParams] = useSearchParams();

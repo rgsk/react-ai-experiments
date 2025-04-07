@@ -1,4 +1,4 @@
-import useGlobalContext from "~/hooks/useGlobalContext";
+import useGlobalContext from "~/providers/context/useGlobalContext";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 
 interface ProfileInfoProps {}

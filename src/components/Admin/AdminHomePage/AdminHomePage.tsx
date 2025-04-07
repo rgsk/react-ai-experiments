@@ -2,9 +2,9 @@ import { CheckCheck, Copy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
-import { getToken } from "~/hooks/useGlobalContext";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import { CreditDetails } from "~/lib/typesJsonData";
+import { getToken } from "~/providers/context/useGlobalContext";
 
 interface AdminHomePageProps {}
 const AdminHomePage: React.FC<AdminHomePageProps> = ({}) => {

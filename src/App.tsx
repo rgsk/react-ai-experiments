@@ -4,10 +4,10 @@ import Navbar from "./components/Navbar/Navbar";
 import CentralLoader from "./components/Shared/CentralLoader";
 import CreditsOverModal from "./components/Shared/CreditsOverModal";
 import useAuthRequired from "./hooks/auth/useAuthRequired";
-import useGlobalContext from "./hooks/useGlobalContext";
 import usePathname from "./hooks/usePathname";
 import { useWindowSize } from "./hooks/useWindowSize";
 import environmentVars from "./lib/environmentVars";
+import useGlobalContext from "./providers/context/useGlobalContext";
 
 function App() {
   useEffect(() => {

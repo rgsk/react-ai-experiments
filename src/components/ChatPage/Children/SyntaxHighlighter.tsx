@@ -24,10 +24,10 @@ import {
 } from "~/hooks/codeRunners/usePythonRunner";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
-import useGlobalContext from "~/hooks/useGlobalContext";
 import { useWindowSize } from "~/hooks/useWindowSize";
 import { getSharedPreviewLink } from "~/lib/chatUtils";
 import { cn, getCsvFile } from "~/lib/utils";
+import useGlobalContext from "~/providers/context/useGlobalContext";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
 import JsxPreview from "./JsxPreview";

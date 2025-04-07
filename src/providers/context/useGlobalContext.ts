@@ -13,8 +13,8 @@ import { v4 } from "uuid";
 import { firebaseAuth } from "~/lib/firebaseApp";
 import { CreditDetails, UserData } from "~/lib/typesJsonData";
 import experimentsService from "~/services/experimentsService";
-import useJsonData from "./useJsonData";
-import useLocalStorageState from "./useLocalStorageState";
+import useJsonData from "../../hooks/useJsonData";
+import useLocalStorageState from "../../hooks/useLocalStorageState";
 
 export const getToken = async () => {
   const token = await firebaseAuth.currentUser?.getIdToken();

@@ -6,8 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import useGlobalContext from "~/hooks/useGlobalContext";
 import authService from "~/lib/authService";
+import useGlobalContext from "~/providers/context/useGlobalContext";
 import { LoadingSpinner } from "../Shared/LoadingSpinner";
 import { ModeToggle } from "../Shared/ModeToggle";
 import { Button } from "../ui/button";

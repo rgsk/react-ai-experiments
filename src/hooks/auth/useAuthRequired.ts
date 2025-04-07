@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import useGlobalContext from "../useGlobalContext";
+import useGlobalContext from "../../providers/context/useGlobalContext";
 const authExcludedRoutes = ["/pdf"];
 const useAuthRequired = () => {
   const { firebaseUser, firebaseUserLoading } = useGlobalContext();

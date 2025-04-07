@@ -10,10 +10,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
-import useGlobalContext, { LogLevel } from "~/hooks/useGlobalContext";
 import { SetSharedState } from "~/hooks/useJsonData";
 import { Model } from "~/lib/constants";
 import { Persona, Preferences } from "~/lib/typesJsonData";
+import useGlobalContext, {
+  LogLevel,
+} from "~/providers/context/useGlobalContext";
 import ModelSelector from "../ModelSelector";
 interface RightPanelProps {
   preferences: Preferences;

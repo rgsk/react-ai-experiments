@@ -2,7 +2,6 @@ import axios from "axios";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { v4 } from "uuid";
 import { TranscriptResponse } from "youtube-transcript";
-import { getToken } from "~/hooks/useGlobalContext";
 import { Model } from "~/lib/constants";
 import environmentVars from "~/lib/environmentVars";
 import {
@@ -15,6 +14,7 @@ import {
   WebsiteMeta,
 } from "~/lib/typesJsonData";
 import { encodeQueryParams } from "~/lib/utils";
+import { getToken } from "~/providers/context/useGlobalContext";
 import experimentsServiceSampleResponses from "./experimentsServiceSampleResponses";
 import { JsonData } from "./jsonDataService";
 export const axiosExperimentsInstance = axios.create({
