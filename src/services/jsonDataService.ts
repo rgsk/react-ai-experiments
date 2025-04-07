@@ -12,7 +12,7 @@ export type JsonData<T> = {
   updatedAt: ISODateString;
 };
 
-const addPrefixToKey = (key: string) => {
+export const addPrefixToKey = (key: string) => {
   if (key.includes("admin")) {
     return `reactAIExperiments/${key}`;
   }

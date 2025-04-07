@@ -52,7 +52,6 @@ import {
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
-import jsonDataService from "~/services/jsonDataService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
@@ -385,11 +384,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   );
 
   const refetchChatHistory = useCallback(() => {
-    queryClient.invalidateQueries(
-      jsonDataService.getKeysLike({
-        key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
-      })
-    );
+    queryClient.invalidateQueries({
+      queryKey: [
+        "json-data/key-like",
+        prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
+      ],
+    });
   }, [prefixChatRelatedKey, queryClient]);
 
   const [persona] = useJsonData<Persona>(`personas/${personaId}`, undefined, {
