@@ -208,6 +208,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
                   setText(e.target.value);
                 }
               }}
+              autoFocus={!isMobile}
               onFocus={() => {
                 setInputFocused(true);
               }}
