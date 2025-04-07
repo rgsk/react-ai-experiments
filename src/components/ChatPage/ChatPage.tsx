@@ -457,22 +457,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     [setMessages]
   );
-  useEffect(() => {
-    if (messages?.length === 1 && chat && !chat.title) {
-      const firstMessage = messages[0].content;
-      if (typeof firstMessage === "string") {
-        (async () => {
-          const title = await generateTitleBasedOnFirstUserMessage(
-            firstMessage
-          );
-          setChat({
-            ...chat,
-            title,
-          });
-        })();
-      }
-    }
-  }, [chat, messages, setChat]);
+
   const handleFilesChange = async (files: File[]) => {
     if (files) {
       const supportedFiles: File[] = [];
@@ -952,6 +937,18 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     if (!hasRemainingCredits) return;
 
     setAttachedFiles([]);
+    if (messages?.length === 0) {
+      generateTitleBasedOnFirstUserMessage(text).then((title) => {
+        if (!chat) {
+          alert("no chat");
+          throw new Error("no chat");
+        }
+        setChat({
+          ...chat,
+          title,
+        });
+      });
+    }
     const userMessage: Message = {
       id: v4(),
       role: "user",
