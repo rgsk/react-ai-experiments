@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
+import usePrefixChatRelatedKey from "~/hooks/chat/usePrefixChatRelatedKey";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import {
   getCSVContents,
@@ -64,7 +65,6 @@ import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import RightPanel from "./Children/RightPanel/RightPanel";
 import ShareChatPreview from "./Children/ShareChatPreview";
 import TopPanel from "./Children/TopPanel/TopPanel";
-import usePrefixChatRelatedKey from "./hooks/usePrefixChatRelatedKey";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
 export type FileEntry = {

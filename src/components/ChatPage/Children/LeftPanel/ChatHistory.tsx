@@ -6,11 +6,11 @@ import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
 
 import { useParams } from "react-router-dom";
 import CentralLoader from "~/components/Shared/CentralLoader";
+import usePrefixChatRelatedKey from "~/hooks/chat/usePrefixChatRelatedKey";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import usePrevious from "~/hooks/usePrevious";
 import { uuidPlaceholder } from "~/lib/constants";
 import jsonDataService from "~/services/jsonDataService";
-import usePrefixChatRelatedKey from "../../hooks/usePrefixChatRelatedKey";
 import { getHistoryBlocks } from "../History/HistoryBlock/getHistoryBlocks";
 const incrementItemsLoaded = 100;
 interface ChatHistoryProps {}
