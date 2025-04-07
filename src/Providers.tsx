@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { GlobalContextProvider } from "./hooks/GlobalContext";
+import { GlobalContextProvider } from "./providers/GlobalContextProvider";
 import { ThemeProvider } from "./providers/ThemeProvider";
 const queryClient = new QueryClient();
 

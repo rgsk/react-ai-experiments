@@ -1,4 +1,4 @@
-import { GlobalContext, useGlobalContextValue } from "./useGlobalContext";
+import { GlobalContext, useGlobalContextValue } from "~/hooks/useGlobalContext";
 
 interface IGlobalContextProviderProps {
   children: any;
