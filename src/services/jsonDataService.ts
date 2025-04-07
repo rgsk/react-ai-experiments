@@ -1,5 +1,5 @@
 import { ISODateString } from "~/lib/typesJsonData";
-import { encodeQueryParams } from "~/lib/utils";
+import { encodeQueryParams, safeSleep } from "~/lib/utils";
 import { axiosExperimentsInstance } from "./experimentsService";
 
 export type JsonData<T> = {
@@ -48,6 +48,8 @@ const jsonDataService = {
     return {
       queryKey: [path],
       queryFn: async () => {
+        await safeSleep(3000);
+
         const result = await axiosExperimentsInstance.get<{
           data: JsonData<T>[];
           count: number;

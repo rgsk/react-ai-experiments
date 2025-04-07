@@ -391,13 +391,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     {}
   );
-  useEffect(() => {
-    console.log({ preferences });
-  }, [preferences]);
+
   const { data: chatHistory, refetch: refetchChatHistory } =
     useJsonDataKeysLike<Chat>({
       key: attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`),
+      page: 1,
+      perPage: 10,
     });
+
   const [persona] = useJsonData<Persona>(`personas/${personaId}`);
 
   const navigate = useNavigate();
