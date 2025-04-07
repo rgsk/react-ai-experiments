@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
+import useChatHistory from "~/hooks/chat/useChatHistory";
 import usePrefixChatRelatedKey from "~/hooks/chat/usePrefixChatRelatedKey";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
 import {
@@ -26,12 +27,7 @@ import {
   generateTitleBasedOnFirstUserMessage,
 } from "~/lib/chatUtils";
 import clientTools from "~/lib/clientTools";
-import {
-  defaultModel,
-  Model,
-  modelOptions,
-  uuidPlaceholder,
-} from "~/lib/constants";
+import { defaultModel, Model, modelOptions } from "~/lib/constants";
 import { generateQuestionInstruction } from "~/lib/specialMessageParser";
 import {
   Chat,
@@ -362,7 +358,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       return prev;
     });
   };
-
+  const chatHistoryProps = useChatHistory();
   const { prefixChatRelatedKey, personaId } = usePrefixChatRelatedKey();
   const [preferences, setPreferences] = useJsonData<Preferences>(
     prefixChatRelatedKey(`preferences`),
@@ -383,14 +379,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     {}
   );
 
-  const refetchChatHistory = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: [
-        "json-data/key-like",
-        prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
-      ],
-    });
-  }, [prefixChatRelatedKey, queryClient]);
+  const { refetchChatHistory } = chatHistoryProps;
 
   const [persona] = useJsonData<Persona>(`personas/${personaId}`, undefined, {
     enabled: !!personaId,
@@ -1102,6 +1091,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         <LeftPanel
           openNewChat={openNewChat}
           openNewChatLoading={openNewChatLoading}
+          chatHistoryProps={chatHistoryProps}
         />
       )}
       <div

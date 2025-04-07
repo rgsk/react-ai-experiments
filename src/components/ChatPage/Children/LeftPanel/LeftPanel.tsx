@@ -1,14 +1,17 @@
 import NewChatIcon from "~/components/Icons/NewChatIcon";
 import { Button } from "~/components/ui/button";
+import useChatHistory from "~/hooks/chat/useChatHistory";
 import { SearchDialog } from "../SearchDialog";
 import ChatHistory from "./ChatHistory";
 interface LeftPanelProps {
   openNewChat: () => void;
   openNewChatLoading: boolean;
+  chatHistoryProps: ReturnType<typeof useChatHistory>;
 }
 const LeftPanel: React.FC<LeftPanelProps> = ({
   openNewChat,
   openNewChatLoading,
+  chatHistoryProps,
 }) => {
   return (
     <div className="h-full flex flex-col">
@@ -25,7 +28,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({
         <SearchDialog />
       </div>
       <div className="flex-1 overflow-hidden">
-        <ChatHistory />
+        <ChatHistory chatHistoryProps={chatHistoryProps} />
       </div>
     </div>
   );

@@ -6,10 +6,11 @@ import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
 import CentralLoader from "~/components/Shared/CentralLoader";
 import useChatHistory from "~/hooks/chat/useChatHistory";
 import { getHistoryBlocks } from "../History/HistoryBlock/getHistoryBlocks";
-interface ChatHistoryProps {}
-const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
-  const { chatHistory, loadMoreChatHistory, refetchChatHistory } =
-    useChatHistory();
+interface ChatHistoryProps {
+  chatHistoryProps: ReturnType<typeof useChatHistory>;
+}
+const ChatHistory: React.FC<ChatHistoryProps> = ({ chatHistoryProps }) => {
+  const { chatHistory, loadMoreChatHistory } = chatHistoryProps;
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(chatHistory?.data.map(({ value }) => value) || []);
   }, [chatHistory]);
