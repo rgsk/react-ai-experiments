@@ -45,7 +45,9 @@ const MessageActions: React.FC<MessageActionsProps> = ({
     playing,
     stopPlaying,
     loading: audioLoading,
+    streamLoading,
   } = usePlayAudio({ audioPlayerRef });
+
   const onLikeDislike = async ({
     type,
     text,

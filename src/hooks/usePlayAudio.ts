@@ -12,6 +12,7 @@ const usePlayAudio = ({
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array>>();
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [streamLoading, setStreamLoading] = useState(false);
 
   const appendNextBuffer = (sourceBuffer: SourceBuffer) => {
     if (audioQueue.current.length > 0 && !sourceBuffer.updating) {
@@ -32,6 +33,7 @@ const usePlayAudio = ({
   const playAudio = useCallback(
     async ({ text }: { text: string }) => {
       setLoading(true);
+      setStreamLoading(true);
       const reader = await experimentsService.getPlayAudioStreamReader({
         text: text,
       });
@@ -59,6 +61,7 @@ const usePlayAudio = ({
           reader.read().then(({ done, value }) => {
             if (done) {
               processAudioChunk(endOfStreamUint8Array);
+              setStreamLoading(false);
               return;
             }
 
@@ -114,6 +117,7 @@ const usePlayAudio = ({
     playing,
     stopPlaying,
     loading,
+    streamLoading,
   };
 };
 export default usePlayAudio;
