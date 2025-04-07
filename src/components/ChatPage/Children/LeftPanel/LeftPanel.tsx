@@ -1,17 +1,14 @@
 import NewChatIcon from "~/components/Icons/NewChatIcon";
 import { Button } from "~/components/ui/button";
-import { Chat } from "~/lib/typesJsonData";
-import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
 import { SearchDialog } from "../SearchDialog";
+import ChatHistory from "./ChatHistory";
 interface LeftPanelProps {
   openNewChat: () => void;
   openNewChatLoading: boolean;
-  historyBlocks: [string, Chat[]][];
 }
 const LeftPanel: React.FC<LeftPanelProps> = ({
   openNewChat,
   openNewChatLoading,
-  historyBlocks,
 }) => {
   return (
     <div className="h-full flex flex-col">
@@ -27,10 +24,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({
         </Button>
         <SearchDialog />
       </div>
-      <div className="flex-1 overflow-auto space-y-[20px] px-[16px]">
-        {historyBlocks.map(([date, items], i) => (
-          <HistoryBlock key={i} date={date} chats={items} />
-        ))}
+      <div className="flex-1 overflow-hidden">
+        <ChatHistory />
       </div>
     </div>
   );

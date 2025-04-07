@@ -391,12 +391,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     {}
   );
-
+  const [historyItemsPerPage, setHistoryItemsPerPage] = useState(100);
   const { data: chatHistory, refetch: refetchChatHistory } =
     useJsonDataKeysLike<Chat>({
       key: attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`),
       page: 1,
-      perPage: 10,
+      perPage: historyItemsPerPage,
     });
 
   const [persona] = useJsonData<Persona>(`personas/${personaId}`);
@@ -1110,7 +1110,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         <LeftPanel
           openNewChat={openNewChat}
           openNewChatLoading={openNewChatLoading}
-          historyBlocks={historyBlocks}
         />
       )}
       <div
