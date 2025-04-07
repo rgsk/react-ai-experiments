@@ -21,6 +21,7 @@ const useTextStream = ({
     completeAudio: () => void;
     startPlayback: (socket: Socket) => void;
     stopPlaying: () => void;
+    enabled: boolean;
   };
 }) => {
   const [text, setText] = useState("");
@@ -97,7 +98,9 @@ const useTextStream = ({
       streamAudio?: boolean;
     }) => {
       const socket = socketRef.current;
-      autoReadAloudPropsRef.current?.startPlayback(socket!);
+      if (autoReadAloudPropsRef.current?.enabled) {
+        autoReadAloudPropsRef.current?.startPlayback(socket!);
+      }
       setLoading(true);
       setText("");
       setReasoningText("");

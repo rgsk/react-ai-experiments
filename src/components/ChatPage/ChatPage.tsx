@@ -291,6 +291,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       completeAudio: playAudioChunks.completeAudio,
       startPlayback: playAudioChunks.startPlayback,
       stopPlaying: playAudioChunks.stopPlaying,
+      enabled: !!autoReadAloudEnabled,
     },
   });
 
