@@ -17,9 +17,12 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({ chat }) => {
   const entryRef = useRef<HTMLDivElement>(null);
   const { isFirstHistoryRender, setIsFirstHistoryRender } = useGlobalContext();
   useEffect(() => {
-    if (active && entryRef.current && isFirstHistoryRender) {
+    const entry = entryRef.current;
+    if (active && entry && isFirstHistoryRender) {
       setIsFirstHistoryRender(false);
-      entryRef.current.scrollIntoView({ behavior: "instant", block: "center" });
+      setTimeout(() => {
+        entry.scrollIntoView({ behavior: "instant", block: "center" });
+      }, 100);
     }
   }, [active, isFirstHistoryRender, setIsFirstHistoryRender]);
   if (!chat.title) {

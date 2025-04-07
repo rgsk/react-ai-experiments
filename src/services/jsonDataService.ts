@@ -56,6 +56,21 @@ const jsonDataService = {
       },
     };
   },
+  getRowNumber: ({ key, keyLike }: { key: string; keyLike: string }) => {
+    const path = `/json-data/row-number?${encodeQueryParams({
+      key: addPrefixToKey(key),
+      keyLike: addPrefixToKey(keyLike),
+    })}`;
+    return {
+      queryKey: [path],
+      queryFn: async () => {
+        const result = await axiosExperimentsInstance.get<{
+          rowNumber: number;
+        }>(path);
+        return result.data;
+      },
+    };
+  },
 
   deleteKeysLike: async ({ key }: { key: string }) => {
     const result = await axiosExperimentsInstance.delete(
