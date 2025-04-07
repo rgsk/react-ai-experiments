@@ -931,6 +931,19 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   getCurrentMessagesRef.current = getCurrentMessages;
   const { deductCredits } = useGlobalContext();
 
+  const updateChatTitle = (firstUserMessage: string) => {
+    generateTitleBasedOnFirstUserMessage(firstUserMessage).then((title) => {
+      if (!chat) {
+        alert("no chat");
+        throw new Error("no chat");
+      }
+      setChat({
+        ...chat,
+        title,
+      });
+    });
+  };
+
   const handleSend: HandleSend = async ({ text }) => {
     playAudioChunks.stopPlaying();
     const hasRemainingCredits = await deductCredits();
@@ -938,16 +951,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
 
     setAttachedFiles([]);
     if (messages?.length === 0) {
-      generateTitleBasedOnFirstUserMessage(text).then((title) => {
-        if (!chat) {
-          alert("no chat");
-          throw new Error("no chat");
-        }
-        setChat({
-          ...chat,
-          title,
-        });
-      });
+      updateChatTitle(text);
     }
     const userMessage: Message = {
       id: v4(),
