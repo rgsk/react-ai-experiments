@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { produce } from "immer";
 import { ArrowDown } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
@@ -17,7 +17,6 @@ import useDropArea from "~/hooks/useDropArea";
 import useEnsureScrolledToBottom from "~/hooks/useEnsureScrolledToBottom";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import useJsonData from "~/hooks/useJsonData";
-import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import useLocalStorageState from "~/hooks/useLocalStorageState";
 import usePlayAudioChunks from "~/hooks/usePlayAudioChunks";
 import useTextStream from "~/hooks/useTextStream";
@@ -53,13 +52,13 @@ import {
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
+import jsonDataService from "~/services/jsonDataService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
 import { DraggingBackdrop } from "../Shared/DraggingBackdrop";
 import SidebarWithBackdrop from "../Shared/SidebarWithBackdrop";
 import { Button } from "../ui/button";
-import { getHistoryBlocks } from "./Children/History/HistoryBlock/getHistoryBlocks";
 import LeftPanel from "./Children/LeftPanel/LeftPanel";
 import MessageInput from "./Children/MessageInput";
 import RenderMessages from "./Children/RenderMessages/RenderMessages";
@@ -146,7 +145,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     "autoReadAloudEnabled",
     false
   );
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     const [] = [chatId];
     if (!md) {
@@ -367,12 +366,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const [searchParams] = useSearchParams();
 
   const personaId = searchParams?.get("personaId") ?? undefined;
-  const attachPersonaPrefixIfPresent = (key: string) => {
-    if (personaId) {
-      return `personas/${personaId}/${key}`;
-    }
-    return key;
-  };
+  const attachPersonaPrefixIfPresent = useCallback(
+    (key: string) => {
+      if (personaId) {
+        return `personas/${personaId}/${key}`;
+      }
+      return key;
+    },
+    [personaId]
+  );
   const [preferences, setPreferences] = useJsonData<Preferences>(
     attachPersonaPrefixIfPresent(`preferences`),
     () => {
@@ -391,13 +393,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     {}
   );
-  const [historyItemsPerPage, setHistoryItemsPerPage] = useState(100);
-  const { data: chatHistory, refetch: refetchChatHistory } =
-    useJsonDataKeysLike<Chat>({
-      key: attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`),
-      page: 1,
-      perPage: historyItemsPerPage,
-    });
+
+  const refetchChatHistory = useCallback(() => {
+    queryClient.invalidateQueries(
+      jsonDataService.getKeysLike({
+        key: attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`),
+      })
+    );
+  }, [attachPersonaPrefixIfPresent, queryClient]);
 
   const [persona] = useJsonData<Persona>(`personas/${personaId}`);
 
@@ -1007,9 +1010,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   openNewChatLoadingRef.current = openNewChatLoading;
   const openNewChatRef = useRef(openNewChat);
   openNewChatRef.current = openNewChat;
-  const historyBlocks = useMemo(() => {
-    return getHistoryBlocks(chatHistory?.data.map(({ value }) => value) || []);
-  }, [chatHistory]);
 
   const assistantMessageLoading =
     toolCallsInProgress ||
