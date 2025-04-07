@@ -4,28 +4,20 @@ import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Chat } from "~/lib/typesJsonData";
 import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
 
-import { useSearchParams } from "react-router-dom";
 import CentralLoader from "~/components/Shared/CentralLoader";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import usePrevious from "~/hooks/usePrevious";
 import { uuidPlaceholder } from "~/lib/constants";
+import usePrefixChatRelatedKey from "../../hooks/usePrefixChatRelatedKey";
 import { getHistoryBlocks } from "../History/HistoryBlock/getHistoryBlocks";
 const incrementItemsLoaded = 100;
 interface ChatHistoryProps {}
 const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
-  const [searchParams] = useSearchParams();
-
-  const personaId = searchParams?.get("personaId") ?? undefined;
-  const attachPersonaPrefixIfPresent = (key: string) => {
-    if (personaId) {
-      return `personas/${personaId}/${key}`;
-    }
-    return key;
-  };
+  const { prefixChatRelatedKey } = usePrefixChatRelatedKey();
   const [historyItemsPerPage, setHistoryItemsPerPage] =
     useState(incrementItemsLoaded);
   const { data: _chatHistory } = useJsonDataKeysLike<Chat>({
-    key: attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`),
+    key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
     page: 1,
     perPage: historyItemsPerPage,
   });

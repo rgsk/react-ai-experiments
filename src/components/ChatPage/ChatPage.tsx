@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { produce } from "immer";
 import { ArrowDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import useAuthRequired from "~/hooks/auth/useAuthRequired";
 import useCodeRunners from "~/hooks/codeRunners/useCodeRunners";
@@ -65,6 +65,7 @@ import RenderMessages from "./Children/RenderMessages/RenderMessages";
 import RightPanel from "./Children/RightPanel/RightPanel";
 import ShareChatPreview from "./Children/ShareChatPreview";
 import TopPanel from "./Children/TopPanel/TopPanel";
+import usePrefixChatRelatedKey from "./hooks/usePrefixChatRelatedKey";
 export type HandleSend = ({ text }: { text: string }) => void;
 export const observeImageResizeClassname = "observe-img-resize";
 export type FileEntry = {
@@ -363,20 +364,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     });
   };
 
-  const [searchParams] = useSearchParams();
-
-  const personaId = searchParams?.get("personaId") ?? undefined;
-  const attachPersonaPrefixIfPresent = useCallback(
-    (key: string) => {
-      if (personaId) {
-        return `personas/${personaId}/${key}`;
-      }
-      return key;
-    },
-    [personaId]
-  );
+  const { prefixChatRelatedKey, personaId } = usePrefixChatRelatedKey();
   const [preferences, setPreferences] = useJsonData<Preferences>(
-    attachPersonaPrefixIfPresent(`preferences`),
+    prefixChatRelatedKey(`preferences`),
     () => {
       return {
         instructions: {
@@ -397,16 +387,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const refetchChatHistory = useCallback(() => {
     queryClient.invalidateQueries(
       jsonDataService.getKeysLike({
-        key: attachPersonaPrefixIfPresent(`chats/${uuidPlaceholder}`),
+        key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
       })
     );
-  }, [attachPersonaPrefixIfPresent, queryClient]);
+  }, [prefixChatRelatedKey, queryClient]);
 
   const [persona] = useJsonData<Persona>(`personas/${personaId}`);
 
   const navigate = useNavigate();
   useAuthRequired();
-  const chatKey = attachPersonaPrefixIfPresent(`chats/${chatId}`);
+  const chatKey = prefixChatRelatedKey(`chats/${chatId}`);
   const [chat, setChat, { updating: chatUpdating, refetch: refetchChat }] =
     useJsonData<Chat>(
       chatKey,
@@ -419,7 +409,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     );
   const [messages, setMessages, { loading: messagesLoading }] = useJsonData<
     Message[]
-  >(attachPersonaPrefixIfPresent(`chats/${chatId}/messages`), []);
+  >(prefixChatRelatedKey(`chats/${chatId}/messages`), []);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
