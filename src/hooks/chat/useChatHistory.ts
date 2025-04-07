@@ -14,7 +14,7 @@ const useChatHistory = () => {
 
   const [initialRowNumber, setInitialRowNumber] = useState<number>();
   useEffect(() => {
-    if (chatId && !initialRowNumber) {
+    if (chatId && initialRowNumber === undefined) {
       (async () => {
         const { rowNumber } = await jsonDataService
           .getRowNumber({
@@ -58,7 +58,9 @@ const useChatHistory = () => {
         perPage: historyItemsPerPage,
       },
       {
-        enabled: typeof initialRowNumber === "number" && !!historyItemsPerPage,
+        enabled:
+          typeof initialRowNumber === "number" &&
+          typeof historyItemsPerPage === "number",
       }
     );
 
