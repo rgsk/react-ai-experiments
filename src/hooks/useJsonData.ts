@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { firebaseAuth } from "~/lib/firebaseApp";
 import jsonDataService from "~/services/jsonDataService";
 import usePrevious from "./usePrevious";
 
@@ -114,6 +115,12 @@ function useJsonData<T>(
 
   useEffect(() => {
     void populateState();
+  }, [populateState]);
+
+  useEffect(() => {
+    return firebaseAuth.onAuthStateChanged(async (user) => {
+      populateState();
+    });
   }, [populateState]);
 
   useEffect(() => {
