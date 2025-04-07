@@ -33,12 +33,12 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
       })();
     }
   }, [chatId, initialRowNumber, prefixChatRelatedKey]);
-  const [historyItemsPerPage, setHistoryItemsPerPage] =
-    useState(incrementItemsLoaded);
+  const [historyItemsPerPage, setHistoryItemsPerPage] = useState<number>();
   useEffect(() => {
     if (initialRowNumber) {
       setHistoryItemsPerPage(
         Math.ceil(initialRowNumber / incrementItemsLoaded) *
+          incrementItemsLoaded +
           incrementItemsLoaded
       );
     }
@@ -50,7 +50,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
       perPage: historyItemsPerPage,
     },
     {
-      enabled: !!initialRowNumber,
+      enabled: !!initialRowNumber && !!historyItemsPerPage,
     }
   );
 
@@ -69,7 +69,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
       <InfiniteScroll
         dataLength={chatHistory.data.length}
         next={() => {
-          setHistoryItemsPerPage((prev) => prev + incrementItemsLoaded);
+          setHistoryItemsPerPage((prev) => (prev ?? 0) + incrementItemsLoaded);
         }}
         hasMore={chatHistory.data.length < chatHistory.count}
         // hasMore={false}
