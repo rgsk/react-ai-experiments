@@ -29,7 +29,7 @@ const useChatHistory = () => {
   }, [chatId, initialRowNumber, prefixChatRelatedKey]);
   const [historyItemsPerPage, setHistoryItemsPerPage] = useState<number>();
   useEffect(() => {
-    if (initialRowNumber) {
+    if (typeof initialRowNumber === "number") {
       /*
               calculation explaination -
               let result = Math.ceil(initialRowNumber / incrementItemsLoaded) * incrementItemsLoaded
@@ -58,7 +58,7 @@ const useChatHistory = () => {
         perPage: historyItemsPerPage,
       },
       {
-        enabled: !!initialRowNumber && !!historyItemsPerPage,
+        enabled: typeof initialRowNumber === "number" && !!historyItemsPerPage,
       }
     );
 
