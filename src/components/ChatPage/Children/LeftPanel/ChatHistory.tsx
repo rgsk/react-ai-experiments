@@ -35,7 +35,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
   }, [chatId, initialRowNumber, prefixChatRelatedKey]);
   const [historyItemsPerPage, setHistoryItemsPerPage] = useState<number>();
   useEffect(() => {
-    if (initialRowNumber) {
+    if (typeof initialRowNumber === "number") {
       /*
             calculation explaination -
             let result = Math.ceil(initialRowNumber / incrementItemsLoaded) * incrementItemsLoaded
@@ -63,7 +63,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
       perPage: historyItemsPerPage,
     },
     {
-      enabled: !!initialRowNumber && !!historyItemsPerPage,
+      enabled: typeof initialRowNumber === "number" && !!historyItemsPerPage,
     }
   );
 
@@ -73,7 +73,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
     return getHistoryBlocks(chatHistory?.data.map(({ value }) => value) || []);
   }, [chatHistory]);
 
-  if (!chatHistory || !initialRowNumber) return <CentralLoader />;
+  if (!chatHistory) return <CentralLoader />;
   return (
     <div
       id="scrollableDiv"
