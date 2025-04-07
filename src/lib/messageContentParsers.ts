@@ -15,16 +15,14 @@ export const messageContentParsers = {
       url: string;
       content: any;
     };
-    const {
-      websiteContentResult: { imageModelOutput, imageOCROutput },
-      websiteMeta,
-    } = content as {
-      websiteContentResult: {
+    const { websiteContentResult, websiteMeta } = content as {
+      websiteContentResult?: {
         imageModelOutput: string;
         imageOCROutput: string;
       };
       websiteMeta: WebsiteMeta;
     };
+    const { imageModelOutput, imageOCROutput } = websiteContentResult ?? {};
     return {
       fileName,
       url,
