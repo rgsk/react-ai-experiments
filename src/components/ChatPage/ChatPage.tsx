@@ -359,6 +359,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     });
   };
   const chatHistoryProps = useChatHistory();
+  const { refetchChatHistory } = chatHistoryProps;
   const { prefixChatRelatedKey, personaId } = usePrefixChatRelatedKey();
   const [preferences, setPreferences] = useJsonData<Preferences>(
     prefixChatRelatedKey(`preferences`),
@@ -378,8 +379,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     {}
   );
-
-  const { refetchChatHistory } = chatHistoryProps;
 
   const [persona] = useJsonData<Persona>(`personas/${personaId}`, undefined, {
     enabled: !!personaId,
@@ -417,6 +416,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
 
   const chatRef = useRef(chat);
   chatRef.current = chat;
+
   useEffect(() => {
     refetchChatHistory();
   }, [chatId, refetchChatHistory]);

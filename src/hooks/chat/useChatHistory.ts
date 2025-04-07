@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Chat } from "~/lib/typesJsonData";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
 import usePrevious from "~/hooks/usePrevious";
@@ -50,25 +51,35 @@ const useChatHistory = () => {
       );
     }
   }, [initialRowNumber]);
-  const { data: _chatHistory, refetch: refetchChatHistory } =
-    useJsonDataKeysLike<Chat>(
-      {
-        key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
-        page: 1,
-        perPage: historyItemsPerPage,
-      },
-      {
-        enabled:
-          typeof initialRowNumber === "number" &&
-          typeof historyItemsPerPage === "number",
-      }
-    );
+  const { data: _chatHistory } = useJsonDataKeysLike<Chat>(
+    {
+      key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
+      page: 1,
+      perPage: historyItemsPerPage,
+    },
+    {
+      enabled:
+        typeof initialRowNumber === "number" &&
+        typeof historyItemsPerPage === "number",
+    }
+  );
 
   const previousChatHistory = usePrevious(_chatHistory);
   const chatHistory = _chatHistory || previousChatHistory;
   const loadMoreChatHistory = useCallback(() => {
     setHistoryItemsPerPage((prev) => (prev ?? 0) + incrementItemsLoaded);
   }, []);
+  const queryClient = useQueryClient();
+  // we don't want to fetch when enabled is false
+  // alternative implementation could be check if enabled = true, call refetch
+  const refetchChatHistory = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [
+        "json-data/key-like",
+        prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
+      ],
+    });
+  }, [prefixChatRelatedKey, queryClient]);
   return { chatHistory, loadMoreChatHistory, refetchChatHistory };
 };
 export default useChatHistory;
