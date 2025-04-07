@@ -469,7 +469,7 @@ const AIAvatar: React.FC<AIAvatarProps> = ({}) => {
       <div
         className={cn(
           "absolute top-0 left-0 translate-y-1/2",
-          divBounds.width > 700 ? "-translate-x-full" : "-translate-x-[14px]"
+          divBounds.width > 700 ? "-translate-x-[65%]" : "-translate-x-[14px]"
         )}
       >
         <img src="/ai-avatar.svg" className="w-[24px]" />
