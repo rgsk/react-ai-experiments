@@ -1,10 +1,10 @@
-import SampleAudioAIResponse from "../Sample/SampleAudioAIResponse";
+import SampleInfiniteScroll from "../Sample/SampleInfiniteScroll";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleAudioAIResponse />
+      <SampleInfiniteScroll />
     </div>
   );
 };
