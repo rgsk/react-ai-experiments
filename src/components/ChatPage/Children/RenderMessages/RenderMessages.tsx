@@ -77,7 +77,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
               toolCall,
               messageContent: message.content,
             });
-            localFetchedWebPages.push(websiteMeta);
+            localFetchedWebPages.push(websiteMeta ?? {});
           }
         }
       }
