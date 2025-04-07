@@ -24,12 +24,7 @@ import {
   generateTitleBasedOnFirstUserMessage,
 } from "~/lib/chatUtils";
 import clientTools from "~/lib/clientTools";
-import {
-  defaultModel,
-  Model,
-  modelOptions,
-  uuidPlaceholder,
-} from "~/lib/constants";
+import { defaultModel, Model, modelOptions } from "~/lib/constants";
 import { generateQuestionInstruction } from "~/lib/specialMessageParser";
 import {
   Chat,
@@ -50,9 +45,9 @@ import {
   html,
   safeSleep,
 } from "~/lib/utils";
+import useChatContext from "~/providers/context/useChatContext";
 import useGlobalContext from "~/providers/context/useGlobalContext";
 import experimentsService from "~/services/experimentsService";
-import jsonDataService from "~/services/jsonDataService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
@@ -132,6 +127,7 @@ function mergeUserMessages(messages: Message[]): Message[] {
 
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
+  const { refetchChatHistory } = useChatContext();
   const [leftPanelOpen, setLeftPanelOpen] = useLocalStorageState(
     "leftPanelOpen",
     true
@@ -383,14 +379,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     },
     {}
   );
-
-  const refetchChatHistory = useCallback(() => {
-    queryClient.invalidateQueries(
-      jsonDataService.getKeysLike({
-        key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
-      })
-    );
-  }, [prefixChatRelatedKey, queryClient]);
 
   const [persona] = useJsonData<Persona>(`personas/${personaId}`, undefined, {
     enabled: !!personaId,

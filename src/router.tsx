@@ -19,6 +19,7 @@ import PreviewPage from "./components/PreviewPage/PreviewPage";
 import SharedChatPage from "./components/SharedChatPage/SharedChatPage";
 import SharedPreviewPage from "./components/SharedPreviewPage/SharedPreviewPage";
 import YoutubeTranscriptPage from "./components/YoutubeTranscriptPage/YoutubeTranscriptPage";
+import { ChatContextProvider } from "./providers/ChatContextProvider";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -35,7 +36,14 @@ const router = createBrowserRouter(
       <Route path="login" element={<LoginPage />} />
       <Route path="preview-page" element={<PreviewPage />} />
       <Route path="chat">
-        <Route path=":id" element={<ChatPage />} />
+        <Route
+          path=":id"
+          element={
+            <ChatContextProvider>
+              <ChatPage />
+            </ChatContextProvider>
+          }
+        />
       </Route>
       <Route path="shared-chat">
         <Route path=":id" element={<SharedChatPage />} />

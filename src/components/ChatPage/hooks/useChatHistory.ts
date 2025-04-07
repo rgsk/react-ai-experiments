@@ -50,22 +50,23 @@ const useChatHistory = () => {
       );
     }
   }, [initialRowNumber]);
-  const { data: _chatHistory } = useJsonDataKeysLike<Chat>(
-    {
-      key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
-      page: 1,
-      perPage: historyItemsPerPage,
-    },
-    {
-      enabled: !!initialRowNumber && !!historyItemsPerPage,
-    }
-  );
+  const { data: _chatHistory, refetch: refetchChatHistory } =
+    useJsonDataKeysLike<Chat>(
+      {
+        key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
+        page: 1,
+        perPage: historyItemsPerPage,
+      },
+      {
+        enabled: !!initialRowNumber && !!historyItemsPerPage,
+      }
+    );
 
   const previousChatHistory = usePrevious(_chatHistory);
   const chatHistory = _chatHistory || previousChatHistory;
   const loadMoreChatHistory = useCallback(() => {
     setHistoryItemsPerPage((prev) => (prev ?? 0) + incrementItemsLoaded);
   }, []);
-  return { chatHistory, loadMoreChatHistory };
+  return { chatHistory, loadMoreChatHistory, refetchChatHistory };
 };
 export default useChatHistory;

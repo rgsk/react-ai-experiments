@@ -4,11 +4,11 @@ import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
 
 import CentralLoader from "~/components/Shared/CentralLoader";
-import useChatHistory from "../../hooks/useChatHistory";
+import useChatContext from "~/providers/context/useChatContext";
 import { getHistoryBlocks } from "../History/HistoryBlock/getHistoryBlocks";
 interface ChatHistoryProps {}
 const ChatHistory: React.FC<ChatHistoryProps> = ({}) => {
-  const { chatHistory, loadMoreChatHistory } = useChatHistory();
+  const { chatHistory, loadMoreChatHistory } = useChatContext();
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(chatHistory?.data.map(({ value }) => value) || []);
   }, [chatHistory]);
