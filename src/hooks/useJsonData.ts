@@ -102,19 +102,21 @@ function useJsonData<T>(
   const [updating, setUpdating] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
   useEffect(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
+    if (enabled) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      setUpdating(true);
+      const latestValue = localValue;
+      timerRef.current = setTimeout(async () => {
+        await jsonDataService.setKey({
+          key: keyRef.current,
+          value: latestValue,
+        });
+        setUpdating(false);
+      }, 1000);
     }
-    setUpdating(true);
-    const latestValue = localValue;
-    timerRef.current = setTimeout(async () => {
-      await jsonDataService.setKey({
-        key: keyRef.current,
-        value: latestValue,
-      });
-      setUpdating(false);
-    }, 1000);
-  }, [localValue]);
+  }, [enabled, localValue]);
   const refetch = useCallback(async () => {
     const result = await jsonDataService.getKey<T>({
       key,

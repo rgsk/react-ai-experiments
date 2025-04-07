@@ -392,7 +392,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     );
   }, [prefixChatRelatedKey, queryClient]);
 
-  const [persona] = useJsonData<Persona>(`personas/${personaId}`);
+  const [persona] = useJsonData<Persona>(`personas/${personaId}`, undefined, {
+    enabled: !!personaId,
+  });
 
   const navigate = useNavigate();
   useAuthRequired();
