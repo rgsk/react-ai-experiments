@@ -138,7 +138,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const previewLanguages = ["html", "jsx"];
   return (
     <div>
-      <div className="rounded-[12px] overflow-hidden">
+      <div>
         {disableHeader ? (
           <></>
         ) : (
@@ -146,7 +146,8 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             className={cn(
               "bg-[#50505a] w-full",
               "flex justify-between items-center",
-              "px-[16px] py-[8px]"
+              "px-[16px] py-[8px]",
+              "sticky top-[-16px] z-50"
             )}
           >
             <span className={cn("text-white", heading ? "text-sm" : "text-xs")}>

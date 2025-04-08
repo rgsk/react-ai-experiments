@@ -50,7 +50,7 @@ const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
         </Button>
       </div>
       <div className="min-h-[30px]"></div>
-      <div className="flex-1 overflow-auto border border-gray-400 p-8 rounded-lg">
+      <div className="flex-1 overflow-auto border border-gray-400 p-4 rounded-lg">
         {queryResult.data ? (
           <>
             {queryResult.data.data.map((entry, i) => {

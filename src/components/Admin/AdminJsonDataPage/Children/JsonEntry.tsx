@@ -7,13 +7,10 @@ interface JsonEntryProps {
 }
 const JsonEntry: React.FC<JsonEntryProps> = ({ entry }) => {
   return (
-    <div className="space-y-2">
-      <div className="sticky top-[-32px] bg-background py-2 text-sm z-50">
-        {entry.key}
-      </div>
+    <div>
       <JsonRenderer
         object={recursiveParseJson(entry.value)}
-        disableHeader
+        heading={entry.key}
         wordWrap={true}
       />
     </div>
