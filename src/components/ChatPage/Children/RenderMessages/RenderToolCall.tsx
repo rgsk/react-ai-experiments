@@ -1,6 +1,7 @@
 import { ChatCompletionMessageToolCall } from "openai/resources/index.mjs";
 import { Fragment } from "react";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
+import JsonRenderer from "~/components/Shared/JsonRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import TargetBlankLink from "~/components/Shared/TargetBlankLink";
 import { Separator } from "~/components/ui/separator";
@@ -29,9 +30,7 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
         <div className="mb-4">
           <p>Function:</p>
         </div>
-        <p className="whitespace-pre-wrap">
-          {JSON.stringify(toolCall, null, 4)}
-        </p>
+        <JsonRenderer object={toolCall} />
       </div>
     );
   };
@@ -45,7 +44,13 @@ const RenderToolCall: React.FC<RenderToolCallProps> = ({
           <LoadingSpinner size={20} />
         ) : (
           <p className="whitespace-pre-wrap">
-            {JSON.stringify(parsedJsonContent, null, 4)}
+            {typeof parsedJsonContent === "string" ? (
+              parsedJsonContent
+            ) : (
+              <>
+                <JsonRenderer object={parsedJsonContent} />
+              </>
+            )}
           </p>
         )}
       </div>

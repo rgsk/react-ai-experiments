@@ -6,6 +6,7 @@ import ActionButton from "~/components/Shared/ActionButton";
 import CollapsibleWrapper from "~/components/Shared/CollapsibleWrapper";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
 import ImagePreview from "~/components/Shared/ImagePreview";
+import JsonRenderer from "~/components/Shared/JsonRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import PDFReader from "~/components/Shared/PDFReader/PDFReader";
 import { Button } from "~/components/ui/button";
@@ -179,9 +180,7 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                           loading={message.status === "in_progress"}
                         >
                           <div className="pr-4">
-                            <p className="whitespace-pre-wrap break-words w-[640px]">
-                              {JSON.stringify(parsedContent, null, 4)}
-                            </p>
+                            <JsonRenderer object={parsedContent} />
                           </div>
                         </CollapsibleWrapper>
                       </div>
@@ -338,9 +337,9 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                         scrollContainerRef={scrollContainerRef}
                         heading="Tool Calls"
                       >
-                        <p className="whitespace-pre-wrap pl-4">
-                          {JSON.stringify(message.tool_calls, null, 4)}
-                        </p>
+                        <div className="pl-4">
+                          <JsonRenderer object={message.tool_calls} />
+                        </div>
                       </CollapsibleWrapper>
                     </div>
                   )}
