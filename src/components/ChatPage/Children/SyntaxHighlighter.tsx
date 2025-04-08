@@ -80,7 +80,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const codeRef = useRef(code);
   const previewRef = useRef<HTMLDivElement>(null);
   codeRef.current = code;
-  const { copied, copy } = useCopyToClipboard();
+  const { copied, copiedText, copy } = useCopyToClipboard();
   const [wordWrap, setWordWrap] = useState(parentWordWrap);
   useEffect(() => {
     setWordWrap(parentWordWrap);
@@ -136,6 +136,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const lineHeight = monacoFontSize * 1.5;
   const paddingTop = 20;
   const previewLanguages = ["html", "jsx"];
+  const getFencedCode = () => {
+    return `
+\`\`\`${language}
+${code}
+\`\`\`
+`;
+  };
   return (
     <div>
       <div>
@@ -161,8 +168,26 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                   }
                 }}
               >
-                {copied ? <Check size={12} /> : <Copy size={12} />}
+                {copied && copiedText === code ? (
+                  <Check size={12} />
+                ) : (
+                  <Copy size={12} />
+                )}
                 <span>{copied ? "Copied!" : "Copy"}</span>
+              </CodeButton>
+              <CodeButton
+                onClick={() => {
+                  if (code) {
+                    copy(getFencedCode());
+                  }
+                }}
+              >
+                {copied ? <Check size={12} /> : <Copy size={12} />}
+                <span>
+                  {copied && copiedText === getFencedCode()
+                    ? "Copied!"
+                    : "Copy Fenced"}
+                </span>
               </CodeButton>
               <CodeButton
                 onClick={() => {
