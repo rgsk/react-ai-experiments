@@ -233,7 +233,11 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
           <>
             <div
               onWheelCapture={(e) => {
-                e.stopPropagation();
+                // Check if vertical scrolling is dominant
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                  // stopPropagation only for vertical scroll (allow horizontal scroll)
+                  e.stopPropagation();
+                }
               }}
             >
               <Editor
