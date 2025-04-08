@@ -6,6 +6,7 @@ import {
 import App from "~/App";
 import Providers from "~/Providers";
 import AdminHomePage from "./components/Admin/AdminHomePage/AdminHomePage";
+import AdminJsonDataPage from "./components/Admin/AdminJsonDataPage/AdminJsonDataPage";
 import AdminSingleUserPage from "./components/Admin/AdminSingleUserPage/AdminSingleUserPage";
 import ChatPage from "./components/ChatPage/ChatPage";
 import EditPersonaPage from "./components/EditPersonaPage/EditPersonaPage";
@@ -58,6 +59,7 @@ const router = createBrowserRouter(
         <Route path="users">
           <Route path=":userEmail" element={<AdminSingleUserPage />} />
         </Route>
+        <Route path="jsonData" element={<AdminJsonDataPage />}></Route>
       </Route>
       <Route path="personas">
         <Route index element={<PersonasPage />} />

@@ -13,6 +13,9 @@ export type JsonData<T> = {
 };
 
 export const addPrefixToKey = (key: string) => {
+  if (key.startsWith("raw/")) {
+    return key.slice("raw/".length);
+  }
   if (key.includes("admin")) {
     return `reactAIExperiments/${key}`;
   }
