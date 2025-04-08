@@ -32,7 +32,7 @@ export enum LogLevel {
 export const useGlobalContextValue = () => {
   const [firebaseUser, setFirebaseUser] = useState<User>();
   const [firebaseUserLoading, setFirebaseUserLoading] = useState(true);
-  const [isFirstHistoryRender, setIsFirstHistoryRender] = useState(true);
+  const isFirstHistoryEntryRenderRef = useRef(true);
   const [logLevel, setLogLevel] = useLocalStorageState<LogLevel>(
     "logLevel",
     LogLevel.DEBUG
@@ -115,8 +115,7 @@ export const useGlobalContextValue = () => {
     deductCredits,
     creditsOverMessage,
     setCreditsOverMessage,
-    isFirstHistoryRender,
-    setIsFirstHistoryRender,
+    isFirstHistoryEntryRenderRef,
     logLevel,
     setLogLevel,
   };
