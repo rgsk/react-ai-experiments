@@ -46,7 +46,7 @@ const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
           }}
           variant="outline"
         >
-          <RotateCwIcon />
+          {queryResult.isRefetching ? <LoadingSpinner /> : <RotateCwIcon />}
           <span>Reload</span>
         </Button>
       </div>
