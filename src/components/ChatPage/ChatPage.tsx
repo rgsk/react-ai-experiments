@@ -876,12 +876,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       <span>
         when you have responded to user with googleSearch results, try to cite
         sources in your response message, which can be link from Google Search
-        Results or link you used for getUrlContent
+        Results or link you used for getUrlContent,
+      </span>
+      <span>
+        don't mention complete links, mentioning links means say something like
+        "uses [Babel](https://babeljs.io/) for Fast Refresh"
       </span>
       <span>
         Apart from citing sources in your response message, return all the
-        sources used. Use this format - just list the links like below in hidden
-        tag
+        sources used to generate your response. Use this format - just list the
+        links like below in hidden tag
         <hidden>
           <cited-sources
             ><li>https://github.com/tashapais</li>
