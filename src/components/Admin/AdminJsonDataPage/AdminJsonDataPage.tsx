@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Container from "~/components/Shared/Container";
 import CustomPagination from "~/components/Shared/CustomPagination";
 import JsonRenderer from "~/components/Shared/JsonRenderer";
@@ -7,6 +7,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import useDebounce from "~/hooks/useDebounce";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
+import { recursiveParseJson } from "~/lib/utils";
 const perPage = 10;
 interface AdminJsonDataPageProps {}
 const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
@@ -21,6 +22,9 @@ const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
     },
     { enabled: !!debouncedJsonDataKey }
   );
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedJsonDataKey]);
   return (
     <Container>
       <div className="space-y-2">
@@ -40,7 +44,7 @@ const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
               return (
                 <div key={entry.id} className="space-y-2">
                   <p>{entry.key}</p>
-                  <JsonRenderer object={entry.value} />
+                  <JsonRenderer object={recursiveParseJson(entry.value)} />
                 </div>
               );
             })}
