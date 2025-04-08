@@ -2,14 +2,13 @@ import { RotateCwIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Container from "~/components/Shared/Container";
 import CustomPagination from "~/components/Shared/CustomPagination";
-import JsonRenderer from "~/components/Shared/JsonRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import useDebounce from "~/hooks/useDebounce";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
-import { recursiveParseJson } from "~/lib/utils";
+import JsonEntry from "./Children/JsonEntry";
 const perPage = 10;
 interface AdminJsonDataPageProps {}
 const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
@@ -55,14 +54,8 @@ const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
         {queryResult.data ? (
           <>
             {queryResult.data.data.map((entry, i) => {
-              return (
-                <div key={JSON.stringify(entry)} className="space-y-2">
-                  <JsonRenderer
-                    heading={entry.key}
-                    object={recursiveParseJson(entry.value)}
-                  />
-                </div>
-              );
+              // key={JSON.stringify(entry)} is important to correctly update
+              return <JsonEntry key={JSON.stringify(entry)} entry={entry} />;
             })}
           </>
         ) : (

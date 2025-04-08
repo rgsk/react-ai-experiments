@@ -9,7 +9,7 @@ import {
   WrapText,
   X,
 } from "lucide-react";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
@@ -48,6 +48,8 @@ interface SyntaxHighlighterProps {
   codeProps: any;
   loading: boolean;
   heading?: string;
+  disableHeader?: boolean;
+  wordWrap?: boolean;
 }
 const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   language,
@@ -56,6 +58,8 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   codeProps,
   loading,
   heading,
+  disableHeader,
+  wordWrap: parentWordWrap,
 }) => {
   const { loading: codeRunnersLoading, runCode } = useCodeRunners();
   const [sharePreviewLoading, setSharePreviewLoading] = useState(false);
@@ -77,7 +81,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const previewRef = useRef<HTMLDivElement>(null);
   codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
-  const [wordWrap, setWordWrap] = useState(false);
+  const [wordWrap, setWordWrap] = useState(parentWordWrap);
+  useEffect(() => {
+    setWordWrap(parentWordWrap);
+  }, [parentWordWrap]);
   const [editorContentHeight, setEditorContentHeight] = useState(0);
 
   const { currentExecuteCodeRef } = useGlobalContext();
@@ -132,98 +139,102 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   return (
     <div>
       <div className="rounded-[12px] overflow-hidden">
-        <div
-          className={cn(
-            "bg-[#50505a] w-full",
-            "flex justify-between items-center",
-            "px-[16px] py-[8px]"
-          )}
-        >
-          <span className={cn("text-white", heading ? "text-sm" : "text-xs")}>
-            {heading ? heading : language === "default" ? "" : language}
-          </span>
-          <div className="flex gap-3">
-            <CodeButton
-              onClick={() => {
-                if (code) {
-                  copy(code);
-                }
-              }}
-            >
-              {copied ? <Check size={12} /> : <Copy size={12} />}
-              <span>{copied ? "Copied!" : "Copy"}</span>
-            </CodeButton>
-            <CodeButton
-              onClick={() => {
-                setWordWrap((prev) => !prev);
-              }}
-              active={wordWrap}
-            >
-              <WrapText size={12} />
-              <span>Word Wrap</span>
-            </CodeButton>
-            {isCodeOutput ? (
-              <></>
-            ) : (
-              <>
-                {previewLanguages.includes(language) ? (
-                  <>
-                    {!showPreview && (
-                      <CodeButton
-                        onClick={() => {
-                          if (showPreview) {
-                            setShowPreview(false);
-                          } else {
-                            setShowPreview(true);
-                            setTimeout(() => {
-                              previewRef.current?.scrollIntoView();
-                            });
-                          }
-                        }}
-                      >
-                        <PreviewIcon size={12} />
-                        <span>Preview</span>
-                      </CodeButton>
-                    )}
-                    <a href={iframePreviewLink} target="_blank">
-                      <CodeButton>
-                        <OpenInNewTabIcon size={12} />
-                        <span>Open in New Tab</span>
-                      </CodeButton>
-                    </a>
-                  </>
-                ) : (
-                  <>
-                    {codeExecutionAllowed && (
-                      <CodeButton
-                        disabled={codeRunnersLoading}
-                        onClick={executeCode}
-                      >
-                        {codeRunnersLoading ? (
-                          <LoadingSpinner size={12} />
-                        ) : (
-                          <Play size={12} />
-                        )}
-                        <span>Run</span>
-                      </CodeButton>
-                    )}
-                  </>
-                )}
-
-                {code !== initialCode && (
-                  <CodeButton
-                    onClick={() => {
-                      setCode(initialCode);
-                    }}
-                  >
-                    <RotateCcw size={12} />
-                    <span>Reset</span>
-                  </CodeButton>
-                )}
-              </>
+        {disableHeader ? (
+          <></>
+        ) : (
+          <div
+            className={cn(
+              "bg-[#50505a] w-full",
+              "flex justify-between items-center",
+              "px-[16px] py-[8px]"
             )}
+          >
+            <span className={cn("text-white", heading ? "text-sm" : "text-xs")}>
+              {heading ? heading : language === "default" ? "" : language}
+            </span>
+            <div className="flex gap-3">
+              <CodeButton
+                onClick={() => {
+                  if (code) {
+                    copy(code);
+                  }
+                }}
+              >
+                {copied ? <Check size={12} /> : <Copy size={12} />}
+                <span>{copied ? "Copied!" : "Copy"}</span>
+              </CodeButton>
+              <CodeButton
+                onClick={() => {
+                  setWordWrap((prev) => !prev);
+                }}
+                active={wordWrap}
+              >
+                <WrapText size={12} />
+                <span>Word Wrap</span>
+              </CodeButton>
+              {isCodeOutput ? (
+                <></>
+              ) : (
+                <>
+                  {previewLanguages.includes(language) ? (
+                    <>
+                      {!showPreview && (
+                        <CodeButton
+                          onClick={() => {
+                            if (showPreview) {
+                              setShowPreview(false);
+                            } else {
+                              setShowPreview(true);
+                              setTimeout(() => {
+                                previewRef.current?.scrollIntoView();
+                              });
+                            }
+                          }}
+                        >
+                          <PreviewIcon size={12} />
+                          <span>Preview</span>
+                        </CodeButton>
+                      )}
+                      <a href={iframePreviewLink} target="_blank">
+                        <CodeButton>
+                          <OpenInNewTabIcon size={12} />
+                          <span>Open in New Tab</span>
+                        </CodeButton>
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      {codeExecutionAllowed && (
+                        <CodeButton
+                          disabled={codeRunnersLoading}
+                          onClick={executeCode}
+                        >
+                          {codeRunnersLoading ? (
+                            <LoadingSpinner size={12} />
+                          ) : (
+                            <Play size={12} />
+                          )}
+                          <span>Run</span>
+                        </CodeButton>
+                      )}
+                    </>
+                  )}
+
+                  {code !== initialCode && (
+                    <CodeButton
+                      onClick={() => {
+                        setCode(initialCode);
+                      }}
+                    >
+                      <RotateCcw size={12} />
+                      <span>Reset</span>
+                    </CodeButton>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {loading ? (
           <>
