@@ -3,7 +3,6 @@ import { Chat } from "~/lib/typesJsonData";
 
 import { useParams } from "react-router-dom";
 import useJsonDataKeysLike from "~/hooks/useJsonDataKeysLike";
-import usePrevious from "~/hooks/usePrevious";
 import { uuidPlaceholder } from "~/lib/constants";
 import jsonDataService from "~/services/jsonDataService";
 import usePrefixChatRelatedKey from "./usePrefixChatRelatedKey";
@@ -50,7 +49,7 @@ const useChatHistory = () => {
       );
     }
   }, [initialRowNumber]);
-  const { data: _chatHistory, refetch: refetchChatHistory } =
+  const { data: chatHistory, refetch: refetchChatHistory } =
     useJsonDataKeysLike<Chat>(
       {
         key: prefixChatRelatedKey(`chats/${uuidPlaceholder}`),
@@ -64,8 +63,6 @@ const useChatHistory = () => {
       }
     );
 
-  const previousChatHistory = usePrevious(_chatHistory);
-  const chatHistory = _chatHistory || previousChatHistory;
   const loadMoreChatHistory = useCallback(() => {
     setHistoryItemsPerPage((prev) => (prev ?? 0) + incrementItemsLoaded);
   }, []);

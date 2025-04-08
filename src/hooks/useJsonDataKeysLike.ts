@@ -34,6 +34,7 @@ const useJsonDataKeysLike = <T>(
     queryFn: query.queryFn,
     enabled: enabled,
     retry: false,
+    placeholderData: (prev) => prev,
   });
 
   return queryResult;
