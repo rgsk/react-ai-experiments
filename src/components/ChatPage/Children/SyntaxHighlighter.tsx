@@ -1,6 +1,14 @@
 import Editor from "@monaco-editor/react";
 import { Copy } from "iconsax-react";
-import { Check, Play, RefreshCw, RotateCcw, Share, X } from "lucide-react";
+import {
+  Check,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  Share,
+  WrapText,
+  X,
+} from "lucide-react";
 import React, { useMemo, useRef, useState } from "react";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -149,8 +157,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
               onClick={() => {
                 setWordWrap((prev) => !prev);
               }}
+              active={wordWrap}
             >
-              Word Wrap
+              <WrapText size={12} />
+              <span>Word Wrap</span>
             </CodeButton>
             {isCodeOutput ? (
               <></>
@@ -493,16 +503,21 @@ interface CodeButtonProps {
   onClick?: () => void;
   children: any;
   disabled?: boolean;
+  active?: boolean;
 }
 const CodeButton: React.FC<CodeButtonProps> = ({
   onClick,
   children,
   disabled,
+  active,
 }) => {
   return (
     <button
       disabled={disabled}
-      className="text-white text-xs border border-white rounded-md px-2 flex items-center gap-2 py-1"
+      className={cn(
+        "text-white text-xs border border-white rounded-md px-2 flex items-center gap-2 py-1",
+        active && "bg-white text-black"
+      )}
       onClick={onClick}
     >
       {children}
