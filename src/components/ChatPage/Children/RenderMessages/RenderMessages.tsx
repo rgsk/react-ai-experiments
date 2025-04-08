@@ -1,5 +1,5 @@
 import { Copy } from "iconsax-react";
-import { ArrowRight, Check, Download } from "lucide-react";
+import { Check, Download } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import useMeasure from "react-use-measure";
 import ActionButton from "~/components/Shared/ActionButton";
@@ -20,6 +20,7 @@ import { HandleSend } from "../../ChatPage";
 import { FilePreview } from "../FileUploadedPreview/FileUploadedPreview";
 import { MemoizedMarkdownRenderer } from "../MarkdownRenderer";
 import MessageActions from "../MessageActions/MessageActions";
+import RelatedQuestions from "./Children/RelatedQuestions";
 import RenderCitedSources from "./Children/RenderCitedSources";
 import RenderMentionedUrls from "./Children/RenderMentionedUrls";
 import RenderToolCall from "./RenderToolCall";
@@ -346,39 +347,15 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                 </div>
 
                 {questionSuggestionsResult.hasQuestionSuggestions && (
-                  <div className="p-4">
-                    {questionSuggestionsResult.questionSuggestionsLoading && (
-                      <LoadingSpinner size={20} />
-                    )}
-                    {questionSuggestionsResult.questionSuggestions.length >
-                      0 && (
-                      <>
-                        <div>
-                          <p>Related Questions:</p>
-                        </div>
-                        <div className="h-2"></div>
-                        <div className="flex flex-col">
-                          {questionSuggestionsResult.questionSuggestions.map(
-                            (qs, i) => (
-                              <button
-                                key={qs + i}
-                                onClick={() => {
-                                  handleSend?.({ text: qs });
-                                }}
-                              >
-                                {i === 0 && <Separator />}
-                                <div className="py-2 text-left flex gap-2 items-center justify-between hover:bg-muted/50 transition-colors">
-                                  <span>{qs}</span>
-                                  <ArrowRight className="h-5 w-5" />
-                                </div>
-                                <Separator />
-                              </button>
-                            )
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <RelatedQuestions
+                    questionSuggestions={
+                      questionSuggestionsResult.questionSuggestions
+                    }
+                    questionSuggestionsLoading={
+                      questionSuggestionsResult.questionSuggestionsLoading
+                    }
+                    handleSend={handleSend}
+                  />
                 )}
               </div>
             );
