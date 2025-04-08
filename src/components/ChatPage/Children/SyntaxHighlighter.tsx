@@ -67,6 +67,8 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const previewRef = useRef<HTMLDivElement>(null);
   codeRef.current = code;
   const { copied, copy } = useCopyToClipboard();
+  const [wordWrap, setWordWrap] = useState(false);
+  const [editorContentHeight, setEditorContentHeight] = useState(0);
 
   const { currentExecuteCodeRef } = useGlobalContext();
   const codeExecutionAllowed = useMemo(
@@ -113,14 +115,9 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const executeCodeRef = useRef(executeCode);
   executeCodeRef.current = executeCode;
   const iframePreviewLink = `/preview-page?id=${id}`;
-  const lines = code?.split("\n") ?? [];
-  const countOfLines = lines[lines.length - 1]
-    ? lines.length
-    : lines.length - 1;
   const monacoFontSize = 14;
   const lineHeight = monacoFontSize * 1.5;
   const paddingTop = 20;
-  const paddingBottom = 20;
   const previewLanguages = ["html", "jsx"];
   return (
     <div>
@@ -147,6 +144,13 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             >
               {copied ? <Check size={12} /> : <Copy size={12} />}
               <span>{copied ? "Copied!" : "Copy"}</span>
+            </CodeButton>
+            <CodeButton
+              onClick={() => {
+                setWordWrap((prev) => !prev);
+              }}
+            >
+              Word Wrap
             </CodeButton>
             {isCodeOutput ? (
               <></>
@@ -244,7 +248,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 defaultLanguage={language === "jsx" ? "javascript" : language}
                 value={code}
                 theme="vs-dark"
-                height={paddingTop + countOfLines * lineHeight + paddingBottom}
+                height={editorContentHeight}
                 options={{
                   fontSize: monacoFontSize,
                   lineHeight: lineHeight,
@@ -256,6 +260,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                   padding: {
                     top: paddingTop,
                   },
+                  wordWrap: wordWrap,
                   readOnly: isCodeOutput, // Ensure output is read-only
                 }}
                 onChange={(newValue) => setCode(newValue || "")}
@@ -271,6 +276,17 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                       }
                     );
                   }
+                  const updateEditorHeight = () => {
+                    const contentHeight = editor.getContentHeight();
+                    setEditorContentHeight(contentHeight);
+                  };
+                  // Initial update of the container's height
+                  updateEditorHeight();
+
+                  // Listen for changes in content size and update the height accordingly
+                  editor.onDidContentSizeChange(() => {
+                    updateEditorHeight();
+                  });
                 }}
               />
             </div>
