@@ -879,20 +879,22 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         Results or link you used for getUrlContent,
       </span>
       <span>
-        don't mention complete links, mentioning links means say something like
-        "uses [Babel](https://babeljs.io/) for Fast Refresh"
-      </span>
-      <span>
-        Apart from citing sources in your response message, return all the
-        sources used to generate your response. Use this format - just list the
-        links like below in hidden tag
-        <hidden>
-          <cited-sources
-            ><li>https://github.com/tashapais</li>
-            <li>https://tashapais.com/</li>
-            <li>https://tashapais.medium.com/</li>
-          </cited-sources>
-        </hidden>
+        <span
+          >first method: mention markdown links in natural flow of response
+          where appropriate
+          <span />
+        </span>
+        <span>
+          second method: cite all the sources used to generate your response.
+          Use this format - just list the links like below in hidden tag
+          <hidden>
+            <cited-sources
+              ><li>https://github.com/tashapais</li>
+              <li>https://tashapais.com/</li>
+              <li>https://tashapais.medium.com/</li>
+            </cited-sources>
+          </hidden>
+        </span>
       </span>
     `;
     const additionalInstructions: string[] = [];
