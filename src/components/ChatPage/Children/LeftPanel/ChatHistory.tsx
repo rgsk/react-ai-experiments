@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
 import HistoryBlock from "../History/HistoryBlock/HistoryBlock";
@@ -14,6 +14,23 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ chatHistoryProps }) => {
   const historyBlocks = useMemo(() => {
     return getHistoryBlocks(chatHistory?.data.map(({ value }) => value) || []);
   }, [chatHistory]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const { type } = event.data;
+      if (type === "SCROLL_HISTORY_TO_TOP") {
+        const scrollableDiv = document.getElementById("scrollableDiv");
+        if (scrollableDiv) {
+          scrollableDiv.scrollTo({ top: 0 });
+        }
+      }
+    };
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
   if (!chatHistory) return <CentralLoader />;
   return (
     <div

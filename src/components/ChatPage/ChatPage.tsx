@@ -49,6 +49,7 @@ import {
   safeSleep,
 } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
+import jsonDataService from "~/services/jsonDataService";
 import OpenAIRealtimeWebRTC from "../RealtimeWebRTC/OpenAIRealtimeWebRTC";
 import CentralLoader from "../Shared/CentralLoader";
 import Container from "../Shared/Container";
@@ -422,14 +423,6 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const chatRef = useRef(chat);
   chatRef.current = chat;
 
-  useEffect(() => {
-    refetchChatHistory();
-  }, [chatId, refetchChatHistory]);
-  useEffect(() => {
-    if (chat?.title && !chatUpdating) {
-      refetchChatHistory();
-    }
-  }, [chat?.title, chatUpdating, refetchChatHistory]);
   const onGenerateComplete = useCallback(
     async ({ toolCalls }: { toolCalls: ToolCall[] }) => {
       await safeSleep(100, true);
@@ -942,10 +935,21 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
         alert("no chat");
         throw new Error("no chat");
       }
-      setChat({
-        ...chat,
-        title,
-      });
+      jsonDataService
+        .setKey({
+          key: chatKey,
+          value: {
+            ...chat,
+            title,
+          },
+        })
+        .then(() => {
+          refetchChat();
+          return refetchChatHistory();
+        })
+        .then(() => {
+          window.postMessage({ type: "SCROLL_HISTORY_TO_TOP" }, "*");
+        });
     });
   };
 
