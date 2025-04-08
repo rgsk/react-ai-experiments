@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import jsonDataService from "~/services/jsonDataService";
+import useRunOnWindowFocus from "./useRunOnWindowFocus";
 
 const useJsonDataKeysLike = <T>(
   {
@@ -34,6 +35,13 @@ const useJsonDataKeysLike = <T>(
     queryFn: query.queryFn,
     enabled: enabled,
     placeholderData: (prev) => prev,
+    refetchOnWindowFocus: false,
+  });
+
+  useRunOnWindowFocus(() => {
+    if (enabled) {
+      queryResult.refetch();
+    }
   });
 
   return queryResult;
