@@ -1,5 +1,7 @@
 export const uuidPlaceholder = "________-____-____-____-____________";
 export const openaiIdPlaceholder = "_____________________________";
+export const trueValue = true;
+export const falseValue = false;
 export const defaultModel = "openai/gpt-4o";
 export type Model =
   | "deepseek/deepseek-chat"

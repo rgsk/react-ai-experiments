@@ -237,7 +237,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                 padding: 26,
                 marginTop: 0,
                 marginBottom: 0,
-                paddingTop: paddingTop,
+                paddingTop: 26,
               }}
             >
               {code}
@@ -269,6 +269,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
                   },
                   padding: {
                     top: paddingTop,
+                    bottom: paddingTop,
                   },
                   wordWrap: wordWrap,
                   readOnly: isCodeOutput, // Ensure output is read-only
