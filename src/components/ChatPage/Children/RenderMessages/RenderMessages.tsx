@@ -169,21 +169,19 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({
                       </CollapsibleWrapper>
                     </div>
                     <div className="h-4"></div>
-                    <div className="flex justify-end">
-                      <div className="w-[640px]">
-                        <CollapsibleWrapper
-                          scrollContainerRef={scrollContainerRef}
-                          heading={`File Parsing Result - ${
-                            fileEntry.fileMetadata!.name
-                          }`}
-                          type="right"
-                          loading={message.status === "in_progress"}
-                        >
-                          <div className="pr-4">
-                            <JsonRenderer object={parsedContent} />
-                          </div>
-                        </CollapsibleWrapper>
-                      </div>
+                    <div className="max-w-[640px] ml-auto">
+                      <CollapsibleWrapper
+                        scrollContainerRef={scrollContainerRef}
+                        heading={`File Parsing Result - ${
+                          fileEntry.fileMetadata!.name
+                        }`}
+                        type="right"
+                        loading={message.status === "in_progress"}
+                      >
+                        <div className="pr-4">
+                          <JsonRenderer object={parsedContent} />
+                        </div>
+                      </CollapsibleWrapper>
                     </div>
                   </>
                 )}
