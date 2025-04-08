@@ -1,8 +1,10 @@
+import { RotateCwIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Container from "~/components/Shared/Container";
 import CustomPagination from "~/components/Shared/CustomPagination";
 import JsonRenderer from "~/components/Shared/JsonRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
+import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import useDebounce from "~/hooks/useDebounce";
@@ -35,6 +37,18 @@ const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
             setJsonDataKey(e.target.value);
           }}
         />
+      </div>
+      <div className="min-h-[30px]"></div>
+      <div className="flex">
+        <Button
+          onClick={() => {
+            queryResult.refetch();
+          }}
+          variant="outline"
+        >
+          <RotateCwIcon />
+          <span>Reload</span>
+        </Button>
       </div>
       <div className="min-h-[30px]"></div>
       <div className="flex-1 overflow-auto border border-gray-400 p-8 rounded-lg">
