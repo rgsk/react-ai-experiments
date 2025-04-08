@@ -47,6 +47,7 @@ interface SyntaxHighlighterProps {
   isCodeOutput: boolean;
   codeProps: any;
   loading: boolean;
+  heading?: string;
 }
 const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   language,
@@ -54,6 +55,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   isCodeOutput,
   codeProps,
   loading,
+  heading,
 }) => {
   const { loading: codeRunnersLoading, runCode } = useCodeRunners();
   const [sharePreviewLoading, setSharePreviewLoading] = useState(false);
@@ -137,11 +139,9 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
             "px-[16px] py-[8px]"
           )}
         >
-          {language === "default" ? (
-            <span></span>
-          ) : (
-            <span className="text-white text-xs">{language}</span>
-          )}
+          <span className={cn("text-white", heading ? "text-sm" : "text-xs")}>
+            {heading ? heading : language === "default" ? "" : language}
+          </span>
           <div className="flex gap-3">
             <CodeButton
               onClick={() => {
