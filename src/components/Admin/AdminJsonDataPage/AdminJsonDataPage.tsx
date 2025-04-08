@@ -40,9 +40,9 @@ const AdminJsonDataPage: React.FC<AdminJsonDataPageProps> = ({}) => {
       <div className="flex-1 overflow-auto border border-gray-400 p-8 rounded-lg">
         {queryResult.data ? (
           <>
-            {queryResult.data.data.map((entry) => {
+            {queryResult.data.data.map((entry, i) => {
               return (
-                <div key={entry.id} className="space-y-2">
+                <div key={JSON.stringify(entry)} className="space-y-2">
                   <p>{entry.key}</p>
                   <JsonRenderer object={recursiveParseJson(entry.value)} />
                 </div>
