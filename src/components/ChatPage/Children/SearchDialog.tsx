@@ -24,7 +24,7 @@ export function SearchDialog() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const personaId = searchParams?.get("personaId") ?? undefined;
   const navigate = useNavigate();
-  const { setIsFirstHistoryRender } = useGlobalContext();
+  const { isFirstHistoryEntryRenderRef } = useGlobalContext();
 
   const searchMessagesQuery = useMemo(
     () => experimentsService.searchMessages({ q: searchQuery, personaId }),
@@ -142,7 +142,7 @@ export function SearchDialog() {
                       className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex justify-between items-center gap-2"
                       onClick={() => {
                         setOpen(false);
-                        setIsFirstHistoryRender(true);
+                        isFirstHistoryEntryRenderRef.current = true;
                         if (personaId) {
                           if (matchingMessage) {
                             navigate(
