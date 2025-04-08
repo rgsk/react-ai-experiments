@@ -109,7 +109,7 @@ const CustomPagination: React.FC<ICustomPaginationProps> = ({
             <PaginationItem>
               <PaginationPrevious
                 onClick={goToPrevPage}
-                isActive={!prevPageDisabled}
+                disabled={prevPageDisabled}
               />
             </PaginationItem>
             {pagesToShow.map((pageNumber, i) => {
@@ -119,6 +119,7 @@ const CustomPagination: React.FC<ICustomPaginationProps> = ({
                     <PaginationEllipsis />
                   ) : (
                     <PaginationLink
+                      size="icon"
                       isActive={pageNumber === currentPage}
                       onClick={() => {
                         setCurrentPage(pageNumber);
@@ -134,7 +135,7 @@ const CustomPagination: React.FC<ICustomPaginationProps> = ({
             <PaginationItem>
               <PaginationNext
                 onClick={goToNextPage}
-                isActive={!nextPageDisabled}
+                disabled={nextPageDisabled}
               />
             </PaginationItem>
           </PaginationContent>
