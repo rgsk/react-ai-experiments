@@ -33,6 +33,7 @@ const useJsonDataKeysLike = <T>(
     queryKey: query.queryKey,
     queryFn: query.queryFn,
     enabled: enabled,
+    retry: false,
   });
 
   return queryResult;
