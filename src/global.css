@@ -57,6 +57,12 @@
   }
 }
 @layer base {
+  .dark {
+    scrollbar-color: #6a7282 #6a728241;
+  }
+}
+
+@layer base {
   * {
     @apply border-border;
   }
