@@ -234,7 +234,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
                     }
                   }
                 }
-                if (!isMobile) {
+                if (isMobile) {
+                  if (e.key === "Enter" && e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                } else {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit();
