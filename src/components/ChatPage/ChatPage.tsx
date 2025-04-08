@@ -148,7 +148,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       setLeftPanelOpen(false);
     }
   }, [chatId, md, setLeftPanelOpen]);
-  const { userData } = useGlobalContext();
+  const { userData, setIsFirstHistoryRender } = useGlobalContext();
+  useEffect(() => {
+    if (!leftPanelOpen) {
+      setIsFirstHistoryRender(true);
+    }
+  }, [leftPanelOpen, setIsFirstHistoryRender]);
   const [toolCallsAndOutputs, setToolCallsAndOutputs] = useState<
     {
       toolCall: ToolCall;
