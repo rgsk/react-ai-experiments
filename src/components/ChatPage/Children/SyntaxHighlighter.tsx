@@ -20,6 +20,7 @@ import PreviewIcon from "~/components/Icons/PreviewIcon";
 import ActionButton from "~/components/Shared/ActionButton";
 import CsvRenderer from "~/components/Shared/CsvRenderer";
 import { LoadingSpinner } from "~/components/Shared/LoadingSpinner";
+import MaintiainOriginalWidth from "~/components/Shared/MaintiainOriginalWidth";
 import PDFReader from "~/components/Shared/PDFReader/PDFReader";
 import { Button } from "~/components/ui/button";
 import useCodeRunners, {
@@ -286,21 +287,23 @@ ${code}
 
         {loading ? (
           <>
-            {/* @ts-ignore */}
-            <Prism
-              style={vscDarkPlus}
-              PreTag="div"
-              language={language}
-              {...codeProps}
-              customStyle={{
-                padding: 26,
-                marginTop: 0,
-                marginBottom: 0,
-                paddingTop: 26,
-              }}
-            >
-              {code}
-            </Prism>
+            <MaintiainOriginalWidth>
+              {/* @ts-ignore */}
+              <Prism
+                style={vscDarkPlus}
+                PreTag="div"
+                language={language}
+                {...codeProps}
+                customStyle={{
+                  padding: 26,
+                  marginTop: 0,
+                  marginBottom: 0,
+                  paddingTop: 26,
+                }}
+              >
+                {code}
+              </Prism>
+            </MaintiainOriginalWidth>
           </>
         ) : (
           <>
