@@ -909,6 +909,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       if (modelOptions[model].toolsSupport) {
         additionalInstructions.push(googleSearchCiteSourcesInstruction);
       }
+      if (model.endsWith("o3-mini")) {
+        additionalInstructions.push(html`
+          when outputting code, make sure to output code in fenced format like
+          \`\`\`{language} {code} \`\`\`
+        `);
+      }
     }
     const additionalMessages: Message[] = additionalInstructions.map(
       (content) => {
