@@ -31,6 +31,7 @@ import {
   pythonCSVPrefix,
   pythonImagePrefix,
 } from "~/hooks/codeRunners/usePythonRunner";
+import useBreakpoints from "~/hooks/useBreakpoints";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
 import useEventListener from "~/hooks/useEventListener";
@@ -70,7 +71,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
     output: "",
     error: "",
   });
-
+  const { md } = useBreakpoints();
   const windowSize = useWindowSize();
   const [divRef, divBounds] = useMeasure();
   const id = useMemo(() => v4(), []);
@@ -182,22 +183,34 @@ ${code}
                 ) : (
                   <Copy size={12} />
                 )}
-                <span>{copied ? "Copied!" : "Copy"}</span>
+                {md && (
+                  <span>
+                    {copied && copiedText === code ? "Copied!" : "Copy"}
+                  </span>
+                )}
               </CodeButton>
-              <CodeButton
-                onClick={() => {
-                  if (code) {
-                    copy(getFencedCode());
-                  }
-                }}
-              >
-                {copied ? <Check size={12} /> : <Copy size={12} />}
-                <span>
-                  {copied && copiedText === getFencedCode()
-                    ? "Copied!"
-                    : "Copy Fenced"}
-                </span>
-              </CodeButton>
+              {md && (
+                <CodeButton
+                  onClick={() => {
+                    if (code) {
+                      copy(getFencedCode());
+                    }
+                  }}
+                >
+                  {copied && copiedText === getFencedCode() ? (
+                    <Check size={12} />
+                  ) : (
+                    <Copy size={12} />
+                  )}
+                  {md && (
+                    <span>
+                      {copied && copiedText === getFencedCode()
+                        ? "Copied!"
+                        : "Copy Fenced"}
+                    </span>
+                  )}
+                </CodeButton>
+              )}
               <CodeButton
                 onClick={() => {
                   setWordWrap((prev) => !prev);
@@ -205,7 +218,7 @@ ${code}
                 active={wordWrap}
               >
                 <WrapText size={12} />
-                <span>Word Wrap</span>
+                {md && <span>Word Wrap</span>}
               </CodeButton>
               {isCodeOutput ? (
                 <></>
@@ -227,13 +240,13 @@ ${code}
                           }}
                         >
                           <PreviewIcon size={12} />
-                          <span>Preview</span>
+                          {md && <span>Preview</span>}
                         </CodeButton>
                       )}
                       <a href={iframePreviewLink} target="_blank">
                         <CodeButton>
                           <OpenInNewTabIcon size={12} />
-                          <span>Open in New Tab</span>
+                          {md && <span>Open in New Tab</span>}
                         </CodeButton>
                       </a>
                     </>
@@ -249,7 +262,7 @@ ${code}
                           ) : (
                             <Play size={12} />
                           )}
-                          <span>Run</span>
+                          {md && <span>Run</span>}
                         </CodeButton>
                       )}
                     </>
@@ -262,7 +275,7 @@ ${code}
                       }}
                     >
                       <RotateCcw size={12} />
-                      <span>Reset</span>
+                      {md && <span>Reset</span>}
                     </CodeButton>
                   )}
                 </>
