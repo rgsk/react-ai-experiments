@@ -881,7 +881,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       <span>
         <span
           >first method: mention markdown links in natural flow of response
-          where appropriate
+          where appropriate, please make sure you don't mention links in a list.
           <span />
         </span>
         <span>
