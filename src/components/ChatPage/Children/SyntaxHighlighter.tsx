@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { isMobile } from "react-device-detect";
 import { Prism } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import useMeasure from "react-use-measure";
@@ -36,7 +37,6 @@ import useEventListener from "~/hooks/useEventListener";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { useWindowSize } from "~/hooks/useWindowSize";
 import { getSharedPreviewLink } from "~/lib/chatUtils";
-import { trueValue } from "~/lib/constants";
 import { cn, getCsvFile } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
@@ -147,13 +147,15 @@ ${code}
 `;
   };
   useEventListener("click", () => {
-    setDisabledPointerEvents(true);
+    if (isMobile) {
+      setDisabledPointerEvents(true);
+    }
   });
 
   return (
     <div>
       <div>
-        {disableHeader || trueValue ? (
+        {disableHeader ? (
           <></>
         ) : (
           <div
@@ -291,12 +293,16 @@ ${code}
           <>
             <div
               onClick={(e) => {
-                e.stopPropagation();
-                setDisabledPointerEvents(false);
+                if (isMobile) {
+                  e.stopPropagation();
+                  setDisabledPointerEvents(false);
+                }
               }}
             >
               <div
-                className={cn(disabledPointerEvents && "pointer-events-none")}
+                className={cn(
+                  isMobile && disabledPointerEvents && "pointer-events-none"
+                )}
                 onWheelCapture={(e) => {
                   // Check if vertical scrolling is dominant
                   if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
