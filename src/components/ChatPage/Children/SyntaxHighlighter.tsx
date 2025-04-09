@@ -32,9 +32,11 @@ import {
 } from "~/hooks/codeRunners/usePythonRunner";
 import useBroadcastChannelState from "~/hooks/useBroadcastChannelState";
 import useCopyToClipboard from "~/hooks/useCopyToClipboard";
+import useEventListener from "~/hooks/useEventListener";
 import useGlobalContext from "~/hooks/useGlobalContext";
 import { useWindowSize } from "~/hooks/useWindowSize";
 import { getSharedPreviewLink } from "~/lib/chatUtils";
+import { trueValue } from "~/lib/constants";
 import { cn, getCsvFile } from "~/lib/utils";
 import experimentsService from "~/services/experimentsService";
 import IFramePreview from "./IFramePreview";
@@ -74,6 +76,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = ({
   const id = useMemo(() => v4(), []);
   const [code, setCode] = useBroadcastChannelState(`code-${id}`, initialCode);
   useBroadcastChannelState(`language-${id}`, language);
+  const [disabledPointerEvents, setDisabledPointerEvents] = useState(true);
 
   const [showPreview, setShowPreview] = useState(false);
   const [showIframe, setShowIframe] = useState(true);
@@ -143,10 +146,14 @@ ${code}
 \`\`\`
 `;
   };
+  useEventListener("click", () => {
+    setDisabledPointerEvents(true);
+  });
+
   return (
     <div>
       <div>
-        {disableHeader ? (
+        {disableHeader || trueValue ? (
           <></>
         ) : (
           <div
@@ -283,60 +290,68 @@ ${code}
         ) : (
           <>
             <div
-              onWheelCapture={(e) => {
-                // Check if vertical scrolling is dominant
-                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                  // stopPropagation only for vertical scroll (allow horizontal scroll)
-                  e.stopPropagation();
-                }
+              onClick={(e) => {
+                e.stopPropagation();
+                setDisabledPointerEvents(false);
               }}
             >
-              <Editor
-                defaultLanguage={language === "jsx" ? "javascript" : language}
-                value={code}
-                theme="vs-dark"
-                height={editorContentHeight}
-                options={{
-                  fontSize: monacoFontSize,
-                  lineHeight: lineHeight,
-                  scrollBeyondLastLine: false,
-                  lineNumbers: "off",
-                  minimap: {
-                    enabled: false,
-                  },
-                  padding: {
-                    top: paddingTop,
-                    bottom: paddingTop,
-                  },
-                  wordWrap: wordWrap,
-                  readOnly: isCodeOutput, // Ensure output is read-only
-                }}
-                onChange={(newValue) => setCode(newValue || "")}
-                onMount={(editor, monaco) => {
-                  if (!isCodeOutput) {
-                    editor.onDidFocusEditorWidget(() => {
-                      currentExecuteCodeRef.current = executeCodeRef;
-                    });
-                    editor.addCommand(
-                      monaco.KeyMod.Shift | monaco.KeyCode.Enter,
-                      () => {
-                        currentExecuteCodeRef.current?.current();
-                      }
-                    );
+              <div
+                className={cn(disabledPointerEvents && "pointer-events-none")}
+                onWheelCapture={(e) => {
+                  // Check if vertical scrolling is dominant
+                  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    // stopPropagation only for vertical scroll (allow horizontal scroll)
+                    e.stopPropagation();
                   }
-                  const updateEditorHeight = () => {
-                    const contentHeight = editor.getContentHeight();
-                    setEditorContentHeight(contentHeight);
-                  };
-                  // Initial update of the container's height
-                  updateEditorHeight();
-
-                  // Listen for changes in content size and update the height accordingly
-                  editor.onDidContentSizeChange(() => {
-                    updateEditorHeight();
-                  });
                 }}
-              />
+              >
+                <Editor
+                  defaultLanguage={language === "jsx" ? "javascript" : language}
+                  value={code}
+                  theme="vs-dark"
+                  height={editorContentHeight}
+                  options={{
+                    fontSize: monacoFontSize,
+                    lineHeight: lineHeight,
+                    scrollBeyondLastLine: false,
+                    lineNumbers: "off",
+                    minimap: {
+                      enabled: false,
+                    },
+                    padding: {
+                      top: paddingTop,
+                      bottom: paddingTop,
+                    },
+                    wordWrap: wordWrap,
+                    readOnly: isCodeOutput, // Ensure output is read-only
+                  }}
+                  onChange={(newValue) => setCode(newValue || "")}
+                  onMount={(editor, monaco) => {
+                    if (!isCodeOutput) {
+                      editor.onDidFocusEditorWidget(() => {
+                        currentExecuteCodeRef.current = executeCodeRef;
+                      });
+                      editor.addCommand(
+                        monaco.KeyMod.Shift | monaco.KeyCode.Enter,
+                        () => {
+                          currentExecuteCodeRef.current?.current();
+                        }
+                      );
+                    }
+                    const updateEditorHeight = () => {
+                      const contentHeight = editor.getContentHeight();
+                      setEditorContentHeight(contentHeight);
+                    };
+                    // Initial update of the container's height
+                    updateEditorHeight();
+
+                    // Listen for changes in content size and update the height accordingly
+                    editor.onDidContentSizeChange(() => {
+                      updateEditorHeight();
+                    });
+                  }}
+                />
+              </div>
             </div>
           </>
         )}
