@@ -294,6 +294,10 @@ ${code}
                 PreTag="div"
                 language={language}
                 {...codeProps}
+                lineProps={{
+                  style: { whiteSpace: "pre-wrap" },
+                }}
+                wrapLines={wordWrap}
                 customStyle={{
                   padding: 26,
                   marginTop: 0,
